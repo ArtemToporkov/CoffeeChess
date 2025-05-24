@@ -24,9 +24,27 @@
 
 .nav-link {
     text-decoration: none;
+    position: relative;
     color: var(--white-coffee);
     font-size: 24px;
     font-family: 'Caprasimo', sans-serif;
+}
+
+.nav-link::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: -2px;
+    width: 0;
+    height: 2px;
+    background-color: var(--white-coffee);
+    transition: width 0.3s ease, left 0.3s ease;
+    transform: translateX(-50%);
+}
+
+.nav-link:hover::after {
+    width: 100%;
+    transform: translateX(-50%);
 }
 
 .nav-left,
