@@ -1,0 +1,40 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - CoffeeChess</title>
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/CoffeeChess.Web.styles.css" asp-append-version="true" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Caprasimo&family=Montserrat:wght@400&display=swap" rel="stylesheet">
+</head>
+<body>
+<header class="app-header">
+    <nav class="main-nav">
+        <div class="nav-left">
+            <a asp-controller="Home" asp-action="Index" class="nav-link">Play</a>
+            <a asp-controller="Settings" asp-action="Index" class="nav-link">Settings</a>
+        </div>
+        <div class="nav-logo">
+            <img src="~/img/coffee-cup.png" alt="Coffee Chess Logo" />
+        </div>
+        <div class="nav-right">
+            <a asp-controller="Account" asp-action="Login" class="nav-link">Log in</a>
+            <a asp-controller="Account" asp-action="Register" class="nav-link">Sign up</a>
+        </div>
+    </nav>
+</header>
+
+<div class="container">
+    <main role="main" class="pb-3">
+        @RenderBody()
+    </main>
+</div>
+
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/js/site.js" asp-append-version="true"></script>
+@await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

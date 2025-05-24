@@ -1,0 +1,35 @@
+﻿.app-header,
+.main-nav {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.app-header {
+  background-color: var(--dark-coffee);
+  height: 105px;
+  border-bottom: 5px solid var(--white-coffee);
+  border-top: 5px solid var(--white-coffee);
+}
+
+.main-nav {
+  width: 100%;
+}
+
+.nav-link {
+  text-decoration: none;
+  color: var(--white-coffee);
+  font-size: 36px;
+  font-family: 'Caprasimo', sans-serif;
+}
+
+.nav-logo {
+  width: 65px;
+  height: 65px;
+}
+
+.nav-logo img {
+  width: 65px;
+  height: 65px;
+}
