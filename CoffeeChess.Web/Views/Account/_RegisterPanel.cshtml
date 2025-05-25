@@ -1,0 +1,36 @@
+﻿@model CoffeeChess.Web.Models.RegisterViewModel
+
+<div class="register-panel" data-animation-order="0">
+    <h2 class="auth-title">Registration</h2>
+    <form asp-action="Register" asp-route-returnurl="@ViewBag.ReturnUrl" method="post" class="auth-form" id="registerForm">
+        @Html.AntiForgeryToken() 
+        
+        <div asp-validation-summary="ModelOnly" class="text-danger auth-validation-summary"></div>
+
+        <div class="form-group">
+            <input asp-for="UserName" class="form-control auth-input" placeholder="Login" />
+            <span asp-validation-for="UserName" class="text-danger auth-validation-message"></span>
+        </div>
+        <div class="form-group">
+            <input asp-for="Email" class="form-control auth-input" placeholder="Email" />
+            <span asp-validation-for="Email" class="text-danger auth-validation-message"></span>
+        </div>
+        <div class="form-group">
+            <input asp-for="Password" class="form-control auth-input" placeholder="Password" />
+            <span asp-validation-for="Password" class="text-danger auth-validation-message"></span>
+        </div>
+        <div class="form-group">
+            <input asp-for="ConfirmPassword" class="form-control auth-input" placeholder="Repeat password" />
+            <span asp-validation-for="ConfirmPassword" class="text-danger auth-validation-message"></span>
+        </div>
+        <button type="submit" class="btn-coffee auth-button">Sign up</button>
+    </form>
+    <p class="auth-switch-link">
+        Already have an account? 
+        <a asp-action="Login" asp-route-returnurl="@ViewData["ReturnUrl"]" class="ajax-nav-link" data-url="@Url.Action("Login", "Account", new { returnUrl = ViewData["ReturnUrl"] })">Log in</a>
+    </p>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

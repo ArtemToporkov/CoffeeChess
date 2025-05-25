@@ -1,4 +1,5 @@
 @import "components/_welcome-panel.css";
+@import "components/_register-panel.css";
 
 :root {
     --white-coffee: #FFE6D4;
