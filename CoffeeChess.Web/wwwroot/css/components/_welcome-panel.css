@@ -1,0 +1,91 @@
+﻿.welcome-panel {
+    --welcome-panel-border-radius: 12px;
+    background-color: var(--white-coffee);
+    
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    position: absolute;
+    
+    box-sizing: border-box;
+    padding: 50px;
+
+    width: 550px;
+    height: 550px;
+    top: 55%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    
+    border-radius: 50px;
+    border: var(--welcome-panel-border-radius) solid var(--dark-coffee);
+}
+
+.welcome-panel::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    
+    top: calc(-1 * var(--welcome-panel-border-radius));
+    left: calc(-1 * var(--welcome-panel-border-radius));
+    right: calc(-1 * var(--welcome-panel-border-radius));
+    bottom: calc(-1 * var(--welcome-panel-border-radius));
+    
+    border-radius: 50px;
+    border: 4px solid var(--white-coffee);
+}
+
+.welcome-title {
+    font-family: 'Caprasimo', sans-serif;
+    color: var(--dark-coffee);
+    font-size: 80px;
+    text-shadow: 
+        -4px 4px 0 var(--white-coffee),
+        -8px 8px 0 var(--dark-coffee);
+    margin: 0;
+}
+
+.welcome-text {
+    font-family: 'Montserrat', sans-serif;
+    color: var(--dark-coffee);
+    font-size: 24px;
+}
+
+.welcome-buttons-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 50px;
+}
+
+.welcome-button {
+    background-color: var(--dark-coffee);
+    color: var(--white-coffee);
+    text-decoration: none;
+    
+    border-radius: 100px;
+    width: 160px;
+    height: 60px;
+    box-shadow: 
+        -3px 3px 0 var(--white-coffee),
+        -6px 6px 0 var(--dark-coffee);
+    
+    
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    
+    font-family: 'Caprasimo', sans-serif;
+    font-size: 35px;
+    
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.welcome-button:active {
+    transform: translate(-6px, 6px);
+    box-shadow:
+        0 0 0 var(--white-coffee),
+        0 0 0 var(--dark-coffee);
+}
