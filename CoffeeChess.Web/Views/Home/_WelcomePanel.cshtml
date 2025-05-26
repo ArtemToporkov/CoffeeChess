@@ -6,8 +6,20 @@
         cute place where you can play
         chess and relax...
     </p>
-    <div class="welcome-buttons-container">
-        <a asp-controller="Account" asp-action="Login" class="welcome-button ajax-nav-link" data-url="@Url.Action("Login", "Account")">Log in</a>
-        <a asp-controller="Account" asp-action="Register" class="welcome-button ajax-nav-link" data-url="@Url.Action("Register", "Account")">Sign up</a>
-    </div>
+    @if (User.Identity.IsAuthenticated)
+    {
+        <div class="welcome-buttons-container">
+            <a asp-controller="Home" asp-action="Index" class="welcome-button ajax-nav-link" 
+               data-url="@Url.Action("Index", "Home")">Play</a>
+        </div>
+    }
+    else
+    {
+        <div class="welcome-buttons-container">
+            <a asp-controller="Account" asp-action="Login" class="welcome-button ajax-nav-link" 
+               data-url="@Url.Action("Login", "Account")">Log in</a>
+            <a asp-controller="Account" asp-action="Register" class="welcome-button ajax-nav-link" 
+               data-url="@Url.Action("Register", "Account")">Sign up</a>
+        </div>
+    }
 </div>

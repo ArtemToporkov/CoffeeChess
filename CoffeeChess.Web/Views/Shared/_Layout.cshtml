@@ -20,10 +20,22 @@
         <div class="nav-logo">
             <img src="~/img/coffee-cup.png" alt="Coffee Chess Logo" />
         </div>
-        <div class="nav-right">
-            <a asp-controller="Account" asp-action="Login" class="nav-link">Log in</a>
-            <a asp-controller="Account" asp-action="Register" class="nav-link">Sign up</a>
-        </div>
+        @if (User.Identity.IsAuthenticated)
+        {
+            <div class="nav-right">
+                <a asp-controller="Home" asp-action="Index" class="nav-link">@User.Identity.Name</a>
+                <a asp-controller="Home" asp-action="Index" class="nav-avatar">
+                    <img src="img/empty-avatar-icon.png"/>
+                </a>
+            </div>
+        }
+        else
+        {
+            <div class="nav-right">
+                <a asp-controller="Account" asp-action="Login" class="nav-link">Log in</a>
+                <a asp-controller="Account" asp-action="Register" class="nav-link">Sign up</a>
+            </div>
+        }
     </nav>
 </header>
 
