@@ -62,7 +62,7 @@ namespace CoffeeChess.Web.Controllers
             {
                 return PartialView("_LoginPanel");
             }
-            return View("Login_FullPage");
+            return View("LoginPanel");
         }
 
         [HttpPost]
@@ -89,7 +89,7 @@ namespace CoffeeChess.Web.Controllers
                     {
                         return PartialView("_LoginPanel", model);
                     }
-                    return View("Login_FullPage", model);
+                    return View("LoginPanel", model);
                 }
             }
 
@@ -97,7 +97,7 @@ namespace CoffeeChess.Web.Controllers
             {
                  return PartialView("_LoginPanel", model);
             }
-            return View("Login_FullPage", model);
+            return View("LoginPanel", model);
         }
 
         [HttpPost]

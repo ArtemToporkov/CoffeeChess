@@ -1,0 +1,28 @@
+﻿@model LoginViewModel
+
+<div class="login-panel" data-animation-order="0">
+    <h1 class="login-title">Log in</h1>
+    <form asp-action="Login" asp-route-returnurl="@ViewBag.ReturnUrl" method="post" id="loginForm">
+        @Html.AntiForgeryToken() 
+        
+        <div asp-validation-summary="ModelOnly" class="login-error auth-validation-summary"></div>
+        
+        <div class="login-input-group">
+            <input asp-for="UserName" class="login-input" placeholder="Login" />
+            <span asp-validation-for="UserName" class="login-error"></span>
+        </div>
+        <div class="login-input-group">
+            <input asp-for="Password" class="login-input" placeholder="Password" />
+            <span asp-validation-for="Password" class="login-error"></span>
+        </div>
+        <button type="submit" class="login-button">Log in</button>
+    </form>
+    <p class="login-switch-to-register-link">
+        Doesn't have an account? 
+        <a asp-action="Register" asp-route-returnurl="@ViewData["ReturnUrl"]" class="login-link" data-url="@Url.Action("Register", "Account", new { returnUrl = ViewData["ReturnUrl"] })">Sign up</a>
+    </p>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
