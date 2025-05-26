@@ -1,0 +1,21 @@
+﻿{
+  "version": "1.0",
+  "defaultProvider": "cdnjs",
+  "libraries": [
+    {
+      "library": "chessboard-js@1.0.0",
+      "destination": "wwwroot/lib/chessboardjs/",
+      "files": [
+        "chessboard-1.0.0.min.js",
+        "chessboard-1.0.0.min.css"
+      ]
+    },
+    {
+      "library": "chess.js@0.13.4",
+      "destination": "wwwroot/lib/chess.js/",
+      "files": [
+        "chess.min.js"
+      ]
+    }
+  ]
+}
