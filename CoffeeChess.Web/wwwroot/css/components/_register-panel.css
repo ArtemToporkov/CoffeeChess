@@ -1,0 +1,136 @@
+﻿.register-panel {
+    --register-panel-border-radius: 12px;
+    background-color: var(--white-coffee);
+
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    position: absolute;
+
+    box-sizing: border-box;
+    padding: 20px 50px;
+
+    width: 550px;
+    height: 550px;
+    top: 55%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+    border-radius: 50px;
+    border: var(--register-panel-border-radius) solid var(--dark-coffee);
+}
+
+.register-panel::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+
+    top: calc(-1 * var(--register-panel-border-radius));
+    left: calc(-1 * var(--register-panel-border-radius));
+    right: calc(-1 * var(--register-panel-border-radius));
+    bottom: calc(-1 * var(--register-panel-border-radius));
+
+    border-radius: 50px;
+    border: 4px solid var(--white-coffee);
+}
+
+.register-title {
+    font-family: 'Caprasimo', sans-serif;
+    color: var(--dark-coffee);
+    font-size: 60px;
+    text-shadow:
+            -4px 4px 0 var(--white-coffee),
+            -8px 8px 0 var(--dark-coffee);
+    margin: 0;
+}
+
+#registerForm {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 30px;
+}
+
+.register-input-group {
+    width: 100%;
+}
+
+.register-input {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 22px;
+    outline: none;
+    border: none;
+    padding-left: 10px;
+    padding-right: 10px;
+    
+    display: flex;
+    position: relative;
+    
+    background-color: var(--dark-coffee);
+    color: var(--white-coffee);
+    box-shadow:
+        0 0 0 5px var(--white-coffee),
+        0 0 0 8px var(--dark-coffee);
+    
+    width: 100%;
+    height: 40px;
+    
+    border-radius: 100px;
+}
+
+.register-input::placeholder {
+    color: var(--white-coffee-unselected);
+}
+
+.register-input:focus {
+    box-shadow:
+            0 0 0 5px var(--white-coffee),
+            0 0 0 8px var(--dark-coffee-unselected);
+}
+
+.register-switch-to-login-link {
+    margin: 0;
+    font-family: 'Montserrat', sans-serif;
+}
+
+.register-button {
+    background-color: var(--dark-coffee);
+    color: var(--white-coffee);
+    text-decoration: none;
+
+    border-radius: 100px;
+    width: 160px;
+    height: 60px;
+    box-shadow:
+            -3px 3px 0 var(--white-coffee),
+            -6px 6px 0 var(--dark-coffee);
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    font-family: 'Caprasimo', sans-serif;
+    font-size: 35px;
+
+    cursor: pointer;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.register-button:active {
+    transform: translate(-6px, 6px);
+    box-shadow:
+            0 0 0 var(--white-coffee),
+            0 0 0 var(--dark-coffee);
+}
+
+.register-error {
+    display: none; <!-- TODO: style errors -->
+}
+
+.register-link {
+    color: var(--dark-coffee);
+}
+
