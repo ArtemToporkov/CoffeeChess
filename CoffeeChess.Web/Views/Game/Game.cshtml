@@ -3,4 +3,7 @@
     ViewBag.Title = "Game";
 }
 @await Html.PartialAsync("_Game");
-
+@section Scripts
+{
+    <script src="~/js/game/chat.js" asp-append-version="true"></script>
+}

@@ -4,9 +4,9 @@
 @import "components/_game.css";
 
 :root {
-    --white-coffee: #FFE6D4;
+    --milk-coffee: #FFE6D4;
     --dark-coffee: #2B1100;
-    --white-coffee-unselected: rgba(255, 230, 212, 0.6);
+    --milk-coffee-unselected: rgba(255, 230, 212, 0.6);
     --dark-coffee-unselected: rgba(43, 17, 0, 0.6);
 }
 

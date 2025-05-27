@@ -1,5 +1,5 @@
 ﻿.register-panel {
-    background-color: var(--white-coffee);
+    background-color: var(--milk-coffee);
 
     display: flex;
     flex-direction: column;
@@ -19,7 +19,7 @@
     border-radius: 50px;
     box-shadow:
             0 0 0 8px var(--dark-coffee),
-            0 0 0 12px var(--white-coffee);
+            0 0 0 12px var(--milk-coffee);
 }
 
 .register-title {
@@ -27,7 +27,7 @@
     color: var(--dark-coffee);
     font-size: 60px;
     text-shadow:
-            -4px 4px 0 var(--white-coffee),
+            -4px 4px 0 var(--milk-coffee),
             -8px 8px 0 var(--dark-coffee);
     margin: 0;
 }
@@ -57,9 +57,9 @@
     position: relative;
     
     background-color: var(--dark-coffee);
-    color: var(--white-coffee);
+    color: var(--milk-coffee);
     box-shadow:
-        0 0 0 5px var(--white-coffee),
+        0 0 0 5px var(--milk-coffee),
         0 0 0 8px var(--dark-coffee);
     
     width: 100%;
@@ -69,25 +69,25 @@
 }
 
 .register-input::placeholder {
-    color: var(--white-coffee-unselected);
+    color: var(--milk-coffee-unselected);
 }
 
 .register-input:focus {
     box-shadow:
-            0 0 0 5px var(--white-coffee),
+            0 0 0 5px var(--milk-coffee),
             0 0 0 8px var(--dark-coffee-unselected);
 }
 
 .register-button {
     background-color: var(--dark-coffee);
-    color: var(--white-coffee);
+    color: var(--milk-coffee);
     text-decoration: none;
 
     border-radius: 100px;
     width: 160px;
     height: 60px;
     box-shadow:
-            -3px 3px 0 var(--white-coffee),
+            -3px 3px 0 var(--milk-coffee),
             -6px 6px 0 var(--dark-coffee);
 
     display: flex;
@@ -104,7 +104,7 @@
 .register-button:active {
     transform: translate(-6px, 6px);
     box-shadow:
-            0 0 0 var(--white-coffee),
+            0 0 0 var(--milk-coffee),
             0 0 0 var(--dark-coffee);
 }
 

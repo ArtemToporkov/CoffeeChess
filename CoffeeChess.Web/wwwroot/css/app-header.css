@@ -14,8 +14,8 @@
 .app-header {
     background-color: var(--dark-coffee);
     height: 60px;
-    border-bottom: 5px solid var(--white-coffee);
-    border-top: 5px solid var(--white-coffee);
+    border-bottom: 5px solid var(--milk-coffee);
+    border-top: 5px solid var(--milk-coffee);
 }
 
 .main-nav {
@@ -25,7 +25,7 @@
 .nav-link {
     text-decoration: none;
     position: relative;
-    color: var(--white-coffee);
+    color: var(--milk-coffee);
     font-size: 24px;
     font-family: 'Caprasimo', sans-serif;
 }
@@ -37,7 +37,7 @@
     bottom: -2px;
     width: 0;
     height: 2px;
-    background-color: var(--white-coffee);
+    background-color: var(--milk-coffee);
     transition: width 0.3s ease, left 0.3s ease;
     transform: translateX(-50%);
 }
@@ -72,7 +72,7 @@
     align-items: center;
     
     border-radius: 10px;
-    border: 4px solid var(--white-coffee);
+    border: 4px solid var(--milk-coffee);
     padding: 3px;
     
     width: 20px;
@@ -82,7 +82,7 @@
 }
 
 .nav-avatar:hover {
-    border: 4px solid var(--white-coffee-unselected);
+    border: 4px solid var(--milk-coffee-unselected);
 }
 
 .nav-avatar img {

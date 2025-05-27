@@ -1,19 +1,21 @@
 ﻿@model GameViewModel
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<UserModel> SignInManager
+@inject UserManager<UserModel> UserManager
 
 <div class="game-left-panel">
+    <div class="music-player-panel">
+        
+    </div>
     <div class="chat-panel">
-        <h1 class="chat-title">Chat</h1>
-        <div class="chat-messages" id="chatMessages">
+        <p class="chat-title">Chat</p>
+        <div id="chatMessages">
             <div class="chat-message">
-                <span class="chat-message-sender">ILikeSpaghetti:</span>
-                <span class="chat-message-text">nice game!</span>
-            </div>
-            <div class="chat-message">
-                <span class="chat-message-sender">Pizza_Love:</span>
-                <span class="chat-message-text">thanks!</span>
+                <span class="chat-message-sender">Coffee shop:</span>
+                <span class="chat-message-text">game will start in 3... 2... 1... Play!</span>
             </div>
         </div>
-        <input type="text" id="chatInputGame" class="chat-input" placeholder="Type something..." />
+        <input type="text" id="chatInput" placeholder="Type something..."/>
     </div>
 </div>
 <div class="game-middle-panel">
@@ -22,3 +24,12 @@
 <div class="game-right-panel">
     
 </div>
+
+@if (SignInManager.IsSignedIn(User))
+{
+    <div id="currentUserData" data-username="@UserManager.GetUserName(User)" style="display: none;"></div>
+}
+else
+{
+    <div id="currentUserData" data-username="You" style="display: none;"></div> <!-- Имя для гостя -->
+}
