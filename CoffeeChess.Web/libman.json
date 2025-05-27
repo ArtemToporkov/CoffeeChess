@@ -3,7 +3,8 @@
   "defaultProvider": "cdnjs",
   "libraries": [
     {
-      "library": "chessboard-js@1.0.0",
+      "library": "..\\lib-patches\\chessboardjs\\",
+      "provider": "filesystem",
       "destination": "wwwroot/lib/chessboardjs/",
       "files": [
         "chessboard-1.0.0.js",
