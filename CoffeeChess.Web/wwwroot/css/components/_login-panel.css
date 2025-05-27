@@ -1,5 +1,4 @@
 ﻿.login-panel {
-    --login-panel-border-radius: 12px;
     background-color: var(--dark-coffee);
 
     display: flex;
@@ -18,21 +17,9 @@
     transform: translate(-50%, -50%);
 
     border-radius: 50px;
-    border: var(--login-panel-border-radius) solid var(--white-coffee);
-}
-
-.login-panel::before {
-    content: "";
-    position: absolute;
-    z-index: -1;
-
-    top: calc(-1 * var(--login-panel-border-radius));
-    left: calc(-1 * var(--login-panel-border-radius));
-    right: calc(-1 * var(--login-panel-border-radius));
-    bottom: calc(-1 * var(--login-panel-border-radius));
-
-    border-radius: 50px;
-    border: 4px solid var(--dark-coffee);
+    box-shadow:
+            0 0 0 8px var(--white-coffee),
+            0 0 0 12px var(--dark-coffee);
 }
 
 .login-title {

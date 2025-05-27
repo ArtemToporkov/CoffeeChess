@@ -1,0 +1,23 @@
+﻿.game-left-panel {
+    background-color: var(--dark-coffee);
+
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    position: absolute;
+
+    box-sizing: border-box;
+    padding: 50px;
+
+    width: 550px;
+    height: 550px;
+    top: 55%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+    border-radius: 50px;
+    box-shadow:
+            0 0 0 8px var(--white-coffee),
+            0 0 0 12px var(--dark-coffee);
+}
