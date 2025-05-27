@@ -6,12 +6,12 @@
       "library": "chessboard-js@1.0.0",
       "destination": "wwwroot/lib/chessboardjs/",
       "files": [
-        "chessboard-1.0.0.min.js",
-        "chessboard-1.0.0.min.css"
+        "chessboard-1.0.0.js",
+        "chessboard-1.0.0.css"
       ]
     },
     {
-      "library": "chess.js@0.13.4",
+      "library": "chess.js@0.10.2",
       "destination": "wwwroot/lib/chess.js/",
       "files": [
         "chess.min.js"

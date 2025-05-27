@@ -1,0 +1,11 @@
+﻿.chessboard-63f37 {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.board-b72b1 {
+    border: none;
+    border-radius: 40px;
+    overflow: hidden;
+}

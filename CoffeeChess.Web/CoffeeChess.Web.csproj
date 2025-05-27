@@ -52,6 +52,9 @@
       <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap\dist\js\bootstrap.min.js" />
       <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap\dist\js\bootstrap.min.js.map" />
       <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap\LICENSE" />
+      <_ContentIncludedByDefault Remove="wwwroot\lib\chess.js\chess.min.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\lib\chessboardjs\chessboard-1.0.0.css" />
+      <_ContentIncludedByDefault Remove="wwwroot\lib\chessboardjs\chessboard-1.0.0.js" />
     </ItemGroup>
 
     <ItemGroup>
@@ -65,10 +68,6 @@
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>
       <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="wwwroot\img\chesspieces\" />
     </ItemGroup>
 
 </Project>
