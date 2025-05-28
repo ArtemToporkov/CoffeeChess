@@ -9,3 +9,22 @@
     border-radius: 40px;
     overflow: hidden;
 }
+
+.highlight2-9c5d2, 
+.highlight1-32417 {
+    box-shadow: inset 0 0 0 3px var(--dark-coffee-unselected);
+}
+
+.white-1e1d7 {
+    background-color: var(--milk-coffee-chess-square);
+    font-family: 'Montserrat', sans-serif;
+    color: var(--dark-coffee);
+    transition: box-shadow 0.1s ease;
+}
+
+.black-3c85d {
+    background-color: var(--dark-coffee-chess-square);
+    font-family: 'Montserrat', sans-serif;
+    color: var(--milk-coffee);
+    transition: box-shadow 0.1s ease;
+}

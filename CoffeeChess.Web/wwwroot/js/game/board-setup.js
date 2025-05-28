@@ -28,7 +28,8 @@ $(document).ready(function () {
         onDragStart: onDragStart,
         onDrop: onDrop,
         onSnapEnd: onSnapEnd,
-        pieceTheme: '../img/chesspieces/{piece}.png'
+        pieceTheme: '../img/chesspieces/{piece}.png',
+        snapbackSpeed: 250
     };
     board = Chessboard('myBoard', config);
 });
