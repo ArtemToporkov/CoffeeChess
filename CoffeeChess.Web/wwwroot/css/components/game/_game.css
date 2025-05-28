@@ -66,6 +66,24 @@
     overflow-y: auto;
 }
 
+#chatMessages::-webkit-scrollbar {
+    width: 10px;
+}
+
+#chatMessages::-webkit-scrollbar-thumb {
+    background-color: var(--milk-coffee);
+    border-radius: 6px;
+}
+
+#chatMessages::-webkit-scrollbar-thumb:hover {
+    background-color: var(--milk-coffee-unselected);
+}
+
+#chatMessages::-webkit-scrollbar-track {
+    background-color: var(--milk-coffee-unselected);
+    border-radius: 6px;
+}
+
 .chat-message-sender {
     font-family: 'Caprasimo', sans-serif;
     color: var(--milk-coffee);
