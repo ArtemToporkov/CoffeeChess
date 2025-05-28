@@ -12,19 +12,38 @@
 
 .highlight2-9c5d2, 
 .highlight1-32417 {
-    box-shadow: inset 0 0 0 3px var(--dark-coffee-unselected);
+    box-shadow: inset 0 0 0 4px var(--dark-coffee-unselected);
 }
 
 .white-1e1d7 {
+    display: flex;
+    justify-content: center;
+    align-items: center;
     background-color: var(--milk-coffee-chess-square);
+    transform: scale(1.01, 1.01);
     font-family: 'Montserrat', sans-serif;
     color: var(--dark-coffee);
-    transition: box-shadow 0.1s ease;
+    transition: box-shadow 0.2s ease;
 }
 
 .black-3c85d {
+    display: flex;
+    justify-content: center;
+    align-items: center;
     background-color: var(--dark-coffee-chess-square);
     font-family: 'Montserrat', sans-serif;
     color: var(--milk-coffee);
     transition: box-shadow 0.1s ease;
+}
+
+.board-b72b1 {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.row-5277c {
+    display: flex;
+    flex-direction: row;
+    gap: 0;
 }
