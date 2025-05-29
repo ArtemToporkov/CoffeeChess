@@ -4,13 +4,13 @@ namespace CoffeeChess.Web.Controllers;
 
 public class GameController : Controller
 {
-    public IActionResult Game()
+    public IActionResult CreateGame()
     {
         if (Request.Headers.XRequestedWith == "XMLHttpRequest")
         {
-            return PartialView("_Game");
+            return PartialView("_GameCreation");
         }
 
-        return View();
+        return View("_GameCreation");
     }
 }

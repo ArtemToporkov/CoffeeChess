@@ -319,6 +319,7 @@
     align-items: center;
     justify-content: center;
     flex: 10;
+    cursor: pointer;
 }
 
 .history-selected {
