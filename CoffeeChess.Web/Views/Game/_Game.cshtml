@@ -5,7 +5,7 @@
 
 <div class="game-left-panel">
     <div class="music-player-panel">
-        
+
     </div>
     <div class="chat-panel">
         <p class="chat-title">Chat</p>
@@ -54,6 +54,23 @@
 <div class="game-right-panel">
     <div class="moves-history">
         <p class="history-title">Moves</p>
+        <div class="history">
+            <div class="history-row">
+                <div class="history-move-number">№</div>
+                <div class="history-move">White</div>
+                <div class="history-move">Black</div>
+            </div>
+            <div class="history-row">
+                <div class="history-move-number">1.</div>
+                <div class="history-move">e4</div>
+                <div class="history-move">e5</div>
+            </div>
+            <div class="history-row">
+                <div class="history-move-number">2.</div>
+                <div class="history-move">Nf3</div>
+                <div class="history-move history-selected">Nc6</div>
+            </div>
+        </div>
         <div class="resign-draw-buttons">
             <button class="resign-draw-button">Offer draw ½</button>
             <button class="resign-draw-button">Resign ⚑</button>
@@ -67,5 +84,6 @@
 }
 else
 {
-    <div id="currentUserData" data-username="You" style="display: none;"></div> <!-- Имя для гостя -->
+    <div id="currentUserData" data-username="You" style="display: none;"></div>
+    <!-- Имя для гостя -->
 }
