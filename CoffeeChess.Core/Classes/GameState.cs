@@ -1,8 +1,8 @@
 ﻿using CoffeeChess.Core;
 
-public class GameState(string gameId)
+public class GameState(Guid gameId)
 {
-    public string GameId { get; } = gameId;
+    public Guid GameId { get; } = gameId;
     public string? PlayerWhiteId { get; set; }
     public string? PlayerBlackId { get; set; }
     public string CurrentFen { get; set; } = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
