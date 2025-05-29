@@ -17,6 +17,13 @@
       "files": [
         "chess.min.js"
       ]
+    },
+    {
+      "library": "microsoft-signalr@8.0.7",
+      "destination": "wwwroot/lib/signalr",
+      "files": [
+        "signalr.min.js"
+      ]
     }
   ]
 }
