@@ -44,6 +44,7 @@
 .game-creation-time-control {
     background-color: var(--dark-coffee);
     color: var(--milk-coffee);
+    text-decoration: none;
 
     border: none;
     border-radius: 20px;

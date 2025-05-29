@@ -9,8 +9,8 @@
     @if (User.Identity.IsAuthenticated)
     {
         <div class="welcome-buttons-container">
-            <a asp-controller="Game" asp-action="CreateGame" class="welcome-button ajax-nav-link" 
-               data-url="@Url.Action("CreateGame", "Game")">Play</a>
+            <a asp-controller="Game" asp-action="GameCreation" class="welcome-button ajax-nav-link" 
+               data-url="@Url.Action("GameCreation", "Game")">Play</a>
         </div>
     }
     else
