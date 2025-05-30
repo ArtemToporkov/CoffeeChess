@@ -27,11 +27,17 @@ public class GameController : Controller
 
     public IActionResult CreateGame(
         int minutes, int increment,
-        ColorPreferences colorPreference = ColorPreferences.Any,
+        ColorPreference colorPreference = ColorPreference.Any,
         int minRating = int.MinValue,
         int maxRating = int.MaxValue)
     {
-        // TODO: move to lobby
-        throw new NotImplementedException();
+        // TODO: MOVE TO LOBBY
+        
+        if (Request.Headers.XRequestedWith == "XMLHttpRequest")
+        {
+            return PartialView("_Game");
+        }
+
+        return View("Game");
     }
 }

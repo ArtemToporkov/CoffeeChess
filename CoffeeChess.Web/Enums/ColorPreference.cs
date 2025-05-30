@@ -1,6 +1,6 @@
 ﻿namespace CoffeeChess.Web.Enums;
 
-public enum ColorPreferences
+public enum ColorPreference
 {
     White,
     Black,
