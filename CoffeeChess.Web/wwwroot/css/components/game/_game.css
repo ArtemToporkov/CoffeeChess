@@ -79,7 +79,7 @@
 
 #chatMessages::-webkit-scrollbar-thumb:hover,
 .history::-webkit-scrollbar-thumb:hover {
-    background-color: var(--milk-coffee-unselected);
+    background-color: rgba(255, 230, 212, 0.6);
 }
 
 #chatMessages::-webkit-scrollbar-track,
@@ -111,8 +111,14 @@
     color: var(--dark-coffee);
 
     border: none;
+    outline: none;
     border-radius: 50px;
     box-sizing: border-box;
+
+    transition: box-shadow 0.3s ease;
+    box-shadow:
+            0 0 0 2px transparent,
+            0 0 0 4px transparent;
 }
 
 #chatInput::placeholder {
@@ -120,8 +126,9 @@
 }
 
 #chatInput:focus {
-    outline-offset: 2px;
-    outline: 2px solid var(--milk-coffee);
+    box-shadow:
+            0 0 0 2px var(--dark-coffee),
+            0 0 0 4px var(--milk-coffee);
 }
 
 .game-middle-panel {
