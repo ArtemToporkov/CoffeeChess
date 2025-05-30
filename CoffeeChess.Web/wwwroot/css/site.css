@@ -7,8 +7,8 @@
 :root {
     --milk-coffee: #FFE6D4;
     --dark-coffee: #2B1100;
-    --milk-coffee-unselected: rgba(255, 230, 212, 0.6);
-    --dark-coffee-unselected: rgba(43, 17, 0, 0.6);
+    --milk-coffee-unselected: #aa917f;
+    --dark-coffee-unselected: #806655;
     --milk-coffee-chess-square: #FFE6D4;
     --dark-coffee-chess-square: rgb(171, 129, 99);
 }

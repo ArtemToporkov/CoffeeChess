@@ -21,7 +21,9 @@
             <a asp-controller="Settings" asp-action="Index" class="nav-link">Settings</a>
         </div>
         <div class="nav-logo">
-            <img src="~/img/coffee-cup.png" alt="Coffee Chess Logo" />
+            <a asp-controller="Home" asp-action="Index">
+                <img src="~/img/coffee-cup.png" alt="Coffee Chess Logo"/>
+            </a>
         </div>
         @if (User.Identity.IsAuthenticated)
         {
