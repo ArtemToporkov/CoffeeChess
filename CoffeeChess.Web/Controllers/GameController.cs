@@ -1,4 +1,5 @@
 ﻿using CoffeeChess.Web.Enums;
+using CoffeeChess.Web.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CoffeeChess.Web.Controllers;
@@ -28,16 +29,23 @@ public class GameController : Controller
     public IActionResult CreateGame(
         int minutes, int increment,
         ColorPreference colorPreference = ColorPreference.Any,
-        int minRating = int.MinValue,
+        int minRating = 0,
         int maxRating = int.MaxValue)
     {
-        // TODO: MOVE TO LOBBY
+        var waitingViewModel = new WaitingViewModel
+        {
+            Minutes = minutes,
+            Increment = increment,
+            ColorPreference = colorPreference,
+            MinRating = minRating,
+            MaxRating = maxRating
+        };
         
         if (Request.Headers.XRequestedWith == "XMLHttpRequest")
         {
-            return PartialView("_Game");
+            return PartialView("_GameWaiting", waitingViewModel);
         }
 
-        return View("Game");
+        return View("GameWaiting", waitingViewModel);
     }
 }

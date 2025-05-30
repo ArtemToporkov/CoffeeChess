@@ -1,0 +1,21 @@
+﻿@model WaitingViewModel
+
+<div class="waiting-panel">
+    <p class="waiting-title">Searching...</p>
+    <img src="/img/coffee-need.gif" alt="Coffee gif" class="coffee-gif"/>
+    <div class="conditions">
+        <div class="game-condition">
+            <span class="condition-title">Time control:</span>
+            <span class="condition">@Model.Minutes|@Model.Increment</span>
+        </div>
+        <div class="game-condition">
+            <span class="condition-title">Color:</span>
+            <span class="condition">@Model.ColorPreference</span>
+        </div>
+        <div class="game-condition">
+            <span class="condition-title">Rating range:</span>
+            <span class="condition">@Model.MinRating — @(Model.MaxRating == int.MaxValue ? "Any" : Model.MaxRating)</span>
+        </div>
+    </div>
+    <a asp-controller="Game" asp-action="GameCreation" class="cancel-button">Cancel</a>
+</div>

@@ -3,6 +3,7 @@
 @import "components/_login-panel.css";
 @import "components/game/_game.css";
 @import "components/game/_game-creation.css";
+@import "components/game/_game-waiting.css";
 
 :root {
     --milk-coffee: #FFE6D4;
