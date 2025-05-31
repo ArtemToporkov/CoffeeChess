@@ -1,4 +1,12 @@
 $(document).ready(() => {
+    const connection = new signalR.HubConnectionBuilder()
+        .withUrl("/gameHub")
+        .configureLogging(signalR.LogLevel.Information)
+        .build();
+
+    const pathParts = window.location.pathname.split('/');
+    const gameId = pathParts[pathParts.length - 1];
+    
     let board = null;
     const game = new Chess();
 
@@ -16,6 +24,8 @@ $(document).ready(() => {
 
         if (move === null) 
             return 'snapback';
+        
+        connection.invoke("MakeMove", gameId, game.fen())
     }
     
     function onSnapEnd() {
@@ -32,4 +42,16 @@ $(document).ready(() => {
         snapbackSpeed: 250
     };
     board = Chessboard('myBoard', config);
+
+    connection.on("MakeMove", (newFen) => {
+        game.load(newFen);
+        board.position(newFen);
+    });
+    
+    async function startConnection() {
+        await connection.start();
+        connection.invoke("JoinChatGroup", gameId);
+    }
+    
+    startConnection();
 });

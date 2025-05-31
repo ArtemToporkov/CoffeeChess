@@ -15,5 +15,6 @@ public class GameModel(
     public string? SecondPlayerUserName { get; set; }
     public GameSettingsModel GameSettings { get; set; } = gameSettings;
     public bool Started { get; set; } = false;
+    public string Fen { get; set; } = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
     public ConcurrentQueue<ChatMessageModel> ChatMessages { get; } = new();
 }

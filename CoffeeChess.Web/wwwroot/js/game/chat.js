@@ -25,7 +25,6 @@
 
     const pathParts = window.location.pathname.split('/');
     const gameId = pathParts[pathParts.length - 1];
-    console.log(gameId);
 
     connection.on("ReceiveChatMessage", (user, message) => {
         addMessageToChat(user, message);

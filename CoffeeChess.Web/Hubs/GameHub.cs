@@ -51,4 +51,13 @@ public class GameHub(IGameManagerService gameManager, UserManager<UserModel> use
             await Groups.AddToGroupAsync(Context.ConnectionId, gameId);
         }
     }
+
+    public async Task MakeMove(string gameId, string newFen)
+    {
+        if (gameManager.TryGetGame(gameId, out var game))
+        {
+            game!.Fen = newFen;
+            await Clients.Group(gameId).SendAsync("MakeMove", newFen);
+        }
+    }
 }
