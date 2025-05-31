@@ -1,10 +1,11 @@
 ﻿using CoffeeChess.Core.Enums;
+using CoffeeChess.Service.Interfaces;
 using CoffeeChess.Web.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CoffeeChess.Web.Controllers;
 
-public class GameController : Controller
+public class GameController(IGameManagerService gameManager) : Controller
 {
     public IActionResult GameCreation()
     {
@@ -32,7 +33,7 @@ public class GameController : Controller
         int minRating = 0,
         int maxRating = int.MaxValue)
     {
-        var waitingViewModel = new GameSettingsViewModel
+        var gameSettings = new GameSettingsViewModel
         {
             Minutes = minutes,
             Increment = increment,
@@ -43,9 +44,19 @@ public class GameController : Controller
         
         if (Request.Headers.XRequestedWith == "XMLHttpRequest")
         {
-            return PartialView("_GameWaiting", waitingViewModel);
+            return PartialView("_GameWaiting", gameSettings);
         }
 
-        return View("GameWaiting", waitingViewModel);
+        return View("GameWaiting", gameSettings);
+    }
+
+    public IActionResult Play(string gameId)
+    {
+        if (Request.Headers.XRequestedWith == "XMLHttpRequest")
+        {
+            return PartialView("_Game");
+        }
+
+        return View("Game");
     }
 }

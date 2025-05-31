@@ -1,6 +1,7 @@
 using CoffeeChess.Service.Implementations;
 using CoffeeChess.Service.Interfaces;
 using CoffeeChess.Web.Data;
+using CoffeeChess.Web.Hubs;
 using CoffeeChess.Web.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -45,6 +46,11 @@ app.MapControllerRoute(
         name: "default",
         pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
+app.MapControllerRoute(
+        name: "game",
+        pattern: "{controller=Game}/{action=Play}/{id?}")
+    .WithStaticAssets();
 
+app.MapHub<GameHub>("/gameHub");
 
 app.Run();

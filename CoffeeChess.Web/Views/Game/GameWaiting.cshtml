@@ -3,3 +3,53 @@
     ViewBag.Title = "Game waiting";
 }
 @await Html.PartialAsync("_GameWaiting");
+@section Scripts
+{
+    <script>
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/gameHub")
+            .configureLogging(signalR.LogLevel.Information)
+            .build();
+
+        let currentGameId = null;
+
+        const gameSettings = {
+            minutes: @Model.Minutes,
+            increment: @Model.Increment,
+            colorPreference: @((int)Model.ColorPreference),
+            minRating: @Model.MinRating,
+            maxRating: @Model.MaxRating
+        };
+
+        connection.on("GameCreated", (gameId) => {
+            console.log("Game created with ID:", gameId);
+            currentGameId = gameId;
+        });
+
+        connection.on("GameJoined", (gameId, opponentUsername) => {
+            console.log(`Successfully joined game ${gameId}. Your opponent is ${opponentUsername}`);
+            currentGameId = gameId;
+        });
+
+        connection.on("PlayerJoined", (gameId, username) => {
+            console.log("Player " + username + " joined game " + gameId);
+        });
+
+        connection.on("GameStarted", (gameId, player1, player2) => {
+            console.log(`Game ${gameId} started between ${player1} and ${player2}. Redirecting...`);
+            window.location.href = `/Game/Play/${gameId}`;
+        });
+
+        async function startSignalR() {
+            try {
+                await connection.start();
+                console.log("SignalR Connected.");
+                await connection.invoke("CreateOrJoinGame", gameSettings);
+            } catch (err) {
+                console.error(err.toString());
+            }
+        }
+
+        startSignalR();
+    </script>
+}
