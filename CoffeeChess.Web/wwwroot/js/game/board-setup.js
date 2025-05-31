@@ -1,4 +1,4 @@
-$(document).ready(function () {
+$(document).ready(() => {
     let board = null;
     const game = new Chess();
 
@@ -22,7 +22,7 @@ $(document).ready(function () {
         board.position(game.fen());
     }
     
-    var config = {
+    const config = {
         draggable: true,
         position: 'start',
         onDragStart: onDragStart,

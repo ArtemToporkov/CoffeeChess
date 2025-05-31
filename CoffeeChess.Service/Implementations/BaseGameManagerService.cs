@@ -69,14 +69,9 @@ public class BaseGameManagerService : IGameManagerService
 
     public bool TryAddChatMessage(string gameId, string username, string message)
     {
-        if (!_games.TryGetValue(gameId, out var game)) 
+        if (!TryGetGame(gameId, out var game)) 
             return false;
-        game.ChatMessages.Enqueue(new ChatMessageModel { Username = username, Message = message });
+        game!.ChatMessages.Enqueue(new ChatMessageModel { Username = username, Message = message });
         return true;
-    }
-
-    public bool TryRemoveGame(string gameId)
-    {
-        return _games.TryRemove(gameId, out _);
     }
 }

@@ -10,7 +10,7 @@ public class GameHub(IGameManagerService gameManager, UserManager<UserModel> use
 {
     private async Task<string> GetUsernameAsync()
     {
-        if (Context.User.Identity.IsAuthenticated)
+        if (Context.User?.Identity is { IsAuthenticated: true })
         {
             var user = await userManager.GetUserAsync(Context.User);
             return user?.UserName ?? string.Concat("Guest_", Context.ConnectionId.AsSpan(0, 5));
@@ -26,9 +26,6 @@ public class GameHub(IGameManagerService gameManager, UserManager<UserModel> use
         await Groups.AddToGroupAsync(Context.ConnectionId, game.GameId);
         if (game.Started)
         {
-            await Clients.Caller.SendAsync("GameJoined", game.GameId, game.FirstPlayerUserName);
-            await Clients.Client(game.FirstPlayerId).SendAsync(
-                "PlayerJoined", game.GameId, game.SecondPlayerUserName);
             await Clients.Group(game.GameId).SendAsync(
                 "GameStarted", game.GameId, game.FirstPlayerUserName, game.SecondPlayerUserName);
         }

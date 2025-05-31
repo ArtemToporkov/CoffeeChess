@@ -226,7 +226,7 @@
     color: var(--milk-coffee-unselected);
 }
 
-.timer {
+.info-container {
     background-color: var(--dark-coffee);
 
     display: flex;
@@ -244,7 +244,7 @@
     height: 30px;
 }
 
-.timer-mins-secs {
+.info {
     font-family: 'Caprasimo', sans-serif;
     color: var(--milk-coffee);
 }

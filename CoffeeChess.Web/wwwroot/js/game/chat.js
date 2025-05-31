@@ -41,6 +41,7 @@
     }
 
     startGamePageSignalR();
+    
     const chatInputElement = document.getElementById('chatInput');
     const chatMessagesContainerElement = document.getElementById('chatMessages');
 
