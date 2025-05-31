@@ -35,7 +35,7 @@
             <div class="form-values">
                 <input type="number" min="0" max="4000" placeholder="0" onchange="validateRating(this)" class="form-input" id="minRating"/>
                 <p class="separator">—</p>
-                <input type="number" min="0" max="4000" placeholder="+∞" onchange="validateRating(this)" class="form-input" id="maxRating"/>
+                <input type="number" min="0" max="4000" placeholder="any" onchange="validateRating(this)" class="form-input" id="maxRating"/>
             </div>
         </div>
         
@@ -65,12 +65,12 @@ function validateRating(input) {
     } else if (input.value > max) {
         input.value = max;
     }
-    if (maxRatingInput.value) {
-        if (minRatingInput.id === 'minRating' && maxRatingInput.value < minRatingInput.value) {
-            maxRatingInput.value = minRatingInput.value;
-        } else if (maxRatingInput.id === 'maxRating' && maxRatingInput.value < minRatingInput.value) {
-            minRatingInput.value = maxRatingInput.value;
-        }
+
+    const minValue = parseInt(minRatingInput.value) || 0;
+    const maxValue = parseInt(maxRatingInput.value) || max;
+
+    if (minValue > maxValue) {
+        maxRatingInput.value = minValue;
     }
 }
 </script>
