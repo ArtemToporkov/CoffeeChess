@@ -1,8 +1,8 @@
-﻿using CoffeeChess.Web.Enums;
+﻿using CoffeeChess.Core.Enums;
 
-namespace CoffeeChess.Web.Models;
+namespace CoffeeChess.Core.Models;
 
-public class WaitingViewModel
+public class GameSettingsModel
 {
     public int Minutes { get; set; }
     public int Increment { get; set; }

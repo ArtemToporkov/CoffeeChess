@@ -1,3 +1,5 @@
+using CoffeeChess.Service.Implementations;
+using CoffeeChess.Service.Interfaces;
 using CoffeeChess.Web.Data;
 using CoffeeChess.Web.Models;
 using Microsoft.AspNetCore.Identity;
@@ -21,6 +23,7 @@ builder.Services.AddIdentity<UserModel, IdentityRole>(options =>
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddSignalR();
+builder.Services.AddSingleton<IGameManagerService, BaseGameManagerService>();
 
 var app = builder.Build();
 

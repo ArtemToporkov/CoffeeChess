@@ -1,4 +1,4 @@
-﻿using CoffeeChess.Web.Enums;
+﻿using CoffeeChess.Core.Enums;
 using CoffeeChess.Web.Models;
 using Microsoft.AspNetCore.Mvc;
 
@@ -32,7 +32,7 @@ public class GameController : Controller
         int minRating = 0,
         int maxRating = int.MaxValue)
     {
-        var waitingViewModel = new WaitingViewModel
+        var waitingViewModel = new GameSettingsViewModel
         {
             Minutes = minutes,
             Increment = increment,

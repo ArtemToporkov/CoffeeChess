@@ -1,4 +1,4 @@
-﻿namespace CoffeeChess.Web.Enums;
+﻿namespace CoffeeChess.Core.Enums;
 
 public enum ColorPreference
 {
