@@ -1,4 +1,5 @@
-﻿using CoffeeChess.Core.Models;
+﻿using System.Diagnostics;
+using CoffeeChess.Core.Models;
 using CoffeeChess.Service.Interfaces;
 using CoffeeChess.Web.Models;
 using Microsoft.AspNetCore.Identity;
@@ -20,8 +21,10 @@ public class GameHub(IGameManagerService gameManager, UserManager<UserModel> use
         if (gameManager.TryFindChallenge(Context.UserIdentifier!, out var foundChallenge))
         {
             var game = gameManager.CreateGameBasedOnFoundChallenge(Context.UserIdentifier!, settings, foundChallenge!);
-            await Clients.Users(Context.UserIdentifier!, foundChallenge!.PlayerId).SendAsync(
-                "GameStarted", game.GameId, game.WhitePlayerId, game.BlackPlayerId);
+            await Clients.User(game.WhitePlayerId).SendAsync(
+                "GameStarted", game.GameId, true);
+            await Clients.User(game.BlackPlayerId).SendAsync(
+                "GameStarted", game.GameId, false);
         }
         else
         {
@@ -40,12 +43,46 @@ public class GameHub(IGameManagerService gameManager, UserManager<UserModel> use
         }
     }
 
-    public async Task MakeMove(string gameId, string newFen)
+    public async Task MakeMove(string gameId, string oldFen, string newFen)
     {
         if (gameManager.TryGetGame(gameId, out var game))
         {
-            await Clients.Users(game!.WhitePlayerId, game.BlackPlayerId)
-                .SendAsync("MakeMove", newFen);
+            if (game!.WhitePlayerId == Context.UserIdentifier)
+            {
+                if (game.IsWhiteTurn)
+                {
+                    game.IsWhiteTurn = false;
+                    await Clients.User(game.WhitePlayerId).SendAsync(
+                        "MakeMove", newFen, false);
+                    await Clients.User(game.BlackPlayerId).SendAsync(
+                        "MakeMove", newFen, true);
+                }
+                else
+                {
+                    await Clients.User(game.WhitePlayerId).SendAsync(
+                        "MakeMove", oldFen, false);
+                    await Clients.User(game.BlackPlayerId).SendAsync(
+                        "MakeMove", oldFen, true);
+                }
+            }
+            else if (game.BlackPlayerId == Context.UserIdentifier)
+            {
+                if (!game.IsWhiteTurn)
+                {
+                    game.IsWhiteTurn = true;
+                    await Clients.User(game.WhitePlayerId).SendAsync(
+                        "MakeMove", newFen, true);
+                    await Clients.User(game.BlackPlayerId).SendAsync(
+                        "MakeMove", newFen, false);
+                }
+                else
+                {
+                    await Clients.User(game.WhitePlayerId).SendAsync(
+                        "MakeMove", oldFen, true);
+                    await Clients.User(game.BlackPlayerId).SendAsync(
+                        "MakeMove", oldFen, false);
+                }
+            }
         }
     }
 }

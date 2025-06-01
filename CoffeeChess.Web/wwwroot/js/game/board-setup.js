@@ -11,11 +11,12 @@ $(document).ready(() => {
     const game = new Chess();
 
     function onDragStart(source, piece, position, orientation) {
-        if (game.game_over()) 
+        if (!myTurn || game.game_over()) 
             return false;
     }
 
     function onDrop(source, target) {
+        const oldFen = game.fen();
         const move = game.move({
             from: source,
             to: target,
@@ -25,7 +26,7 @@ $(document).ready(() => {
         if (move === null) 
             return 'snapback';
         
-        connection.invoke("MakeMove", gameId, game.fen())
+        connection.invoke("MakeMove", gameId, oldFen, game.fen())
     }
     
     function onSnapEnd() {
@@ -42,8 +43,14 @@ $(document).ready(() => {
         snapbackSpeed: 250
     };
     board = Chessboard('myBoard', config);
-
-    connection.on("MakeMove", (newFen) => {
+    const isWhite = localStorage.getItem('isWhite') === "true";
+    let myTurn = isWhite;
+    if (!isWhite) {
+        board.flip();
+    }
+    
+    connection.on("MakeMove", (newFen, isMyTurn) => {
+        myTurn = isMyTurn;
         game.load(newFen);
         board.position(newFen);
     });

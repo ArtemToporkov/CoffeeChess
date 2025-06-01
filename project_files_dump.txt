@@ -30,12 +30,10 @@ D:\wonderfulprojects\CoffeeChess\CoffeeChess.Core\Models\GameChallengeModel.cs
 namespace CoffeeChess.Core.Models;
 
 public class GameChallengeModel(
-    string gameId, 
     string playerId, 
     string playerUserName,
     GameSettingsModel gameSettings) 
 {
-    public string GameId { get; set; } = gameId;
     public string PlayerId { get; set; } = playerId;
     public string PlayerUserName { get; set; } = playerUserName;
     public GameSettingsModel GameSettings { get; set; } = gameSettings;
@@ -104,7 +102,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("CoffeeChess.Core")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+644ef4a51504139c812bad8c90c5516761dfdf5c")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+80f8470f6ced57cced4831895f8ac571055a14b0")]
 [assembly: System.Reflection.AssemblyProductAttribute("CoffeeChess.Core")]
 [assembly: System.Reflection.AssemblyTitleAttribute("CoffeeChess.Core")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
@@ -144,43 +142,48 @@ public class BaseGameManagerService : IGameManagerService
     private readonly ConcurrentDictionary<string, GameModel> _games = new();
     private static readonly Random Random = new(); 
 
-    public GameChallengeModel CreateGameChallenge(string creatorConnectionId, 
+    public GameChallengeModel CreateGameChallenge(string creatorId, 
         string creatorUsername, GameSettingsModel settings)
     {
-        var gameId = Guid.NewGuid().ToString("N")[..8];
-        var gameChallenge = new GameChallengeModel(gameId, creatorConnectionId, creatorUsername, settings);
-        _gamesChallenges.TryAdd(gameId, gameChallenge);
+        var gameChallenge = new GameChallengeModel(creatorId, creatorUsername, settings);
+        _gamesChallenges.TryAdd(creatorId, gameChallenge);
         return gameChallenge;
     }
 
-    public bool TryFindGame(string playerConnectionId, string playerUsername, GameSettingsModel settings,
-        out GameModel? foundGame)
+    public bool TryFindChallenge(string playerId, 
+        out GameChallengeModel? foundChallenge)
     {
         foreach (var (gameChallengeId, gameChallenge) in _gamesChallenges)
         {
-            if (gameChallenge.PlayerId != playerConnectionId)
+            if (gameChallenge.PlayerId != playerId)
             {
-                var connectionPlayerColor = GetColor(settings);
-                var (whitePlayerId, blackPlayerId) = connectionPlayerColor == ColorPreference.White
-                    ? (playerConnectionId, gameChallenge.PlayerId)
-                    : (gameChallenge.PlayerId, playerConnectionId);
-                foundGame = new GameModel
-                {
-                    GameId = Guid.NewGuid().ToString("N")[..8],
-                    WhitePlayerId = whitePlayerId,
-                    BlackPlayerId = blackPlayerId,
-                    WhiteTimeLeft = TimeSpan.FromMinutes(settings.Minutes),
-                    BlackTimeLeft = TimeSpan.FromMinutes(settings.Minutes),
-                    Increment = TimeSpan.FromSeconds(settings.Increment)
-                };
-                _games.TryAdd(foundGame.GameId, foundGame);
-                _gamesChallenges.TryRemove(gameChallengeId, out _);
+                _gamesChallenges.TryRemove(gameChallengeId, out foundChallenge);
                 return true;
             }
         }
 
-        foundGame = null;
+        foundChallenge = null;
         return false;
+    }
+
+    public GameModel CreateGameBasedOnFoundChallenge(string playerId, 
+        GameSettingsModel settings, GameChallengeModel gameChallenge)
+    {
+        var connectingPlayerColor = GetColor(settings);
+        var (whitePlayerId, blackPlayerId) = connectingPlayerColor == ColorPreference.White
+            ? (playerId, gameChallenge.PlayerId)
+            : (gameChallenge.PlayerId, playerId);
+        var createdGame = new GameModel
+        {
+            GameId = Guid.NewGuid().ToString("N")[..8],
+            WhitePlayerId = whitePlayerId,
+            BlackPlayerId = blackPlayerId,
+            WhiteTimeLeft = TimeSpan.FromMinutes(settings.Minutes),
+            BlackTimeLeft = TimeSpan.FromMinutes(settings.Minutes),
+            Increment = TimeSpan.FromSeconds(settings.Increment)
+        };
+        _games.TryAdd(createdGame.GameId, createdGame);
+        return createdGame;
     }
     
     public bool TryAddChatMessage(string gameId, string username, string message)
@@ -222,10 +225,12 @@ namespace CoffeeChess.Service.Interfaces;
 
 public interface IGameManagerService
 {
-    GameChallengeModel CreateGameChallenge(string creatorConnectionId, string creatorUsername, GameSettingsModel settings);
+    GameChallengeModel CreateGameChallenge(string creatorId, string creatorUsername, GameSettingsModel settings);
     
-    bool TryFindGame(string playerConnectionId, string playerUsername, 
-        GameSettingsModel settings, out GameModel? foundGame);
+    bool TryFindChallenge(string playerId, out GameChallengeModel? foundChallenge);
+
+    public GameModel CreateGameBasedOnFoundChallenge(string playerId,
+        GameSettingsModel settings, GameChallengeModel gameChallenge);
     
     bool TryAddChatMessage(string gameId, string username, string message);
 
@@ -259,7 +264,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("CoffeeChess.Service")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+644ef4a51504139c812bad8c90c5516761dfdf5c")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+80f8470f6ced57cced4831895f8ac571055a14b0")]
 [assembly: System.Reflection.AssemblyProductAttribute("CoffeeChess.Service")]
 [assembly: System.Reflection.AssemblyTitleAttribute("CoffeeChess.Service")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
@@ -592,8 +597,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 --------------------------------------------------------------------------------
 D:\wonderfulprojects\CoffeeChess\CoffeeChess.Web\Hubs\GameHub.cs
 --------------------------------------------------------------------------------
-﻿using ChessDotNetCore;
-using CoffeeChess.Core.Models;
+﻿using CoffeeChess.Core.Models;
 using CoffeeChess.Service.Interfaces;
 using CoffeeChess.Web.Models;
 using Microsoft.AspNetCore.Identity;
@@ -605,44 +609,34 @@ public class GameHub(IGameManagerService gameManager, UserManager<UserModel> use
 {
     private async Task<string> GetUsernameAsync()
     {
-        if (Context.User?.Identity is { IsAuthenticated: true })
-        {
-            var user = await userManager.GetUserAsync(Context.User);
-            return user?.UserName ?? string.Concat("Guest_", Context.ConnectionId.AsSpan(0, 5));
-        }
-        return string.Concat("Guest_", Context.ConnectionId.AsSpan(0, 5));
+        var user = await userManager.GetUserAsync(Context.User!);
+        return user!.UserName!;
     }
     
     public async Task CreateOrJoinGame(GameSettingsModel settings)
     {
         var username = await GetUsernameAsync();
-        if (gameManager.TryFindGame(Context.ConnectionId, username, settings, out var foundGame))
+        if (gameManager.TryFindChallenge(Context.UserIdentifier!, out var foundChallenge))
         {
-            await Groups.AddToGroupAsync(Context.ConnectionId, foundGame!.GameId);
-            await Clients.Group(foundGame.GameId).SendAsync(
-                "GameStarted", foundGame.GameId, foundGame.WhitePlayerId, foundGame.BlackPlayerId);
+            var game = gameManager.CreateGameBasedOnFoundChallenge(Context.UserIdentifier!, settings, foundChallenge!);
+            await Clients.Users(Context.UserIdentifier!, foundChallenge!.PlayerId).SendAsync(
+                "GameStarted", game.GameId, game.WhitePlayerId, game.BlackPlayerId);
+            await Clients.Users(game.BlackPlayerId).SendAsync("FlipBoard");
         }
         else
         {
-            var gameChallenge = gameManager.CreateGameChallenge(Context.ConnectionId, username, settings);
-            await Clients.Caller.SendAsync("ChallengeCreated", gameChallenge.GameId);
+            gameManager.CreateGameChallenge(Context.UserIdentifier!, username, settings);
         }
     }
     
     public async Task SendChatMessage(string gameId, string message)
     {
         var username = await GetUsernameAsync();
-        if (gameManager.TryAddChatMessage(gameId, username, message))
+        if (gameManager.TryGetGame(gameId, out var game) && 
+            gameManager.TryAddChatMessage(gameId, username, message))
         {
-            await Clients.Group(gameId).SendAsync("ReceiveChatMessage", username, message);
-        }
-    }
-
-    public async Task JoinGame(string gameId)
-    {
-        if (gameManager.TryGetGame(gameId, out _))
-        {
-            await Groups.AddToGroupAsync(Context.ConnectionId, gameId);
+            await Clients.Users(game!.WhitePlayerId, game.BlackPlayerId)
+                .SendAsync("ReceiveChatMessage", username, message + $"{game.WhitePlayerId} {game.BlackPlayerId}");
         }
     }
 
@@ -650,7 +644,8 @@ public class GameHub(IGameManagerService gameManager, UserManager<UserModel> use
     {
         if (gameManager.TryGetGame(gameId, out var game))
         {
-            await Clients.Group(gameId).SendAsync("MakeMove", newFen);
+            await Clients.Users(game!.WhitePlayerId, game.BlackPlayerId)
+                .SendAsync("MakeMove", newFen);
         }
     }
 }
@@ -1562,7 +1557,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("CoffeeChess.Web")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+644ef4a51504139c812bad8c90c5516761dfdf5c")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+80f8470f6ced57cced4831895f8ac571055a14b0")]
 [assembly: System.Reflection.AssemblyProductAttribute("CoffeeChess.Web")]
 [assembly: System.Reflection.AssemblyTitleAttribute("CoffeeChess.Web")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
@@ -1780,8 +1775,6 @@ D:\wonderfulprojects\CoffeeChess\CoffeeChess.Web\Views\Game\GameWaiting.cshtml
             .configureLogging(signalR.LogLevel.Information)
             .build();
 
-        let currentGameId = null;
-
         const gameSettings = {
             minutes: @Model.Minutes,
             increment: @Model.Increment,
@@ -1789,10 +1782,6 @@ D:\wonderfulprojects\CoffeeChess\CoffeeChess.Web\Views\Game\GameWaiting.cshtml
             minRating: @Model.MinRating,
             maxRating: @Model.MaxRating
         };
-
-        connection.on("GameCreated", (gameId) => {
-            currentGameId = gameId;
-        });
 
         connection.on("GameStarted", (gameId, player1, player2) => {
             window.location.href = `/Game/Play/${gameId}`;
@@ -3593,9 +3582,10 @@ $(document).ready(() => {
         board.position(newFen);
     });
     
+    connection.on("FlipBoard", () => board.flip());
+    
     async function startConnection() {
         await connection.start();
-        connection.invoke("JoinGroup", gameId);
     }
     
     startConnection();
@@ -3639,7 +3629,7 @@ D:\wonderfulprojects\CoffeeChess\CoffeeChess.Web\wwwroot\js\game\chat.js
     async function startGamePageSignalR() {
         try {
             await connection.start();
-            await connection.invoke("JoinGroup", gameId);
+            await connection.invoke("JoinGame", gameId);
         } catch (err) {
             console.error(err.toString());
         }
