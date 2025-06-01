@@ -50,7 +50,6 @@ $(document).ready(() => {
     
     async function startConnection() {
         await connection.start();
-        connection.invoke("JoinGame", gameId);
     }
     
     startConnection();

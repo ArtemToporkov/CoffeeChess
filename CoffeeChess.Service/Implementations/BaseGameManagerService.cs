@@ -13,20 +13,20 @@ public class BaseGameManagerService : IGameManagerService
     private readonly ConcurrentDictionary<string, GameModel> _games = new();
     private static readonly Random Random = new(); 
 
-    public GameChallengeModel CreateGameChallenge(string creatorConnectionId, 
+    public GameChallengeModel CreateGameChallenge(string creatorId, 
         string creatorUsername, GameSettingsModel settings)
     {
-        var gameChallenge = new GameChallengeModel(creatorConnectionId, creatorConnectionId, creatorUsername, settings);
-        _gamesChallenges.TryAdd(creatorConnectionId, gameChallenge);
+        var gameChallenge = new GameChallengeModel(creatorId, creatorUsername, settings);
+        _gamesChallenges.TryAdd(creatorId, gameChallenge);
         return gameChallenge;
     }
 
-    public bool TryFindChallenge(string playerConnectionId, string playerUsername, GameSettingsModel settings, 
+    public bool TryFindChallenge(string playerId, 
         out GameChallengeModel? foundChallenge)
     {
         foreach (var (gameChallengeId, gameChallenge) in _gamesChallenges)
         {
-            if (gameChallenge.PlayerId != playerConnectionId)
+            if (gameChallenge.PlayerId != playerId)
             {
                 _gamesChallenges.TryRemove(gameChallengeId, out foundChallenge);
                 return true;
@@ -37,13 +37,13 @@ public class BaseGameManagerService : IGameManagerService
         return false;
     }
 
-    public GameModel CreateGameBasedOnFoundChallenge(string playerConnectionId, 
+    public GameModel CreateGameBasedOnFoundChallenge(string playerId, 
         GameSettingsModel settings, GameChallengeModel gameChallenge)
     {
-        var connectionPlayerColor = GetColor(settings);
-        var (whitePlayerId, blackPlayerId) = connectionPlayerColor == ColorPreference.White
-            ? (playerConnectionId, gameChallenge.PlayerId)
-            : (gameChallenge.PlayerId, playerConnectionId);
+        var connectingPlayerColor = GetColor(settings);
+        var (whitePlayerId, blackPlayerId) = connectingPlayerColor == ColorPreference.White
+            ? (playerId, gameChallenge.PlayerId)
+            : (gameChallenge.PlayerId, playerId);
         var createdGame = new GameModel
         {
             GameId = Guid.NewGuid().ToString("N")[..8],

@@ -4,12 +4,11 @@ namespace CoffeeChess.Service.Interfaces;
 
 public interface IGameManagerService
 {
-    GameChallengeModel CreateGameChallenge(string creatorConnectionId, string creatorUsername, GameSettingsModel settings);
+    GameChallengeModel CreateGameChallenge(string creatorId, string creatorUsername, GameSettingsModel settings);
     
-    bool TryFindChallenge(string playerConnectionId, string playerUsername, 
-        GameSettingsModel settings, out GameChallengeModel? foundChallenge);
+    bool TryFindChallenge(string playerId, out GameChallengeModel? foundChallenge);
 
-    public GameModel CreateGameBasedOnFoundChallenge(string playerConnectionId,
+    public GameModel CreateGameBasedOnFoundChallenge(string playerId,
         GameSettingsModel settings, GameChallengeModel gameChallenge);
     
     bool TryAddChatMessage(string gameId, string username, string message);

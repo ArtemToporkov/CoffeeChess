@@ -21,6 +21,8 @@
 
         connection.on("GameStarted", (gameId, player1, player2) => {
             window.location.href = `/Game/Play/${gameId}`;
+            console.log(player1);
+            console.log(player2);
         });
 
         async function startSignalR() {
