@@ -50,7 +50,7 @@ $(document).ready(() => {
     
     async function startConnection() {
         await connection.start();
-        connection.invoke("JoinChatGroup", gameId);
+        connection.invoke("JoinGame", gameId);
     }
     
     startConnection();

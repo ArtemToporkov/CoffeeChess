@@ -1,4 +1,5 @@
-﻿using CoffeeChess.Core.Models;
+﻿using ChessDotNetCore;
+using CoffeeChess.Core.Models;
 using CoffeeChess.Service.Interfaces;
 using CoffeeChess.Web.Models;
 using Microsoft.AspNetCore.Identity;
@@ -21,17 +22,19 @@ public class GameHub(IGameManagerService gameManager, UserManager<UserModel> use
     public async Task CreateOrJoinGame(GameSettingsModel settings)
     {
         var username = await GetUsernameAsync();
-        var game = gameManager.FindOrCreateGame(Context.ConnectionId, username, settings);
-
-        await Groups.AddToGroupAsync(Context.ConnectionId, game.GameId);
-        if (game.Started)
+        if (gameManager.TryFindChallenge(Context.ConnectionId, username, settings, out var foundChallenge))
         {
+            var game = gameManager.CreateGameBasedOnFoundChallenge(Context.ConnectionId, settings, foundChallenge!);
+            await Groups.AddToGroupAsync(foundChallenge!.CreatorConnectionId, game.GameId);
+            await Groups.AddToGroupAsync(Context.ConnectionId, game.GameId);
+            
             await Clients.Group(game.GameId).SendAsync(
-                "GameStarted", game.GameId, game.FirstPlayerUserName, game.SecondPlayerUserName);
+                "GameStarted", game.GameId, game.WhitePlayerId, game.BlackPlayerId);
         }
         else
         {
-            await Clients.Caller.SendAsync("GameCreated", game.GameId);
+            var gameChallenge = gameManager.CreateGameChallenge(Context.ConnectionId, username, settings);
+            await Clients.Caller.SendAsync("ChallengeCreated", gameChallenge.CreatorConnectionId);
         }
     }
     
@@ -44,19 +47,10 @@ public class GameHub(IGameManagerService gameManager, UserManager<UserModel> use
         }
     }
 
-    public async Task JoinChatGroup(string gameId)
-    {
-        if (gameManager.TryGetGame(gameId, out _))
-        {
-            await Groups.AddToGroupAsync(Context.ConnectionId, gameId);
-        }
-    }
-
     public async Task MakeMove(string gameId, string newFen)
     {
         if (gameManager.TryGetGame(gameId, out var game))
         {
-            game!.Fen = newFen;
             await Clients.Group(gameId).SendAsync("MakeMove", newFen);
         }
     }

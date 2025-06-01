@@ -11,8 +11,6 @@
             .configureLogging(signalR.LogLevel.Information)
             .build();
 
-        let currentGameId = null;
-
         const gameSettings = {
             minutes: @Model.Minutes,
             increment: @Model.Increment,
@@ -20,10 +18,6 @@
             minRating: @Model.MinRating,
             maxRating: @Model.MaxRating
         };
-
-        connection.on("GameCreated", (gameId) => {
-            currentGameId = gameId;
-        });
 
         connection.on("GameStarted", (gameId, player1, player2) => {
             window.location.href = `/Game/Play/${gameId}`;

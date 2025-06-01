@@ -1,20 +1,16 @@
 ﻿using System.Collections.Concurrent;
+using ChessDotNetCore;
 
 namespace CoffeeChess.Core.Models;
 
-public class GameModel(
-    string gameId, 
-    string firstPlayerId, 
-    string firstPlayerUserName,
-    GameSettingsModel gameSettings) 
+public class GameModel
 {
-    public string GameId { get; set; } = gameId;
-    public string FirstPlayerId { get; set; } = firstPlayerId;
-    public string FirstPlayerUserName { get; set; } = firstPlayerUserName;
-    public string? SecondPlayerId { get; set; }
-    public string? SecondPlayerUserName { get; set; }
-    public GameSettingsModel GameSettings { get; set; } = gameSettings;
-    public bool Started { get; set; } = false;
-    public string Fen { get; set; } = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+    public string GameId { get; set; }
+    public string WhitePlayerId { get; set; }
+    public string BlackPlayerId { get; set; }
+    public TimeSpan WhiteTimeLeft { get; set; }
+    public TimeSpan BlackTimeLeft { get; set; }
+    public TimeSpan Increment { get; set; }
+    public ChessGame ChessGame { get; set; } = new();
     public ConcurrentQueue<ChatMessageModel> ChatMessages { get; } = new();
 }

@@ -33,7 +33,7 @@
     async function startGamePageSignalR() {
         try {
             await connection.start();
-            await connection.invoke("JoinChatGroup", gameId);
+            await connection.invoke("JoinGame", gameId);
         } catch (err) {
             console.error(err.toString());
         }
