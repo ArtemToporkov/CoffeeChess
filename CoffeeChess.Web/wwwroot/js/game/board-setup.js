@@ -11,7 +11,7 @@ $(document).ready(() => {
     const game = new Chess();
 
     function onDragStart(source, piece, position, orientation) {
-        if (!myTurn || game.game_over()) 
+        if (!isMyTurn || game.game_over()) 
             return false;
     }
 
@@ -42,14 +42,48 @@ $(document).ready(() => {
         snapbackSpeed: 250
     };
     board = Chessboard('myBoard', config);
+    
     const isWhite = localStorage.getItem('isWhite') === "true";
-    let myTurn = isWhite;
+    let isWhiteTurn = true;
+    let isMyTurn = isWhite;
     if (!isWhite) {
         board.flip();
     }
     
-    connection.on("MakeMove", (newFen, isMyTurn) => {
-        myTurn = isMyTurn;
+    let whiteMillisecondsLeft = localStorage.getItem('totalMillisecondsLeft');
+    let blackMillisecondsLeft = localStorage.getItem('totalMillisecondsLeft');
+    
+    const timer = setInterval(() => {
+        if (isWhiteTurn) {
+            whiteMillisecondsLeft -= 1000;
+        } else {
+            blackMillisecondsLeft -= 1000;
+        }
+        if (whiteMillisecondsLeft < 0 || blackMillisecondsLeft < 0) {
+            // TODO: implement losing a game after time runs out
+        }
+        updateTimers();
+    }, 1000);
+    
+    function updateTimers() {
+        const whiteTotalSecondsLeft = Math.floor(whiteMillisecondsLeft / 1000);
+        const blackTotalSecondsLeft = Math.floor(blackMillisecondsLeft / 1000);
+
+        const whiteMinutesLeft = Math.floor(whiteTotalSecondsLeft / 60);
+        const whiteSecondsLeft = Math.floor(whiteTotalSecondsLeft % 60);
+        const blackMinutesLeft = Math.floor(blackTotalSecondsLeft / 60);
+        const blackSecondsLeft = Math.floor(blackTotalSecondsLeft % 60);
+
+        document.getElementById("whiteTimeLeft").textContent = `${whiteMinutesLeft}:${whiteSecondsLeft}`;
+        document.getElementById("blackTimeLeft").textContent = `${blackMinutesLeft}:${blackSecondsLeft}`;
+    }
+    
+    connection.on("MakeMove", (newFen, newIsMyTurn, newIsWhiteTurn, newWhiteMillisecondsLeft, newBlackMillisecondsLeft) => {
+        isMyTurn = newIsMyTurn;
+        isWhiteTurn = newIsWhiteTurn;
+        whiteMillisecondsLeft = newWhiteMillisecondsLeft;
+        blackMillisecondsLeft = newBlackMillisecondsLeft;
+        updateTimers();
         game.load(newFen);
         board.position(newFen);
     });

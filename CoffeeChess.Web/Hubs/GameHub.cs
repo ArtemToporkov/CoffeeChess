@@ -22,10 +22,11 @@ public class GameHub(IGameManagerService gameManager, UserManager<UserModel> use
         if (gameManager.TryFindChallenge(Context.UserIdentifier!, out var foundChallenge))
         {
             var game = gameManager.CreateGameBasedOnFoundChallenge(Context.UserIdentifier!, settings, foundChallenge!);
+            var totalMillisecondsForOnePlayerLeft = game.WhiteTimeLeft.TotalMilliseconds;
             await Clients.User(game.WhitePlayerId).SendAsync(
-                "GameStarted", game.GameId, true);
+                "GameStarted", game.GameId, true, totalMillisecondsForOnePlayerLeft);
             await Clients.User(game.BlackPlayerId).SendAsync(
-                "GameStarted", game.GameId, false);
+                "GameStarted", game.GameId, false, totalMillisecondsForOnePlayerLeft);
         }
         else
         {
@@ -50,11 +51,12 @@ public class GameHub(IGameManagerService gameManager, UserManager<UserModel> use
         {
             var isWhiteToMove = game!.ChessGame.CurrentPlayer == Player.White;
             var currentPlayerId = isWhiteToMove ? game.WhitePlayerId : game.BlackPlayerId;
-            
+
             if (Context.UserIdentifier != currentPlayerId)
             {
                 await Clients.User(currentPlayerId).SendAsync(
-                    "MakeMove", game.ChessGame.GetFen(), false);
+                    "MakeMove", game.ChessGame.GetFen(), false, isWhiteToMove,
+                    game.WhiteTimeLeft.TotalMilliseconds, game.BlackTimeLeft.TotalMilliseconds);
                 return;
             }
 
@@ -64,16 +66,47 @@ public class GameHub(IGameManagerService gameManager, UserManager<UserModel> use
             if (game.ChessGame.MakeMove(move, true) is MoveType.Invalid)
             {
                 await Clients.User(currentPlayerId).SendAsync(
-                    "MakeMove", game.ChessGame.GetFen(), false);
+                    "MakeMove", game.ChessGame.GetFen(), false, isWhiteToMove,
+                    game.WhiteTimeLeft.TotalMilliseconds, game.BlackTimeLeft.TotalMilliseconds);
                 return;
             }
 
+            ValidateTime(game, isWhiteToMove);
+            
             isWhiteToMove = !isWhiteToMove;
             var newFen = game.ChessGame.GetFen();
             await Clients.User(game.WhitePlayerId).SendAsync(
-                "MakeMove", newFen, isWhiteToMove);
+                "MakeMove", newFen, isWhiteToMove, isWhiteToMove,
+                game.WhiteTimeLeft.TotalMilliseconds, game.BlackTimeLeft.TotalMilliseconds);
             await Clients.User(game.BlackPlayerId).SendAsync(
-                "MakeMove", newFen, !isWhiteToMove);
+                "MakeMove", newFen, !isWhiteToMove, isWhiteToMove,
+                game.WhiteTimeLeft.TotalMilliseconds, game.BlackTimeLeft.TotalMilliseconds);
+        }
+    }
+
+    private static void ValidateTime(GameModel game, bool isWhiteTurn)
+    {
+        var deltaTime = DateTime.UtcNow - game.LastMoveTime;
+        game.LastMoveTime = DateTime.UtcNow;
+        if (isWhiteTurn)
+        {
+            game.WhiteTimeLeft -= deltaTime;
+            if (game.WhiteTimeLeft < TimeSpan.Zero)
+            {
+                // TODO: implement losing a game after time runs out
+            }
+
+            game.WhiteTimeLeft += game.Increment;
+        }
+        else
+        {
+            game.BlackTimeLeft -= deltaTime;
+            if (game.BlackTimeLeft < TimeSpan.Zero)
+            {
+                // TODO: implement losing a game after time runs out
+            }
+
+            game.BlackTimeLeft += game.Increment;  
         }
     }
 }

@@ -19,7 +19,8 @@
             maxRating: @Model.MaxRating
         };
 
-        connection.on("GameStarted", (gameId, isWhite) => {
+        connection.on("GameStarted", (gameId, isWhite, totalMillisecondsLeft) => {
+            localStorage.setItem("totalMillisecondsLeft", totalMillisecondsLeft);
             localStorage.setItem("isWhite", isWhite);
             window.location.href = `/Game/Play/${gameId}`;
         });

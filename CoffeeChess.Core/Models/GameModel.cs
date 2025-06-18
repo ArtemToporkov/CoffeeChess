@@ -12,6 +12,7 @@ public class GameModel
     public TimeSpan WhiteTimeLeft { get; set; }
     public TimeSpan BlackTimeLeft { get; set; }
     public TimeSpan Increment { get; set; }
+    public DateTime LastMoveTime { get; set; } = DateTime.UtcNow;
     public ChessGame ChessGame { get; set; } = new();
     public ConcurrentQueue<ChatMessageModel> ChatMessages { get; } = new();
 }
