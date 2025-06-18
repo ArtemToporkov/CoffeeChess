@@ -58,12 +58,8 @@ public class GameHub(IGameManagerService gameManager, UserManager<UserModel> use
                         "MakeMove", newFen, true);
                 }
                 else
-                {
                     await Clients.User(game.WhitePlayerId).SendAsync(
                         "MakeMove", oldFen, false);
-                    await Clients.User(game.BlackPlayerId).SendAsync(
-                        "MakeMove", oldFen, true);
-                }
             }
             else if (game.BlackPlayerId == Context.UserIdentifier)
             {
@@ -76,12 +72,8 @@ public class GameHub(IGameManagerService gameManager, UserManager<UserModel> use
                         "MakeMove", newFen, false);
                 }
                 else
-                {
-                    await Clients.User(game.WhitePlayerId).SendAsync(
-                        "MakeMove", oldFen, true);
                     await Clients.User(game.BlackPlayerId).SendAsync(
                         "MakeMove", oldFen, false);
-                }
             }
         }
     }
