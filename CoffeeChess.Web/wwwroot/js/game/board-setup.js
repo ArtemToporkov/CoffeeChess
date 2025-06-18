@@ -16,7 +16,6 @@ $(document).ready(() => {
     }
 
     function onDrop(source, target) {
-        const oldFen = game.fen();
         const move = game.move({
             from: source,
             to: target,
@@ -26,7 +25,7 @@ $(document).ready(() => {
         if (move === null) 
             return 'snapback';
         
-        connection.invoke("MakeMove", gameId, oldFen, game.fen())
+        connection.invoke("MakeMove", gameId, move.from, move.to, move.promotion);
     }
     
     function onSnapEnd() {
