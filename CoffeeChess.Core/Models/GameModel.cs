@@ -12,7 +12,6 @@ public class GameModel
     public TimeSpan WhiteTimeLeft { get; set; }
     public TimeSpan BlackTimeLeft { get; set; }
     public TimeSpan Increment { get; set; }
-    public bool IsWhiteTurn { get; set; } = true; 
     public ChessGame ChessGame { get; set; } = new();
     public ConcurrentQueue<ChatMessageModel> ChatMessages { get; } = new();
 }
