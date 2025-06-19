@@ -88,6 +88,14 @@ $(document).ready(() => {
         board.position(newFen);
     });
     
+    connection.on("MoveFailed", (errorMessage) => {
+        // TODO: undo move, display error message
+    });
+    
+    connection.on("CriticalError", (errorMessage) => {
+        // TODO: raise 500 with errorMessage
+    });
+    
     async function startConnection() {
         await connection.start();
     }

@@ -48,15 +48,20 @@ public class GameHub(IGameManagerService gameManager, UserManager<UserModel> use
 
     public async Task MakeMove(string gameId, string from, string to, string? promotion)
     {
-        if (!gameManager.TryMove(gameId, Context.UserIdentifier!, from, to, promotion, out var game))
+        if (!gameManager.TryGetGame(gameId, out var game))
         {
-            await Clients.Caller.SendAsync(
-                "MakeMove", game!.ChessGame.GetFen(), false, game.ChessGame.CurrentPlayer == Player.White,
-                game.WhiteTimeLeft.TotalMilliseconds, game.BlackTimeLeft.TotalMilliseconds);
+            await Clients.Caller.SendAsync("CriticalError", "Game not found");
             return;
         }
 
-        var newFen = game!.ChessGame.GetFen();
+        var moveResult = game!.MakeMove(Context.UserIdentifier!, from, to, promotion);
+        if (!moveResult.Success)
+        {
+            await Clients.Caller.SendAsync("MoveFailed", moveResult.Message);
+            return;
+        }
+
+        var newFen = game.ChessGame.GetFen();
         var isWhiteToMove = game.ChessGame.CurrentPlayer == Player.White;
         
         await Clients.User(game.WhitePlayerId).SendAsync(

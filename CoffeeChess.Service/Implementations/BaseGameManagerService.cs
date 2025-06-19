@@ -74,11 +74,6 @@ public class BaseGameManagerService : IGameManagerService
         return false;
     }
 
-    public bool TryMove(string gameId, string playerId, string from, string to, string? promotion, out GameModel? game)
-    {
-        return TryGetGame(gameId, out game) && game!.TryMove(playerId, from, to, promotion);
-    }
-
     private static ColorPreference GetColor(GameSettingsModel settings)
         => settings.ColorPreference switch
         {

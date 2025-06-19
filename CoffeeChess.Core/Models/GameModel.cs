@@ -16,40 +16,45 @@ public class GameModel
     public ChessGame ChessGame { get; set; } = new();
     public ConcurrentQueue<ChatMessageModel> ChatMessages { get; } = new();
 
-    public bool TryMove(string playerId, string from, string to, string? promotion)
+    public MoveResult MakeMove(string playerId, string from, string to, string? promotion)
     {
-        var isWhiteToMove = ChessGame.CurrentPlayer == Player.White;
-        var currentPlayerId = isWhiteToMove ? WhitePlayerId : BlackPlayerId;
-
-        if (playerId != currentPlayerId || 
-            (currentPlayerId == WhitePlayerId && WhiteTimeLeft < TimeSpan.Zero) ||
+        var isWhiteTurn = ChessGame.CurrentPlayer == Player.White;
+        var currentPlayerId = isWhiteTurn ? WhitePlayerId : BlackPlayerId;
+        
+        if (playerId != currentPlayerId)
+            return MoveResult.Fail("It's not your turn");
+        
+        ReduceTime(isWhiteTurn);
+        if ((currentPlayerId == WhitePlayerId && WhiteTimeLeft < TimeSpan.Zero) ||
             (currentPlayerId == BlackPlayerId && BlackTimeLeft < TimeSpan.Zero))
-            return false;
+            return MoveResult.Fail("Time is ran out.");
 
         var promotionChar = promotion?[0];
         var move = new Move(new(from), new(to), 
             ChessGame.CurrentPlayer, promotionChar);
 
         if (ChessGame.MakeMove(move, true) is MoveType.Invalid)
-            return false;
+            return MoveResult.Fail("Move is invalid.");
 
-        ValidateTime(isWhiteToMove);
-        return true;
+        DoIncrement(isWhiteTurn);
+        return MoveResult.Ok();
     }
 
-    private void ValidateTime(bool isWhiteTurn)
+    private void ReduceTime(bool isWhiteTurn)
     {
         var deltaTime = DateTime.UtcNow - LastMoveTime;
         LastMoveTime = DateTime.UtcNow;
         if (isWhiteTurn)
-        {
             WhiteTimeLeft -= deltaTime;
-            WhiteTimeLeft += Increment;
-        }
         else
-        {
             BlackTimeLeft -= deltaTime;
-            BlackTimeLeft += Increment;  
-        }
+    }
+
+    private void DoIncrement(bool isWhiteTurn)
+    {
+        if (isWhiteTurn)
+            WhiteTimeLeft += Increment;
+        else
+            BlackTimeLeft += Increment;
     }
 }
