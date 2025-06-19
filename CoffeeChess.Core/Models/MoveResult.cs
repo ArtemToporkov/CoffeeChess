@@ -7,5 +7,5 @@ public class MoveResult(bool success, string message)
 
     public static MoveResult Ok() => new(true, string.Empty);
 
-    public static MoveResult Fail(string error) => new(false, error);
+    public static MoveResult Fail(string message) => new(false, message);
 }

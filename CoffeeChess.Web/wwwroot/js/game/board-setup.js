@@ -48,6 +48,7 @@ $(document).ready(() => {
     let isMyTurn = isWhite;
     if (!isWhite) {
         board.flip();
+        $('.game-middle-panel').addClass('flipped');
     }
     
     let whiteMillisecondsLeft = localStorage.getItem('totalMillisecondsLeft');
@@ -74,8 +75,8 @@ $(document).ready(() => {
         const blackMinutesLeft = Math.floor(blackTotalSecondsLeft / 60);
         const blackSecondsLeft = Math.floor(blackTotalSecondsLeft % 60);
 
-        document.getElementById("whiteTimeLeft").textContent = `${whiteMinutesLeft}:${whiteSecondsLeft}`;
-        document.getElementById("blackTimeLeft").textContent = `${blackMinutesLeft}:${blackSecondsLeft}`;
+        $("#whiteTimeLeft").text(`${whiteMinutesLeft}:${whiteSecondsLeft}`);
+        $("#blackTimeLeft").text(`${blackMinutesLeft}:${blackSecondsLeft}`);
     }
     
     connection.on("MakeMove", (newFen, newIsMyTurn, newIsWhiteTurn, newWhiteMillisecondsLeft, newBlackMillisecondsLeft) => {
