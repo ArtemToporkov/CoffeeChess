@@ -14,4 +14,6 @@ public interface IGameManagerService
     bool TryAddChatMessage(string gameId, string username, string message);
 
     public bool TryGetGame(string gameId, out GameModel? game);
+
+    public bool TryMove(string gameId, string playerId, string from, string to, string? promotion, out GameModel? game);
 }

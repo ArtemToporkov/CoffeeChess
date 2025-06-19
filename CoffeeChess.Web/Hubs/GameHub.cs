@@ -23,6 +23,7 @@ public class GameHub(IGameManagerService gameManager, UserManager<UserModel> use
         {
             var game = gameManager.CreateGameBasedOnFoundChallenge(Context.UserIdentifier!, settings, foundChallenge!);
             var totalMillisecondsForOnePlayerLeft = game.WhiteTimeLeft.TotalMilliseconds;
+            
             await Clients.User(game.WhitePlayerId).SendAsync(
                 "GameStarted", game.GameId, true, totalMillisecondsForOnePlayerLeft);
             await Clients.User(game.BlackPlayerId).SendAsync(
@@ -41,72 +42,28 @@ public class GameHub(IGameManagerService gameManager, UserManager<UserModel> use
             gameManager.TryAddChatMessage(gameId, username, message))
         {
             await Clients.Users(game!.WhitePlayerId, game.BlackPlayerId)
-                .SendAsync("ReceiveChatMessage", username, message + $"{game.WhitePlayerId} {game.BlackPlayerId}");
+                .SendAsync("ReceiveChatMessage", username, message);
         }
     }
 
     public async Task MakeMove(string gameId, string from, string to, string? promotion)
     {
-        if (gameManager.TryGetGame(gameId, out var game))
+        if (!gameManager.TryMove(gameId, Context.UserIdentifier!, from, to, promotion, out var game))
         {
-            var isWhiteToMove = game!.ChessGame.CurrentPlayer == Player.White;
-            var currentPlayerId = isWhiteToMove ? game.WhitePlayerId : game.BlackPlayerId;
-
-            if (Context.UserIdentifier != currentPlayerId)
-            {
-                await Clients.User(currentPlayerId).SendAsync(
-                    "MakeMove", game.ChessGame.GetFen(), false, isWhiteToMove,
-                    game.WhiteTimeLeft.TotalMilliseconds, game.BlackTimeLeft.TotalMilliseconds);
-                return;
-            }
-
-            var promotionChar = promotion?[0];
-            var move = new Move(new(from), new(to), game.ChessGame.CurrentPlayer, promotionChar);
-
-            if (game.ChessGame.MakeMove(move, true) is MoveType.Invalid)
-            {
-                await Clients.User(currentPlayerId).SendAsync(
-                    "MakeMove", game.ChessGame.GetFen(), false, isWhiteToMove,
-                    game.WhiteTimeLeft.TotalMilliseconds, game.BlackTimeLeft.TotalMilliseconds);
-                return;
-            }
-
-            ValidateTime(game, isWhiteToMove);
-            
-            isWhiteToMove = !isWhiteToMove;
-            var newFen = game.ChessGame.GetFen();
-            await Clients.User(game.WhitePlayerId).SendAsync(
-                "MakeMove", newFen, isWhiteToMove, isWhiteToMove,
+            await Clients.Caller.SendAsync(
+                "MakeMove", game!.ChessGame.GetFen(), false, game.ChessGame.CurrentPlayer == Player.White,
                 game.WhiteTimeLeft.TotalMilliseconds, game.BlackTimeLeft.TotalMilliseconds);
-            await Clients.User(game.BlackPlayerId).SendAsync(
-                "MakeMove", newFen, !isWhiteToMove, isWhiteToMove,
-                game.WhiteTimeLeft.TotalMilliseconds, game.BlackTimeLeft.TotalMilliseconds);
+            return;
         }
-    }
 
-    private static void ValidateTime(GameModel game, bool isWhiteTurn)
-    {
-        var deltaTime = DateTime.UtcNow - game.LastMoveTime;
-        game.LastMoveTime = DateTime.UtcNow;
-        if (isWhiteTurn)
-        {
-            game.WhiteTimeLeft -= deltaTime;
-            if (game.WhiteTimeLeft < TimeSpan.Zero)
-            {
-                // TODO: implement losing a game after time runs out
-            }
-
-            game.WhiteTimeLeft += game.Increment;
-        }
-        else
-        {
-            game.BlackTimeLeft -= deltaTime;
-            if (game.BlackTimeLeft < TimeSpan.Zero)
-            {
-                // TODO: implement losing a game after time runs out
-            }
-
-            game.BlackTimeLeft += game.Increment;  
-        }
+        var newFen = game!.ChessGame.GetFen();
+        var isWhiteToMove = game.ChessGame.CurrentPlayer == Player.White;
+        
+        await Clients.User(game.WhitePlayerId).SendAsync(
+            "MakeMove", newFen, isWhiteToMove, isWhiteToMove,
+            game.WhiteTimeLeft.TotalMilliseconds, game.BlackTimeLeft.TotalMilliseconds);
+        await Clients.User(game.BlackPlayerId).SendAsync(
+            "MakeMove", newFen, !isWhiteToMove, isWhiteToMove,
+            game.WhiteTimeLeft.TotalMilliseconds, game.BlackTimeLeft.TotalMilliseconds);
     }
 }
