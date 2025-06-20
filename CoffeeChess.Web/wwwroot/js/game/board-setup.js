@@ -87,9 +87,9 @@ $(document).ready(() => {
         $("#blackTimeLeft").text(`${blackMinutesLeft}:${blackSecondsLeft}`);
     }
     
-    connection.on("MakeMove", (newFen, newIsMyTurn, newIsWhiteTurn, newWhiteMillisecondsLeft, newBlackMillisecondsLeft) => {
-        isMyTurn = newIsMyTurn;
+    connection.on("MakeMove", (newFen, newIsWhiteTurn, newWhiteMillisecondsLeft, newBlackMillisecondsLeft) => {
         isWhiteTurn = newIsWhiteTurn;
+        isMyTurn = (isWhite && isWhiteTurn) || (!isWhite && !isWhiteTurn);
         whiteMillisecondsLeft = newWhiteMillisecondsLeft;
         blackMillisecondsLeft = newBlackMillisecondsLeft;
         updateTimers();
