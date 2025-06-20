@@ -16,4 +16,4 @@ This project is being done for educational purposes to practice creating project
 
 > TODO
 > - add new ViewModel for sending game state via SignalR
-> - fix names and ratings display
+> - implement moves fail
