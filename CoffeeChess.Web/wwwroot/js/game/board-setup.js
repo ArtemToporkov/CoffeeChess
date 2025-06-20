@@ -43,6 +43,11 @@ $(document).ready(() => {
     };
     board = Chessboard('myBoard', config);
     
+    $('#whiteUsername').text(localStorage.getItem("whiteUsername"));
+    $('#blackUsername').text(localStorage.getItem("blackUsername"));
+    $('#whiteRating').text(localStorage.getItem("whiteRating"));
+    $('#blackRating').text(localStorage.getItem("blackRating"));
+    
     const isWhite = localStorage.getItem('isWhite') === "true";
     let isWhiteTurn = true;
     let isMyTurn = isWhite;

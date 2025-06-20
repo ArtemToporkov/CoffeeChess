@@ -19,9 +19,14 @@
             maxRating: @Model.MaxRating
         };
 
-        connection.on("GameStarted", (gameId, isWhite, totalMillisecondsLeft) => {
+        connection.on("GameStarted", (gameId, isWhite, whitePlayerInfo, 
+                                      blackPlayerInfo, totalMillisecondsLeft) => {
             localStorage.setItem("totalMillisecondsLeft", totalMillisecondsLeft);
             localStorage.setItem("isWhite", isWhite);
+            localStorage.setItem("whiteUsername", whitePlayerInfo.name);
+            localStorage.setItem("blackUsername", blackPlayerInfo.name);
+            localStorage.setItem("whiteRating", whitePlayerInfo.rating);
+            localStorage.setItem("blackRating", blackPlayerInfo.rating);
             window.location.href = `/Game/Play/${gameId}`;
         });
 

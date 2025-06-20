@@ -3,11 +3,9 @@
 namespace CoffeeChess.Core.Models;
 
 public class GameChallengeModel(
-    string playerId, 
-    string playerUserName,
+    PlayerInfoModel playerInfo,
     GameSettingsModel gameSettings) 
 {
-    public string PlayerId { get; set; } = playerId;
-    public string PlayerUserName { get; set; } = playerUserName;
-    public GameSettingsModel GameSettings { get; set; } = gameSettings;
+    public PlayerInfoModel PlayerInfo { get; init; } = playerInfo;
+    public GameSettingsModel GameSettings { get; init; } = gameSettings;
 }

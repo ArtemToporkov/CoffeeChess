@@ -10,39 +10,40 @@ namespace CoffeeChess.Web.Hubs;
 
 public class GameHub(IGameManagerService gameManager, UserManager<UserModel> userManager) : Hub
 {
-    private async Task<string> GetUsernameAsync()
-    {
-        var user = await userManager.GetUserAsync(Context.User!);
-        return user!.UserName!;
-    }
+    private async Task<UserModel> GetUserAsync() 
+        => await userManager.GetUserAsync(Context.User!) 
+           ?? throw new HubException("[GameHub.GetUserAsync]: User not found.");
     
     public async Task CreateOrJoinGame(GameSettingsModel settings)
     {
-        var username = await GetUsernameAsync();
-        if (gameManager.TryFindChallenge(Context.UserIdentifier!, out var foundChallenge))
+        var user = await GetUserAsync();
+        var playerInfo = new PlayerInfoModel(user.Id, user.UserName!, user.Rating);
+        if (gameManager.TryFindChallenge(playerInfo, out var foundChallenge))
         {
-            var game = gameManager.CreateGameBasedOnFoundChallenge(Context.UserIdentifier!, settings, foundChallenge!);
+            var game = gameManager.CreateGameBasedOnFoundChallenge(playerInfo, settings, foundChallenge!);
             var totalMillisecondsForOnePlayerLeft = game.WhiteTimeLeft.TotalMilliseconds;
             
-            await Clients.User(game.WhitePlayerId).SendAsync(
-                "GameStarted", game.GameId, true, totalMillisecondsForOnePlayerLeft);
-            await Clients.User(game.BlackPlayerId).SendAsync(
-                "GameStarted", game.GameId, false, totalMillisecondsForOnePlayerLeft);
+            await Clients.User(game.WhitePlayerInfo.Id).SendAsync(
+                "GameStarted", game.GameId, true, game.WhitePlayerInfo, game.BlackPlayerInfo, 
+                totalMillisecondsForOnePlayerLeft);
+            await Clients.User(game.BlackPlayerInfo.Id).SendAsync(
+                "GameStarted", game.GameId, false, game.WhitePlayerInfo, game.BlackPlayerInfo, 
+                totalMillisecondsForOnePlayerLeft);
         }
         else
         {
-            gameManager.CreateGameChallenge(Context.UserIdentifier!, username, settings);
+            gameManager.CreateGameChallenge(playerInfo, settings);
         }
     }
     
     public async Task SendChatMessage(string gameId, string message)
     {
-        var username = await GetUsernameAsync();
+        var user = await GetUserAsync();
         if (gameManager.TryGetGame(gameId, out var game) && 
-            gameManager.TryAddChatMessage(gameId, username, message))
+            gameManager.TryAddChatMessage(gameId, user.UserName!, message))
         {
-            await Clients.Users(game!.WhitePlayerId, game.BlackPlayerId)
-                .SendAsync("ReceiveChatMessage", username, message);
+            await Clients.Users(game!.WhitePlayerInfo.Id, game.BlackPlayerInfo.Id)
+                .SendAsync("ReceiveChatMessage", user.UserName!, message);
         }
     }
 
@@ -64,10 +65,10 @@ public class GameHub(IGameManagerService gameManager, UserManager<UserModel> use
         var newFen = game.ChessGame.GetFen();
         var isWhiteToMove = game.ChessGame.CurrentPlayer == Player.White;
         
-        await Clients.User(game.WhitePlayerId).SendAsync(
+        await Clients.User(game.WhitePlayerInfo.Id).SendAsync(
             "MakeMove", newFen, isWhiteToMove, isWhiteToMove,
             game.WhiteTimeLeft.TotalMilliseconds, game.BlackTimeLeft.TotalMilliseconds);
-        await Clients.User(game.BlackPlayerId).SendAsync(
+        await Clients.User(game.BlackPlayerInfo.Id).SendAsync(
             "MakeMove", newFen, !isWhiteToMove, isWhiteToMove,
             game.WhiteTimeLeft.TotalMilliseconds, game.BlackTimeLeft.TotalMilliseconds);
     }
