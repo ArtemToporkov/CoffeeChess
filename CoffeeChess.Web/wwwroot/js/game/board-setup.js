@@ -87,14 +87,14 @@ $(document).ready(() => {
         $("#blackTimeLeft").text(`${blackMinutesLeft}:${blackSecondsLeft}`);
     }
     
-    connection.on("MakeMove", (newFen, newIsWhiteTurn, newWhiteMillisecondsLeft, newBlackMillisecondsLeft) => {
-        isWhiteTurn = newIsWhiteTurn;
+    connection.on("MakeMove", (pgn, newWhiteMillisecondsLeft, newBlackMillisecondsLeft) => {
+        game.load_pgn(pgn);
+        board.position(game.fen());
+        isWhiteTurn = game.turn() === 'w';
         isMyTurn = (isWhite && isWhiteTurn) || (!isWhite && !isWhiteTurn);
         whiteMillisecondsLeft = newWhiteMillisecondsLeft;
         blackMillisecondsLeft = newBlackMillisecondsLeft;
         updateTimers();
-        game.load(newFen);
-        board.position(newFen);
     });
     
     connection.on("MoveFailed", (errorMessage) => {

@@ -62,11 +62,9 @@ public class GameHub(IGameManagerService gameManager, UserManager<UserModel> use
             return;
         }
 
-        var newFen = game.ChessGame.GetFen();
-        var isWhiteToMove = game.ChessGame.CurrentPlayer == Player.White;
+        var pgn = game.GetPgn();
         
         await Clients.Users(game.WhitePlayerInfo.Id, game.BlackPlayerInfo.Id).SendAsync(
-            "MakeMove", newFen, isWhiteToMove,
-            game.WhiteTimeLeft.TotalMilliseconds, game.BlackTimeLeft.TotalMilliseconds);
+            "MakeMove", pgn, game.WhiteTimeLeft.TotalMilliseconds, game.BlackTimeLeft.TotalMilliseconds);
     }
 }
