@@ -13,7 +13,3 @@ Implementing cute chess website using asp.net mvc, signalr.
 ## Description
 
 This project is being done for educational purposes to practice creating projects using asp net.
-
-> TODO
-> - add new ViewModel for sending game state via SignalR
-> - implement moves fail
