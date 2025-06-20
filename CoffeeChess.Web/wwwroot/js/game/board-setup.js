@@ -87,14 +87,53 @@ $(document).ready(() => {
         $("#blackTimeLeft").text(`${blackMinutesLeft}:${blackSecondsLeft}`);
     }
     
+    function updateHistory() {
+        const history = $('#history');
+        history.empty();
+        history.append(getHistoryRow('№', 'White', 'Black'));
+        const moves = game.history();
+        for (let i = 0; i < moves.length; i += 2) {
+            const whiteMove = moves[i];
+            const blackMove = i + 1 < moves.length ? moves[i + 1] : '';
+            history.append(getHistoryRow(i / 2 + 1, whiteMove, blackMove));
+        }
+        if (moves.length > 0) {
+            const lastRow = history.children().last();
+            const lastMoveElement = (moves.length % 2 === 0) ? lastRow.children().eq(2) : lastRow.children().eq(1);
+            lastMoveElement.addClass('history-selected');
+        }
+    }
+    
+    function getHistoryRow(number, whiteMove, blackMove) {
+        return $('<div>', {
+            class: 'history-row'
+        }).append(
+            $('<div>', {
+                class: 'history-move-number',
+                text: number,
+            }),
+            $('<div>', {
+                class: 'history-move',
+                text: whiteMove
+            }),
+            $('<div>', {
+                class: 'history-move',
+                text: blackMove
+            })
+        );
+    }
+    
     connection.on("MakeMove", (pgn, newWhiteMillisecondsLeft, newBlackMillisecondsLeft) => {
         game.load_pgn(pgn);
         board.position(game.fen());
+        
         isWhiteTurn = game.turn() === 'w';
         isMyTurn = (isWhite && isWhiteTurn) || (!isWhite && !isWhiteTurn);
         whiteMillisecondsLeft = newWhiteMillisecondsLeft;
         blackMillisecondsLeft = newBlackMillisecondsLeft;
+        
         updateTimers();
+        updateHistory();
     });
     
     connection.on("MoveFailed", (errorMessage) => {

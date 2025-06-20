@@ -314,6 +314,7 @@
 .history-row {
     display: flex;
     flex-direction: row;
+    gap: 15px;
     width: 100%;
 }
 
@@ -323,6 +324,7 @@
     justify-content: center;
     color: var(--milk-coffee-unselected);
     flex: 4;
+    max-width: 10%;
 }
 
 .history-move {
@@ -331,6 +333,7 @@
     justify-content: center;
     flex: 10;
     cursor: pointer;
+    max-width: 45%;
 }
 
 .history-selected {
