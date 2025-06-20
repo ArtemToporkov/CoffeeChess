@@ -23,10 +23,8 @@
                                       blackPlayerInfo, totalMillisecondsLeft) => {
             localStorage.setItem("totalMillisecondsLeft", totalMillisecondsLeft);
             localStorage.setItem("isWhite", isWhite);
-            localStorage.setItem("whiteUsername", whitePlayerInfo.name);
-            localStorage.setItem("blackUsername", blackPlayerInfo.name);
-            localStorage.setItem("whiteRating", whitePlayerInfo.rating);
-            localStorage.setItem("blackRating", blackPlayerInfo.rating);
+            localStorage.setItem("whitePlayerInfo", JSON.stringify(whitePlayerInfo));
+            localStorage.setItem("blackPlayerInfo", JSON.stringify(blackPlayerInfo));
             window.location.href = `/Game/Play/${gameId}`;
         });
 
