@@ -30,10 +30,13 @@ public class GameModel
             return MoveResult.Fail("Time is ran out.");
 
         var promotionChar = promotion?[0];
-        var move = new Move(new(from), new(to), 
-            ChessGame.CurrentPlayer, promotionChar);
+        var move = ChessGame.GetValidMoves(ChessGame.CurrentPlayer)
+            .FirstOrDefault(m =>
+                m.OriginalPosition.ToString() == from &&
+                m.NewPosition.ToString() == to &&
+                (m.Promotion is null || m.Promotion == promotionChar));
 
-        if (ChessGame.MakeMove(move, true) is MoveType.Invalid)
+        if (move is null || ChessGame.MakeMove(move, true) is MoveType.Invalid)
             return MoveResult.Fail("Move is invalid.");
 
         DoIncrement(isWhiteTurn);
