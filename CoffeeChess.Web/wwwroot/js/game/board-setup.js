@@ -10,11 +10,13 @@ $(document).ready(() => {
     let board = null;
     const game = new Chess();
     const historyViewGame = new Chess();
-    let isHistoryViewing = false;
+    let currentMoveIterationNumber;
     
     function backToLivePosition() {
-        isHistoryViewing = false;
+        currentMoveIterationNumber = game.history().length - 1;
+        isMyTurn = (isWhite && isWhiteTurn) || (!isWhite && !isWhiteTurn);
         board.position(game.fen());
+        $('.history-selected').removeClass('history-selected');
         setLastMoveToSelected();
     }
 
@@ -24,7 +26,7 @@ $(document).ready(() => {
     }
 
     function onDrop(source, target) {
-        if (isHistoryViewing) {
+        if (currentMoveIterationNumber !== game.history().length - 1) {
             backToLivePosition();
             return;
         }
@@ -135,7 +137,8 @@ $(document).ready(() => {
         for (let i = 0; i < moveIterationNumber; i++) {
             historyViewGame.move(game.history()[i]);
         }
-        isHistoryViewing = true;
+        currentMoveIterationNumber = moveIterationNumber - 1;
+        isMyTurn = true;
         board.position(historyViewGame.fen());
     }
     
@@ -172,6 +175,7 @@ $(document).ready(() => {
         game.load_pgn(pgn);
         board.position(game.fen());
         
+        currentMoveIterationNumber = game.history().length - 1;
         isWhiteTurn = game.turn() === 'w';
         isMyTurn = (isWhite && isWhiteTurn) || (!isWhite && !isWhiteTurn);
         whiteMillisecondsLeft = newWhiteMillisecondsLeft;
