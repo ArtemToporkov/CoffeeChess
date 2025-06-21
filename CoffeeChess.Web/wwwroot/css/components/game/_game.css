@@ -332,7 +332,6 @@
     align-items: center;
     justify-content: center;
     flex: 10;
-    cursor: pointer;
     max-width: 45%;
 }
 

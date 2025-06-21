@@ -159,15 +159,15 @@ $(document).ready(() => {
             $('<div>', {
                 class: 'history-move-number',
                 text: number,
-            }),
+            }).css('cursor', 'default'),
             $('<div>', {
                 class: 'history-move',
                 text: whiteMove
-            }),
+            }).css('cursor', whiteMove === 'White' ? 'default' : 'pointer'),
             $('<div>', {
                 class: 'history-move',
                 text: blackMove
-            })
+            }).css('cursor', ['', 'Black'].includes(blackMove) ? 'default' : 'pointer')
         );
     }
     
