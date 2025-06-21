@@ -9,6 +9,14 @@ $(document).ready(() => {
     
     let board = null;
     const game = new Chess();
+    const historyViewGame = new Chess();
+    let isHistoryViewing = false;
+    
+    function backToLivePosition() {
+        isHistoryViewing = false;
+        board.position(game.fen());
+        setLastMoveToSelected();
+    }
 
     function onDragStart(source, piece, position, orientation) {
         if (!isMyTurn || game.game_over()) 
@@ -16,6 +24,11 @@ $(document).ready(() => {
     }
 
     function onDrop(source, target) {
+        if (isHistoryViewing) {
+            backToLivePosition();
+            return;
+        }
+        
         const move = game.move({
             from: source,
             to: target,
@@ -95,8 +108,40 @@ $(document).ready(() => {
         for (let i = 0; i < moves.length; i += 2) {
             const whiteMove = moves[i];
             const blackMove = i + 1 < moves.length ? moves[i + 1] : '';
-            history.append(getHistoryRow(i / 2 + 1, whiteMove, blackMove));
+            let historyRow = getHistoryRow(i / 2 + 1, whiteMove, blackMove);
+            setHistoryViewOnMoveClick(i / 2 + 1, historyRow.children().eq(1), historyRow.children().eq(2));
+            history.append(historyRow);
         }
+        setLastMoveToSelected();
+    }
+    
+    function setHistoryViewOnMoveClick(moveNumber, whiteMoveElement, blackMoveElement) {
+        whiteMoveElement.on('click', () => {
+            undoMovesAndSetBoard(moveNumber, false);
+        })
+        if (blackMoveElement !== null) {
+            blackMoveElement.on('click', () => {
+                undoMovesAndSetBoard(moveNumber, true);
+            })
+        }
+    }
+    
+    function undoMovesAndSetBoard(moveNumber, isBlack) {
+        const moveIterationNumber = isBlack ? moveNumber * 2 : moveNumber * 2 - 1;
+        const childrenNumber = isBlack ? 2 : 1;
+        $('.history-selected').removeClass('history-selected');
+        $('#history').children().eq(moveNumber).children().eq(childrenNumber).addClass('history-selected');
+        historyViewGame.reset();
+        for (let i = 0; i < moveIterationNumber; i++) {
+            historyViewGame.move(game.history()[i]);
+        }
+        isHistoryViewing = true;
+        board.position(historyViewGame.fen());
+    }
+    
+    function setLastMoveToSelected() {
+        const history = $('#history');
+        const moves = game.history();
         if (moves.length > 0) {
             const lastRow = history.children().last();
             const lastMoveElement = (moves.length % 2 === 0) ? lastRow.children().eq(2) : lastRow.children().eq(1);
