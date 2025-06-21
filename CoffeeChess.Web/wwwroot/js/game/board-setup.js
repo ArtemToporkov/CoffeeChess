@@ -97,9 +97,15 @@ $(document).ready(() => {
         const whiteSecondsLeft = Math.floor(whiteTotalSecondsLeft % 60);
         const blackMinutesLeft = Math.floor(blackTotalSecondsLeft / 60);
         const blackSecondsLeft = Math.floor(blackTotalSecondsLeft % 60);
-
-        $("#whiteTimeLeft").text(`${whiteMinutesLeft}:${whiteSecondsLeft}`);
-        $("#blackTimeLeft").text(`${blackMinutesLeft}:${blackSecondsLeft}`);
+        
+        const whiteMinutesText = whiteMinutesLeft < 10 ? `0${whiteMinutesLeft}` : `${whiteMinutesLeft}`;
+        const whiteSecondsText = whiteSecondsLeft < 10 ? `0${whiteSecondsLeft}` : `${whiteSecondsLeft}`;
+        
+        const blackMinutesText = blackMinutesLeft < 10 ? `0${blackMinutesLeft}` : `${blackMinutesLeft}`;
+        const blackSecondsText = blackSecondsLeft < 10 ? `0${blackSecondsLeft}` : `${blackSecondsLeft}`;
+        
+        $("#whiteTimeLeft").text(`${whiteMinutesText}:${whiteSecondsText}`);
+        $("#blackTimeLeft").text(`${blackMinutesText}:${blackSecondsText}`);
     }
     
     function updateHistory() {
