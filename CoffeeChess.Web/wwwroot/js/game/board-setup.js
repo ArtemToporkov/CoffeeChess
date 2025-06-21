@@ -10,12 +10,12 @@ $(document).ready(() => {
     let board = null;
     const game = new Chess();
     const historyViewGame = new Chess();
-    let currentMoveIterationNumber;
+    let currentMoveIterationNumber = -1;
     
     function backToLivePosition() {
         currentMoveIterationNumber = game.history().length - 1;
         isMyTurn = (isWhite && isWhiteTurn) || (!isWhite && !isWhiteTurn);
-        board.position(game.fen());
+        board.position(game.fen(), false);
         $('.history-selected').removeClass('history-selected');
         setLastMoveToSelected();
     }
