@@ -11,11 +11,11 @@ $(document).ready(() => {
     const game = new Chess();
     const historyViewGame = new Chess();
     let currentMoveIterationNumber = -1;
+    let needToBackToLive = false;
     
     function backToLivePosition() {
         currentMoveIterationNumber = game.history().length - 1;
         isMyTurn = (isWhite && isWhiteTurn) || (!isWhite && !isWhiteTurn);
-        board.position(game.fen(), false);
         $('.history-selected').removeClass('history-selected');
         setLastMoveToSelected();
     }
@@ -27,7 +27,7 @@ $(document).ready(() => {
 
     function onDrop(source, target) {
         if (currentMoveIterationNumber !== game.history().length - 1) {
-            backToLivePosition();
+            needToBackToLive = true;
             return;
         }
         
@@ -44,6 +44,10 @@ $(document).ready(() => {
     }
     
     function onSnapEnd() {
+        if (needToBackToLive) {
+            backToLivePosition();
+            needToBackToLive = false;
+        }
         board.position(game.fen());
     }
     
