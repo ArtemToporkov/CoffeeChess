@@ -10,8 +10,8 @@ $(document).ready(() => {
     let board = null;
     const game = new Chess();
     const historyViewGame = new Chess();
-    let currentMoveIterationNumber = -1;
-    let needToBackToLive = false;
+    let currentMoveIndex = -1;
+    let shouldReturnToLive = false;
 
     function onDragStart(source, piece, position, orientation) {
         if (!isMyTurn || game.game_over()) 
@@ -19,8 +19,8 @@ $(document).ready(() => {
     }
 
     function onDrop(source, target) {
-        if (currentMoveIterationNumber !== game.history().length - 1) {
-            needToBackToLive = true;
+        if (currentMoveIndex !== game.history().length - 1) {
+            shouldReturnToLive = true;
             return;
         }
         
@@ -37,12 +37,12 @@ $(document).ready(() => {
     }
     
     function onSnapEnd() {
-        if (needToBackToLive) {
-            currentMoveIterationNumber = game.history().length - 1;
+        if (shouldReturnToLive) {
+            currentMoveIndex = game.history().length - 1;
             isMyTurn = (isWhite && isWhiteTurn) || (!isWhite && !isWhiteTurn);
             $('.history-selected').removeClass('history-selected');
             setLastMoveToSelected();
-            needToBackToLive = false;
+            shouldReturnToLive = false;
         }
         board.position(game.fen());
     }
@@ -135,15 +135,15 @@ $(document).ready(() => {
     }
     
     function undoMovesAndSetBoard(moveNumber, isBlack) {
-        const moveIterationNumber = isBlack ? moveNumber * 2 : moveNumber * 2 - 1;
+        const moveIndex = isBlack ? moveNumber * 2 : moveNumber * 2 - 1;
         const childrenNumber = isBlack ? 2 : 1;
         $('.history-selected').removeClass('history-selected');
         $('#history').children().eq(moveNumber).children().eq(childrenNumber).addClass('history-selected');
         historyViewGame.reset();
-        for (let i = 0; i < moveIterationNumber; i++) {
+        for (let i = 0; i < moveIndex; i++) {
             historyViewGame.move(game.history()[i]);
         }
-        currentMoveIterationNumber = moveIterationNumber - 1;
+        currentMoveIndex = moveIndex - 1;
         isMyTurn = true;
         board.position(historyViewGame.fen());
     }
@@ -181,7 +181,7 @@ $(document).ready(() => {
         game.load_pgn(pgn);
         board.position(game.fen());
         
-        currentMoveIterationNumber = game.history().length - 1;
+        currentMoveIndex = game.history().length - 1;
         isWhiteTurn = game.turn() === 'w';
         isMyTurn = (isWhite && isWhiteTurn) || (!isWhite && !isWhiteTurn);
         whiteMillisecondsLeft = newWhiteMillisecondsLeft;
