@@ -10,6 +10,7 @@ $(document).ready(() => {
     let board = null;
     const game = new Chess();
     const historyViewGame = new Chess();
+    let currentPly = 0;
     let currentMoveIndex = -1;
     let shouldReturnToLive = false;
 
@@ -19,7 +20,7 @@ $(document).ready(() => {
     }
 
     function onDrop(source, target) {
-        if (currentMoveIndex !== game.history().length - 1) {
+        if (currentPly !== game.history().length) {
             shouldReturnToLive = true;
             return;
         }
@@ -38,7 +39,7 @@ $(document).ready(() => {
     
     function onSnapEnd() {
         if (shouldReturnToLive) {
-            currentMoveIndex = game.history().length - 1;
+            currentPly = game.history().length;
             isMyTurn = (isWhite && isWhiteTurn) || (!isWhite && !isWhiteTurn);
             $('.history-selected').removeClass('history-selected');
             setLastMoveToSelected();
@@ -110,40 +111,37 @@ $(document).ready(() => {
     
     function updateHistory() {
         const history = $('#history');
-        history.empty();
-        history.append(getHistoryRow('№', 'White', 'Black'));
+        history.children().slice(1).remove();
         const moves = game.history();
         for (let i = 0; i < moves.length; i += 2) {
             const whiteMove = moves[i];
             const blackMove = i + 1 < moves.length ? moves[i + 1] : '';
             let historyRow = getHistoryRow(i / 2 + 1, whiteMove, blackMove);
-            setHistoryViewOnMoveClick(i / 2 + 1, historyRow.children().eq(1), historyRow.children().eq(2));
+            
+            historyRow.children().eq(1).on('click', () => {
+                undoToPly(i + 1);
+            });
+            if (blackMove !== '') {
+                historyRow.children().eq(2).on('click', () => {
+                   undoToPly(i + 2); 
+                });
+            }
+            
             history.append(historyRow);
         }
         setLastMoveToSelected();
     }
     
-    function setHistoryViewOnMoveClick(moveNumber, whiteMoveElement, blackMoveElement) {
-        whiteMoveElement.on('click', () => {
-            undoMovesAndSetBoard(moveNumber, false);
-        })
-        if (blackMoveElement.text() !== '') {
-            blackMoveElement.on('click', () => {
-                undoMovesAndSetBoard(moveNumber, true);
-            })
-        }
-    }
-    
-    function undoMovesAndSetBoard(moveNumber, isBlack) {
-        const moveIndex = isBlack ? moveNumber * 2 : moveNumber * 2 - 1;
-        const childrenNumber = isBlack ? 2 : 1;
+    function undoToPly(ply) {
         $('.history-selected').removeClass('history-selected');
-        $('#history').children().eq(moveNumber).children().eq(childrenNumber).addClass('history-selected');
+        const childNumber = ply % 2 === 0 ? 2 : 1; 
+        const moveNumber = Math.ceil(ply / 2);
+        $('#history').children().eq(moveNumber).children().eq(childNumber).addClass('history-selected');
         historyViewGame.reset();
-        for (let i = 0; i < moveIndex; i++) {
+        for (let i = 0; i < ply; i++) {
             historyViewGame.move(game.history()[i]);
         }
-        currentMoveIndex = moveIndex - 1;
+        currentPly = ply;
         isMyTurn = true;
         board.position(historyViewGame.fen());
     }
@@ -181,7 +179,7 @@ $(document).ready(() => {
         game.load_pgn(pgn);
         board.position(game.fen());
         
-        currentMoveIndex = game.history().length - 1;
+        currentPly += 1;
         isWhiteTurn = game.turn() === 'w';
         isMyTurn = (isWhite && isWhiteTurn) || (!isWhite && !isWhiteTurn);
         whiteMillisecondsLeft = newWhiteMillisecondsLeft;

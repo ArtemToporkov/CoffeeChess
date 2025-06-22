@@ -311,14 +311,16 @@
     overflow-y: auto;
 }
 
-.history-row {
+.history-row,
+.history-subtitles {
     display: flex;
     flex-direction: row;
     gap: 15px;
     width: 100%;
 }
 
-.history-move-number {
+.history-move-number,
+.history-subtitle-number {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -327,7 +329,8 @@
     max-width: 10%;
 }
 
-.history-move {
+.history-move,
+.history-subtitle {
     display: flex;
     align-items: center;
     justify-content: center;
