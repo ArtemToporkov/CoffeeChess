@@ -131,7 +131,7 @@ $(document).ready(() => {
         whiteMoveElement.on('click', () => {
             undoMovesAndSetBoard(moveNumber, false);
         })
-        if (blackMoveElement !== null) {
+        if (blackMoveElement.text() !== '') {
             blackMoveElement.on('click', () => {
                 undoMovesAndSetBoard(moveNumber, true);
             })
