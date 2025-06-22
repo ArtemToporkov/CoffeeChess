@@ -12,13 +12,6 @@ $(document).ready(() => {
     const historyViewGame = new Chess();
     let currentMoveIterationNumber = -1;
     let needToBackToLive = false;
-    
-    function backToLivePosition() {
-        currentMoveIterationNumber = game.history().length - 1;
-        isMyTurn = (isWhite && isWhiteTurn) || (!isWhite && !isWhiteTurn);
-        $('.history-selected').removeClass('history-selected');
-        setLastMoveToSelected();
-    }
 
     function onDragStart(source, piece, position, orientation) {
         if (!isMyTurn || game.game_over()) 
@@ -45,7 +38,10 @@ $(document).ready(() => {
     
     function onSnapEnd() {
         if (needToBackToLive) {
-            backToLivePosition();
+            currentMoveIterationNumber = game.history().length - 1;
+            isMyTurn = (isWhite && isWhiteTurn) || (!isWhite && !isWhiteTurn);
+            $('.history-selected').removeClass('history-selected');
+            setLastMoveToSelected();
             needToBackToLive = false;
         }
         board.position(game.fen());
