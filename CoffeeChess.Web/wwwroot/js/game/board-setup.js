@@ -197,6 +197,21 @@ $(document).ready(() => {
         // TODO: raise 500 with errorMessage
     });
     
+    $(document).on('keydown', e => {
+       switch (e.key) {
+           case 'ArrowLeft':
+               if (currentPly > 1) {
+                   undoToPly(currentPly - 1);
+               }
+               break;
+           case 'ArrowRight':
+               if (currentPly < game.history().length) {
+                   undoToPly(currentPly + 1);
+               }
+               break;
+       } 
+    });
+    
     async function startConnection() {
         await connection.start();
     }
