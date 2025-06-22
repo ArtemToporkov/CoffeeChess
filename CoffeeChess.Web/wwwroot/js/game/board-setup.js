@@ -133,6 +133,8 @@ $(document).ready(() => {
     }
     
     function undoToPly(ply) {
+        $('#myBoard .piece-417db, body > img.piece-417db').stop(true, true);
+        
         $('.history-selected').removeClass('history-selected');
         const childNumber = ply % 2 === 0 ? 2 : 1; 
         const moveNumber = Math.ceil(ply / 2);
@@ -177,6 +179,8 @@ $(document).ready(() => {
     
     connection.on("MakeMove", (pgn, newWhiteMillisecondsLeft, newBlackMillisecondsLeft) => {
         game.load_pgn(pgn);
+
+        $('#myBoard .piece-417db, body > img.piece-417db').stop(true, true);
         board.position(game.fen());
         
         currentPly += 1;
