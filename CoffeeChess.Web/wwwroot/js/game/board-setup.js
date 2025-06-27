@@ -1,4 +1,5 @@
 import { GameManager } from "./GameManager.js";
+import {ChatManager} from "./ChatManager.js";
 
 $(document).ready(() => {
     const connection = new signalR.HubConnectionBuilder()
@@ -15,6 +16,7 @@ $(document).ready(() => {
         localStorage.getItem('isWhite') === "true",
         localStorage.getItem('totalMillisecondsLeft')
     );
+    const chatManager = new ChatManager(connection, gameId);
     
     const whitePlayerInfo = JSON.parse(localStorage.getItem('whitePlayerInfo'));
     const blackPlayerInfo = JSON.parse(localStorage.getItem('blackPlayerInfo'));
@@ -39,6 +41,10 @@ $(document).ready(() => {
     
     connection.on("CriticalError", (errorMessage) => {
         // TODO: raise 500 with errorMessage
+    });
+
+    connection.on("ReceiveChatMessage", (user, message) => {
+        chatManager.addMessageToChat(user, message);
     });
     
     connection.start();
