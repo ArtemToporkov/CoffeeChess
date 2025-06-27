@@ -1,22 +1,22 @@
 ﻿export class ChatManager {
-    connection;
-    gameId;
-    chatInput;
-    chatMessages;
+    #connection;
+    #gameId;
+    #chatInput;
+    #chatMessages;
     
     constructor(connection, gameId) {
-        this.connection = connection;
-        this.gameId = gameId;
-        this.chatInput = $('#chatInput');
-        this.chatMessages = $('#chatMessages');
+        this.#connection = connection;
+        this.#gameId = gameId;
+        this.#chatInput = $('#chatInput');
+        this.#chatMessages = $('#chatMessages');
 
-        this.chatInput.on('keypress', e => {
+        this.#chatInput.on('keypress', e => {
             if (e.key === 'Enter') {
                 e.preventDefault();
-                const messageText = this.chatInput.val().trim();
+                const messageText = this.#chatInput.val().trim();
                 if (messageText) {
-                    this.connection.invoke("SendChatMessage", this.gameId, messageText);
-                    this.chatInput.val('');
+                    this.#connection.invoke("SendChatMessage", this.#gameId, messageText);
+                    this.#chatInput.val('');
                 }
             }
         });
@@ -37,7 +37,7 @@
             })
         )
 
-        this.chatMessages.append(messageDiv);
-        this.chatMessages.scrollTop(this.chatMessages[0].scrollHeight);
+        this.#chatMessages.append(messageDiv);
+        this.#chatMessages.scrollTop(this.#chatMessages[0].scrollHeight);
     }
 }

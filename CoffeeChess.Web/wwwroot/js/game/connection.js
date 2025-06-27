@@ -1,6 +1,6 @@
 import { GameManager } from "./GameManager.js";
-import {ChatManager} from "./ChatManager.js";
-import {loadUi} from "./ui.js";
+import { ChatManager } from "./ChatManager.js";
+import { loadUi } from "./ui.js";
 
 $(document).ready(() => {
     const connection = new signalR.HubConnectionBuilder()

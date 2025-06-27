@@ -13,12 +13,12 @@
             switch (e.key) {
                 case 'ArrowLeft':
                     if (this.currentPly > 1) {
-                        this.#undoToPly(this.currentPly - 1);
+                        this.#moveToPly(this.currentPly - 1);
                     }
                     break;
                 case 'ArrowRight':
                     if (this.currentPly < this.#game.history().length) {
-                        this.#undoToPly(this.currentPly + 1);
+                        this.#moveToPly(this.currentPly + 1);
                     }
                     break;
             }
@@ -36,11 +36,11 @@
             let historyRow = this.#getHistoryRow(i / 2 + 1, whiteMove, blackMove);
 
             historyRow.children().eq(1).on('click', () => {
-                this.#undoToPly(i + 1);
+                this.#moveToPly(i + 1);
             });
             if (blackMove !== '') {
                 historyRow.children().eq(2).on('click', () => {
-                    this.#undoToPly(i + 2);
+                    this.#moveToPly(i + 2);
                 });
             }
 
@@ -49,7 +49,17 @@
         this.setLastMoveToSelected();
     }
 
-    #undoToPly(ply) {
+    setLastMoveToSelected() {
+        const history = $('#history');
+        const moves = this.#game.history();
+        if (moves.length > 0) {
+            const lastRow = history.children().last();
+            const lastMoveElement = (moves.length % 2 === 0) ? lastRow.children().eq(2) : lastRow.children().eq(1);
+            lastMoveElement.addClass('history-selected');
+        }
+    }
+
+    #moveToPly(ply) {
         $('#myBoard .piece-417db, body > img.piece-417db').stop(true, true);
 
         $('.history-selected').removeClass('history-selected');
@@ -62,16 +72,6 @@
         }
         this.currentPly = ply;
         this.#board.position(this.#historyViewGame.fen());
-    }
-
-    setLastMoveToSelected() {
-        const history = $('#history');
-        const moves = this.#game.history();
-        if (moves.length > 0) {
-            const lastRow = history.children().last();
-            const lastMoveElement = (moves.length % 2 === 0) ? lastRow.children().eq(2) : lastRow.children().eq(1);
-            lastMoveElement.addClass('history-selected');
-        }
     }
 
     #getHistoryRow(number, whiteMove, blackMove) {
