@@ -1,5 +1,6 @@
 import { GameManager } from "./GameManager.js";
 import {ChatManager} from "./ChatManager.js";
+import {loadUi} from "./ui.js";
 
 $(document).ready(() => {
     const connection = new signalR.HubConnectionBuilder()
@@ -17,19 +18,7 @@ $(document).ready(() => {
         localStorage.getItem('totalMillisecondsLeft')
     );
     const chatManager = new ChatManager(connection, gameId);
-    
-    const whitePlayerInfo = JSON.parse(localStorage.getItem('whitePlayerInfo'));
-    const blackPlayerInfo = JSON.parse(localStorage.getItem('blackPlayerInfo'));
-    
-    $('#whiteUsername').text(whitePlayerInfo.name);
-    $('#blackUsername').text(blackPlayerInfo.name);
-    $('#whiteRating').text(whitePlayerInfo.rating);
-    $('#blackRating').text(blackPlayerInfo.rating);
-    
-    if (!gameManager.isWhite) {
-        gameManager.board.flip();
-        $('.game-middle-panel').addClass('flipped');
-    }
+    loadUi(gameManager);
     
     connection.on("MakeMove", (pgn, newWhiteMillisecondsLeft, newBlackMillisecondsLeft) => {
         gameManager.updateGameState(pgn, newWhiteMillisecondsLeft, newBlackMillisecondsLeft);
