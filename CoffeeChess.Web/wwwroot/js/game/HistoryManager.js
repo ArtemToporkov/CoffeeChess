@@ -56,6 +56,9 @@
             const lastRow = history.children().last();
             const lastMoveElement = (moves.length % 2 === 0) ? lastRow.children().eq(2) : lastRow.children().eq(1);
             lastMoveElement.addClass('history-selected');
+            lastMoveElement.addClass('show').one('animationend', () => {
+                $(this).removeClass('show');
+            })
         }
     }
 

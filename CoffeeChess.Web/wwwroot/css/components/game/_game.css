@@ -335,7 +335,12 @@
     align-items: center;
     justify-content: center;
     flex: 10;
+    border-radius: 50px;
     max-width: 45%;
+}
+
+.history-move {
+    transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 .history-selected {
@@ -382,4 +387,17 @@
     box-shadow:
             0 0 0 var(--dark-coffee),
             0 0 0 var(--milk-coffee);
+}
+
+.show {
+    animation: show 0.2s ease;
+}
+
+@keyframes show {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
 }
