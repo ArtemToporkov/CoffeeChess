@@ -9,6 +9,7 @@
         this.#timer = null;
         this.whiteMillisecondsLeft = totalMillisecondsLeft;
         this.blackMillisecondsLeft = totalMillisecondsLeft;
+        this.updateTimers();
     }
     
     start() {
