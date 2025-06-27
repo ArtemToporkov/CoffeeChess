@@ -1,4 +1,5 @@
-import { HistoryManager } from "./history.js";
+import { HistoryManager } from "./HistoryManager.js";
+import { TimersManager } from "./TimersManager.js";
 
 $(document).ready(() => {
     const connection = new signalR.HubConnectionBuilder()
@@ -75,39 +76,9 @@ $(document).ready(() => {
         $('.game-middle-panel').addClass('flipped');
     }
     
-    let whiteMillisecondsLeft = localStorage.getItem('totalMillisecondsLeft');
-    let blackMillisecondsLeft = localStorage.getItem('totalMillisecondsLeft');
-    
-    const timer = setInterval(() => {
-        if (isWhiteTurn) {
-            whiteMillisecondsLeft -= 1000;
-        } else {
-            blackMillisecondsLeft -= 1000;
-        }
-        if (whiteMillisecondsLeft < 0 || blackMillisecondsLeft < 0) {
-            // TODO: implement losing a game after time runs out
-        }
-        updateTimers();
-    }, 1000);
-    
-    function updateTimers() {
-        const whiteTotalSecondsLeft = Math.floor(whiteMillisecondsLeft / 1000);
-        const blackTotalSecondsLeft = Math.floor(blackMillisecondsLeft / 1000);
-
-        const whiteMinutesLeft = Math.floor(whiteTotalSecondsLeft / 60);
-        const whiteSecondsLeft = Math.floor(whiteTotalSecondsLeft % 60);
-        const blackMinutesLeft = Math.floor(blackTotalSecondsLeft / 60);
-        const blackSecondsLeft = Math.floor(blackTotalSecondsLeft % 60);
-        
-        const whiteMinutesText = whiteMinutesLeft < 10 ? `0${whiteMinutesLeft}` : `${whiteMinutesLeft}`;
-        const whiteSecondsText = whiteSecondsLeft < 10 ? `0${whiteSecondsLeft}` : `${whiteSecondsLeft}`;
-        
-        const blackMinutesText = blackMinutesLeft < 10 ? `0${blackMinutesLeft}` : `${blackMinutesLeft}`;
-        const blackSecondsText = blackSecondsLeft < 10 ? `0${blackSecondsLeft}` : `${blackSecondsLeft}`;
-        
-        $("#whiteTimeLeft").text(`${whiteMinutesText}:${whiteSecondsText}`);
-        $("#blackTimeLeft").text(`${blackMinutesText}:${blackSecondsText}`);
-    }
+    const totalMillisecondsLeft = localStorage.getItem('totalMillisecondsLeft');
+    const timersManager = new TimersManager(totalMillisecondsLeft);
+    timersManager.start();
     
     connection.on("MakeMove", (pgn, newWhiteMillisecondsLeft, newBlackMillisecondsLeft) => {
         game.load_pgn(pgn);
@@ -117,10 +88,12 @@ $(document).ready(() => {
         
         isWhiteTurn = game.turn() === 'w';
         isMyTurn = (isWhite && isWhiteTurn) || (!isWhite && !isWhiteTurn);
-        whiteMillisecondsLeft = newWhiteMillisecondsLeft;
-        blackMillisecondsLeft = newBlackMillisecondsLeft;
         
-        updateTimers();
+        timersManager.updateTimers(newWhiteMillisecondsLeft, newBlackMillisecondsLeft, isWhiteTurn);
+        if (timersManager.whiteMillisecondsLeft < 0 || timersManager.whiteMillisecondsLeft < 0) {
+            // TODO: implement losing game after time runs out
+        }
+        
         historyManager.resetHistoryEvents();
     });
     
