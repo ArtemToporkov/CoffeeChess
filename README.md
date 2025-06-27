@@ -5,9 +5,9 @@ Implementing cute chess website using asp.net mvc, signalr.
 ## Status
 
 | Status | Description |
-|--------|----------|
-| 🟢 Done | Authorization, minimal game logic with move and time validation |
-| 🟡 In progress | Moves history |
+|--------|--------|
+| 🟢 Done | Authorization, full game logic with move and time validation, moves history |
+| 🟡 In progress | Game loss, resignation and draw offer |
 | 🔴 Hasn't been started | Music player |
 
 ## Description
