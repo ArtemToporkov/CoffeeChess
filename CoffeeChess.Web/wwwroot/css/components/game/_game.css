@@ -378,7 +378,8 @@
     
 }
 
-#confirmationButtonsContainer {
+#resignConfirmationContainer,
+#drawOfferContainer {
     display: none;
 }
 

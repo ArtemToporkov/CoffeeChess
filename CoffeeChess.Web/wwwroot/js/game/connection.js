@@ -1,6 +1,7 @@
 import { GameManager } from "./managers/GameManager.js";
 import { ChatManager } from "./managers/ChatManager.js";
-import { loadUi } from "./ui.js";
+import { loadUi, receiveDrawOffer, turnButtonsBack } from "./ui.js";
+import { GameActions } from "./GameActions.js";
 
 $(document).ready(() => {
     const connection = new signalR.HubConnectionBuilder()
@@ -18,7 +19,7 @@ $(document).ready(() => {
         localStorage.getItem('totalMillisecondsLeft')
     );
     const chatManager = new ChatManager(connection, gameId);
-    loadUi(gameManager);
+    loadUi(connection, gameManager, gameId);
     
     connection.on("MakeMove", (pgn, newWhiteMillisecondsLeft, newBlackMillisecondsLeft) => {
         gameManager.updateGameState(pgn, newWhiteMillisecondsLeft, newBlackMillisecondsLeft);
@@ -34,6 +35,17 @@ $(document).ready(() => {
 
     connection.on("ReceiveChatMessage", (user, message) => {
         chatManager.addMessageToChat(user, message);
+    });
+    
+    connection.on("PerformGameAction", payload => {
+        switch (payload.gameActionType) {
+            case GameActions.ReceiveDrawOffer:
+                receiveDrawOffer(connection, payload.message);
+                break;
+            case GameActions.GetDrawOfferDeclination:
+                turnButtonsBack();
+                break;
+        }
     });
     
     connection.start();

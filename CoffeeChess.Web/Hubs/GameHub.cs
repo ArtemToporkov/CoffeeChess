@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using ChessDotNetCore;
+using CoffeeChess.Core.Enums;
 using CoffeeChess.Core.Models;
 using CoffeeChess.Service.Interfaces;
 using CoffeeChess.Web.Models;
@@ -66,5 +67,37 @@ public class GameHub(IGameManagerService gameManager, UserManager<UserModel> use
         
         await Clients.Users(game.WhitePlayerInfo.Id, game.BlackPlayerInfo.Id).SendAsync(
             "MakeMove", pgn, game.WhiteTimeLeft.TotalMilliseconds, game.BlackTimeLeft.TotalMilliseconds);
+    }
+
+    public async Task PerformGameAction(string gameId, GameActionType gameActionType)
+    {
+        if (!gameManager.TryGetGame(gameId, out var game))
+        {
+            await Clients.Caller.SendAsync("CriticalError", "Game not found");
+            return;
+        }
+
+        var user = await GetUserAsync();
+        var clientToSendTo = game!.BlackPlayerInfo.Id == user.Id 
+            ? game.WhitePlayerInfo 
+            : game.BlackPlayerInfo;
+        switch (gameActionType)
+        {
+            case GameActionType.SendDrawOffer:
+                var payload = new GameActionPayloadModel
+                {
+                    GameActionType = GameActionType.ReceiveDrawOffer,
+                    Message = $"{user.UserName} offers a draw."
+                };
+                await Clients.User(clientToSendTo.Id).SendAsync("PerformGameAction", payload);
+                break;
+            case GameActionType.DeclineDrawOffer:
+                payload = new GameActionPayloadModel
+                {
+                    GameActionType = GameActionType.GetDrawOfferDeclination,
+                };
+                await Clients.User(clientToSendTo.Id).SendAsync("PerformGameAction", payload);
+                break;
+        }
     }
 }
