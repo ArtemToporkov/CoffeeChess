@@ -349,6 +349,25 @@
     border-radius: 50px;
 }
 
+.resign-draw-info {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.resign-draw-message {
+    position: absolute;
+    top: -25px;
+    
+    font-family: 'Montserrat', sans-serif;
+    font-size: 15px;
+    color: var(--milk-coffee);
+    margin: 0;
+}
+
 .resign-draw-buttons {
     flex: 0 0 auto;
     display: flex;
@@ -357,6 +376,10 @@
     justify-content: center;
     gap: 20px;
     
+}
+
+#confirmationButtonsContainer {
+    display: none;
 }
 
 .resign-draw-button {
