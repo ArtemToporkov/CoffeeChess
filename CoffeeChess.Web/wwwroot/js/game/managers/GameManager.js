@@ -79,7 +79,7 @@ export class GameManager {
             if (this.#shouldReturnToLive) {
                 $('.history-selected').removeClass('history-selected');
                 this.#shouldReturnToLive = false;
-                this.#historyManager.setLastMoveToSelected();
+                this.#historyManager.moveToLastMove();
             }
             this.board.position(this.#game.fen());
         }

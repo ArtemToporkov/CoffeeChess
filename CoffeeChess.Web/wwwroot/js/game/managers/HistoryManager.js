@@ -46,12 +46,13 @@
 
             history.append(historyRow);
         }
-        this.setLastMoveToSelected();
+        this.moveToLastMove();
     }
 
-    setLastMoveToSelected() {
+    moveToLastMove() {
         const history = $('#history');
         const moves = this.#game.history();
+        this.currentPly = moves.length;
         if (moves.length > 0) {
             const lastRow = history.children().last();
             const lastMoveElement = (moves.length % 2 === 0) ? lastRow.children().eq(2) : lastRow.children().eq(1);

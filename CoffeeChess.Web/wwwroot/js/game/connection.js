@@ -1,5 +1,5 @@
-import { GameManager } from "./GameManager.js";
-import { ChatManager } from "./ChatManager.js";
+import { GameManager } from "./managers/GameManager.js";
+import { ChatManager } from "./managers/ChatManager.js";
 import { loadUi } from "./ui.js";
 
 $(document).ready(() => {
