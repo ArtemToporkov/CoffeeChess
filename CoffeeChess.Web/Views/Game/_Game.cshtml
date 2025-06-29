@@ -88,6 +88,17 @@
     </div>
 </div>
 
+<div id="resultModalOverlay" class="modal-overlay"></div>
+
+<div id="milkResultPanel" class="result-panel">
+    <p id="darkResultTitle" class="result-title"></p>
+    <p id="darkResultInfo" class="result-info"></p>
+</div>
+<div id="darkResultPanel" class="result-panel">
+    <p id="milkResultTitle" class="result-title"></p>
+    <p id="milkResultInfo" class="result-info"></p>
+</div>
+
 @if (SignInManager.IsSignedIn(User))
 {
     <div id="currentUserData" data-username="@UserManager.GetUserName(User)" style="display: none;"></div>

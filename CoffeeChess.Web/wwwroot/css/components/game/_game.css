@@ -425,3 +425,109 @@
         opacity: 1;
     }
 }
+
+.modal-overlay {
+    display: none;
+    
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    pointer-events: none;
+    
+    transition: opacity 0.3s ease;
+    backdrop-filter: blur(4px);
+}
+
+.result-panel {
+    display: none;
+    
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    
+    position: absolute;
+    top: 54.5%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    
+    width: 300px;
+    height: 450px;
+
+    background-color: var(--dark-coffee);
+    border-radius: 50px;
+    box-shadow:
+            0 0 0 8px var(--milk-coffee),
+            0 0 0 12px var(--dark-coffee);
+    
+    animation: open 0.3s ease;
+}
+
+@keyframes open {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0);
+    }
+
+    60% {
+        opacity: 0.5;
+        transform: translate(-50%, -50%) scale(1.1);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+#darkResultPanel {
+    background-color: var(--dark-coffee);
+    border-radius: 50px;
+    box-shadow:
+            0 0 0 8px var(--milk-coffee),
+            0 0 0 12px var(--dark-coffee);
+}
+
+#milkResultPanel {
+    background-color: var(--milk-coffee);
+    border-radius: 50px;
+    box-shadow:
+            0 0 0 8px var(--dark-coffee),
+            0 0 0 12px var(--milk-coffee);
+}
+
+.result-title {
+    font-family: 'Caprasimo', sans-serif;
+    font-size: 35px;
+    margin: 0;
+}
+
+#milkResultTitle {
+    color: var(--milk-coffee);
+    text-shadow:
+            -4px 4px 0 var(--dark-coffee),
+            -5px 5px 0 var(--milk-coffee);
+}
+
+#darkResultTitle {
+    color: var(--dark-coffee);
+    text-shadow:
+            -2px 2px 0 var(--milk-coffee),
+            -4px 4px 0 var(--dark-coffee);
+}
+
+.result-info {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 10px;
+    margin: 0;
+}
+
+#milkResultInfo {
+    color: var(--milk-coffee);
+}
+
+#darkResultInfo {
+    color: var(--dark-coffee);
+}
+

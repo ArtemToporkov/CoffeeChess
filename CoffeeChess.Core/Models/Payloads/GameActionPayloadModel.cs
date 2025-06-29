@@ -1,6 +1,6 @@
 ﻿using CoffeeChess.Core.Enums;
 
-namespace CoffeeChess.Core.Models;
+namespace CoffeeChess.Core.Models.Payloads;
 
 public class GameActionPayloadModel
 {

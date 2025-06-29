@@ -1,7 +1,7 @@
 import { GameManager } from "./managers/GameManager.js";
 import { ChatManager } from "./managers/ChatManager.js";
-import { loadUi, receiveDrawOffer, turnButtonsBack } from "./ui.js";
-import { GameActions } from "./GameActions.js";
+import { loadUi, receiveDrawOffer, turnButtonsBack, updateGameResult } from "./ui.js";
+import { GameActionType } from "./GameActionType.js";
 
 $(document).ready(() => {
     const connection = new signalR.HubConnectionBuilder()
@@ -39,13 +39,18 @@ $(document).ready(() => {
     
     connection.on("PerformGameAction", payload => {
         switch (payload.gameActionType) {
-            case GameActions.ReceiveDrawOffer:
+            case GameActionType.ReceiveDrawOffer:
                 receiveDrawOffer(connection, payload.message);
                 break;
-            case GameActions.GetDrawOfferDeclination:
+            case GameActionType.GetDrawOfferDeclination:
                 turnButtonsBack();
                 break;
         }
+    });
+    
+    connection.on("UpdateGameResult", payload => {
+        console.log("should update");
+        updateGameResult(payload.result, payload.message);
     });
     
     connection.start();

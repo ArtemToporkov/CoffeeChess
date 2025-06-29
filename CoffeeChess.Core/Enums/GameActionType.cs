@@ -5,5 +5,6 @@ public enum GameActionType
     SendDrawOffer,
     DeclineDrawOffer,
     ReceiveDrawOffer,
-    GetDrawOfferDeclination
+    GetDrawOfferDeclination,
+    Resign
 }

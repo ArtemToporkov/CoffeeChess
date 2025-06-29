@@ -1,4 +1,5 @@
-﻿import { GameActions } from "./GameActions.js";
+﻿import { GameActionType } from "./GameActionType.js";
+import { GameResultForPlayer } from "./GameResultForPlayer.js";
 
 export function loadUi(connection, gameManager, gameId) {
     const whitePlayerInfo = JSON.parse(localStorage.getItem('whitePlayerInfo'));
@@ -14,7 +15,7 @@ export function loadUi(connection, gameManager, gameId) {
         $('.game-middle-panel').addClass('flipped');
     }
     
-    bindEventsToResignButton();
+    bindEventsToResignButton(connection, gameId);
     bindEventsToDrawOfferButtons(connection, gameId);
 }
 
@@ -32,7 +33,28 @@ export function turnButtonsBack() {
     $('#drawOfferButton').css({});
 }
 
-function bindEventsToResignButton() {
+export function updateGameResult(result, message) {
+    console.log(result);
+    switch (result) {
+        case GameResultForPlayer.Draw:
+        case GameResultForPlayer.Won:
+            $('.modal-overlay').css('display', 'flex');
+            $('#milkResultPanel').css('display', 'flex');
+            $('#darkResultTitle').text(
+                result === GameResultForPlayer.Draw 
+                    ? "Draw" 
+                    : "You win!"
+            );
+            break;
+        case GameResultForPlayer.Lost:
+            $('.modal-overlay').css('display', 'flex');
+            $('#darkResultPanel').css('display', 'flex');
+            $('#milkResultTitle').text("You lose...");
+            break;
+    }
+}
+
+function bindEventsToResignButton(connection, gameId) {
     $('#resignButton').on('click', () => {
         $('#resignDrawMessage').text('Are you sure?');
         $('#resignDrawButtonsContainer').css('display', 'none');
@@ -41,6 +63,7 @@ function bindEventsToResignButton() {
     
     $('#confirmButton').on('click', () => {
         // TODO: implement resignation
+        connection.invoke('PerformGameAction', gameId, GameActionType.Resign);
     });
 
     $('#denyButton').on('click', () => {
@@ -56,7 +79,7 @@ function bindEventsToDrawOfferButtons(connection, gameId) {
             'pointer-events': 'none'
         });
         
-        connection.invoke('PerformGameAction', gameId, GameActions.SendDrawOffer);
+        connection.invoke('PerformGameAction', gameId, GameActionType.SendDrawOffer);
     });
     
     $('#acceptButton').on('click', () => {
@@ -65,6 +88,6 @@ function bindEventsToDrawOfferButtons(connection, gameId) {
 
     $('#declineButton').on('click', () => {
         turnButtonsBack();
-        connection.invoke('PerformGameAction', gameId, GameActions.DeclineDrawOffer);
+        connection.invoke('PerformGameAction', gameId, GameActionType.DeclineDrawOffer);
     });
 }

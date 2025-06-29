@@ -2,6 +2,7 @@
 using ChessDotNetCore;
 using CoffeeChess.Core.Enums;
 using CoffeeChess.Core.Models;
+using CoffeeChess.Core.Models.Payloads;
 using CoffeeChess.Service.Interfaces;
 using CoffeeChess.Web.Models;
 using Microsoft.AspNetCore.Identity;
@@ -84,20 +85,40 @@ public class GameHub(IGameManagerService gameManager, UserManager<UserModel> use
         switch (gameActionType)
         {
             case GameActionType.SendDrawOffer:
-                var payload = new GameActionPayloadModel
+                var actionPayload = new GameActionPayloadModel
                 {
                     GameActionType = GameActionType.ReceiveDrawOffer,
                     Message = $"{user.UserName} offers a draw."
                 };
-                await Clients.User(clientToSendTo.Id).SendAsync("PerformGameAction", payload);
+                await Clients.User(clientToSendTo.Id).SendAsync("PerformGameAction", actionPayload);
                 break;
             case GameActionType.DeclineDrawOffer:
-                payload = new GameActionPayloadModel
+                actionPayload = new GameActionPayloadModel
                 {
                     GameActionType = GameActionType.GetDrawOfferDeclination,
                 };
-                await Clients.User(clientToSendTo.Id).SendAsync("PerformGameAction", payload);
+                await Clients.User(clientToSendTo.Id).SendAsync("PerformGameAction", actionPayload);
+                break;
+            case GameActionType.Resign:
+                await SendGameResultAfterResignation(user.UserName!, user.Id, clientToSendTo.Id);
                 break;
         }
+    }
+
+    private async Task SendGameResultAfterResignation(
+        string resignedPlayerUserName, string resignedPlayerId, string winnerId)
+    {
+        var resignedPayload = new GameResultPayloadModel
+        {
+            Result = GameResultForPlayer.Lost,
+            Message = "You resigned."
+        };
+        var winnerPayload = new GameResultPayloadModel
+        {
+            Result = GameResultForPlayer.Won,
+            Message = $"{resignedPlayerUserName} resigns."
+        };
+        await Clients.User(resignedPlayerId).SendAsync("UpdateGameResult", resignedPayload);
+        await Clients.User(winnerId).SendAsync("UpdateGameResult", winnerPayload);
     }
 }
