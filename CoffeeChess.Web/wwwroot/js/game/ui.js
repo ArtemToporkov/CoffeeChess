@@ -17,6 +17,7 @@ export function loadUi(connection, gameManager, gameId) {
     
     bindEventsToResignButton(connection, gameId);
     bindEventsToDrawOfferButtons(connection, gameId);
+    bindEventsToAnalyzeButtons();
 }
 
 export function receiveDrawOffer(connection, message) {
@@ -45,11 +46,13 @@ export function updateGameResult(result, message) {
                     ? "Draw" 
                     : "You win!"
             );
+            $('#darkResultInfo').text(message);
             break;
         case GameResultForPlayer.Lost:
             $('.modal-overlay').css('display', 'flex');
             $('#darkResultPanel').css('display', 'flex');
             $('#milkResultTitle').text("You lose...");
+            $('#milkResultInfo').text(message);
             break;
     }
 }
@@ -62,7 +65,6 @@ function bindEventsToResignButton(connection, gameId) {
     });
     
     $('#confirmButton').on('click', () => {
-        // TODO: implement resignation
         connection.invoke('PerformGameAction', gameId, GameActionType.Resign);
     });
 
@@ -90,4 +92,18 @@ function bindEventsToDrawOfferButtons(connection, gameId) {
         turnButtonsBack();
         connection.invoke('PerformGameAction', gameId, GameActionType.DeclineDrawOffer);
     });
+}
+
+function bindEventsToAnalyzeButtons() {
+    for (let $button of [$('#milkAnalyzeButton'), $('#darkAnalyzeButton')]) {
+        $button.on('click', () => {
+           $('.modal-overlay').css('display', 'none');
+           for (let $resultPanel of [$('#milkResultPanel'), $('#darkResultPanel')]) {
+               $resultPanel.addClass('close').one('animationend', () => {
+                   $resultPanel.removeClass('close');
+                   $resultPanel.css('display', 'none');
+               });
+           }
+        });
+    }
 }

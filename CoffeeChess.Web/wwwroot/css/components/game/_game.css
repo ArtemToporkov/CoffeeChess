@@ -445,7 +445,7 @@
     
     flex-direction: column;
     align-items: center;
-    justify-content: center;
+    justify-content: space-between;
     
     position: absolute;
     top: 54.5%;
@@ -454,6 +454,9 @@
     
     width: 300px;
     height: 450px;
+    
+    padding: 30px 10px;
+    box-sizing: border-box;
 
     background-color: var(--dark-coffee);
     border-radius: 50px;
@@ -481,6 +484,27 @@
     }
 }
 
+.result-panel.close {
+    animation: close 0.3s ease;
+}
+
+@keyframes close {
+    0% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+
+    40% {
+        opacity: 0.5;
+        transform: translate(-50%, -50%) scale(1.1);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0);
+    }
+}
+
 #darkResultPanel {
     background-color: var(--dark-coffee);
     border-radius: 50px;
@@ -495,6 +519,14 @@
     box-shadow:
             0 0 0 8px var(--dark-coffee),
             0 0 0 12px var(--milk-coffee);
+}
+
+.result-detailed {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
 }
 
 .result-title {
@@ -519,7 +551,7 @@
 
 .result-info {
     font-family: 'Montserrat', sans-serif;
-    font-size: 10px;
+    font-size: 15px;
     margin: 0;
 }
 
@@ -530,4 +562,65 @@
 #darkResultInfo {
     color: var(--dark-coffee);
 }
+
+.result-buttons {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.milk-result-button,
+.dark-result-button {
+    border: none;
+    border-radius: 100px;
+    width: 100px;
+    height: 30px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    font-family: 'Caprasimo', sans-serif;
+    font-size: 15px;
+
+    outline: none;
+    text-decoration: none;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.milk-result-button {
+    background-color: var(--milk-coffee);
+    color: var(--dark-coffee);
+
+    box-shadow:
+            -2px 2px 0 var(--dark-coffee),
+            -3px 3px 0 var(--milk-coffee);
+}
+
+.milk-result-button:active {
+    transform: translate(-3px, 3px);
+    box-shadow:
+            0 0 0 var(--dark-coffee),
+            0 0 0 var(--milk-coffee);
+}
+
+.dark-result-button {
+    background-color: var(--dark-coffee);
+    color: var(--milk-coffee);
+
+    box-shadow:
+            -2px 2px 0 var(--milk-coffee),
+            -3px 3px 0 var(--dark-coffee);
+}
+
+.dark-result-button:active {
+    transform: translate(-3px, 3px);
+    box-shadow:
+            0 0 0 var(--milk-coffee),
+            0 0 0 var(--dark-coffee);
+}
+
+
 

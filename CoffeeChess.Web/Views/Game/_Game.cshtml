@@ -91,12 +91,32 @@
 <div id="resultModalOverlay" class="modal-overlay"></div>
 
 <div id="milkResultPanel" class="result-panel">
-    <p id="darkResultTitle" class="result-title"></p>
-    <p id="darkResultInfo" class="result-info"></p>
+    <div class="result-detailed">
+        <p id="darkResultTitle" class="result-title"></p>
+        <p id="darkResultInfo" class="result-info"></p>
+    </div>
+    <div class="result-buttons">
+        <button id="darkAnalyzeButton" class="dark-result-button">
+            Analyze
+        </button>
+        <a id="darkGoToMainMenuButton" class="dark-result-button" asp-controller="Game"  asp-action="GameCreation">
+            Menu
+        </a>
+    </div>
 </div>
 <div id="darkResultPanel" class="result-panel">
-    <p id="milkResultTitle" class="result-title"></p>
-    <p id="milkResultInfo" class="result-info"></p>
+    <div class="result-detailed">
+        <p id="milkResultTitle" class="result-title"></p>
+        <p id="milkResultInfo" class="result-info"></p>
+    </div>
+    <div class="result-buttons">
+        <button id="milkAnalyzeButton" class="milk-result-button">
+            Analyze
+        </button>
+        <a id="milkGoToMainMenuButton" class="milk-result-button" asp-controller="Game"  asp-action="GameCreation">
+            Menu
+        </a>
+    </div>
 </div>
 
 @if (SignInManager.IsSignedIn(User))

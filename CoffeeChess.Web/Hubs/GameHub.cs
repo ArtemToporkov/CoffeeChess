@@ -111,7 +111,7 @@ public class GameHub(IGameManagerService gameManager, UserManager<UserModel> use
         var resignedPayload = new GameResultPayloadModel
         {
             Result = GameResultForPlayer.Lost,
-            Message = "You resigned."
+            Message = "due to resignation."
         };
         var winnerPayload = new GameResultPayloadModel
         {
