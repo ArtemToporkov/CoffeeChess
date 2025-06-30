@@ -39,7 +39,7 @@ export function updateGameResult(result, message, oldRating, newRating) {
         ? ['dark', 'milk'] 
         : ['milk', 'dark'];
 
-    $('.modal-overlay').css('display', 'flex');
+    $('.modal-overlay').addClass('show');
     $('#resultPanel')
         .css('display', 'flex')
         .addClass(panelColorClass);
@@ -134,7 +134,7 @@ function bindEventsToDrawOfferButtons(connection, gameId) {
 function bindEventsToAnalyzeButtons() {
     const $resultPanel = $('.result-panel');
     $('#analyzeButton').on('click', () => {
-       $('.modal-overlay').css('display', 'none');
+       $('.modal-overlay').removeClass('show');
         $resultPanel.addClass('close').one('animationend', () => {
            $resultPanel.removeClass('close');
            $resultPanel.css('display', 'none');

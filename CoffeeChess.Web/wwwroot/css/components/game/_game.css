@@ -427,8 +427,6 @@
 }
 
 .modal-overlay {
-    display: none;
-    
     top: 0;
     left: 0;
     width: 100%;
@@ -436,8 +434,12 @@
     position: absolute;
     pointer-events: none;
     
-    transition: opacity 0.3s ease;
+    transition: backdrop-filter 0.3s ease;
+}
+
+.modal-overlay.show {
     backdrop-filter: blur(4px);
+    pointer-events: auto;
 }
 
 .result-panel {
