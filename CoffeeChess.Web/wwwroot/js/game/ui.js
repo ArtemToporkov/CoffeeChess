@@ -35,26 +35,25 @@ export function turnButtonsBack() {
 }
 
 export function updateGameResult(result, message, oldRating, newRating) {
-    switch (result) {
-        case GameResultForPlayer.Draw:
-        case GameResultForPlayer.Won:
-            $('.modal-overlay').css('display', 'flex');
-            $('#milkResultPanel').css('display', 'flex');
-            $('#darkResultTitle').text(
-                result === GameResultForPlayer.Draw 
-                    ? "Draw." 
-                    : "You win!"
-            );
-            $('#darkResultInfo').text(message);
-            break;
-        case GameResultForPlayer.Lost:
-            $('.modal-overlay').css('display', 'flex');
-            $('#darkResultPanel').css('display', 'flex');
-            $('#milkResultTitle').text("You lose...");
-            $('#milkResultInfo').text(message);
-            break;
-    }
-    
+    const [panelColorClass, fontButtonsColorClass] = result === GameResultForPlayer.Lost 
+        ? ['dark', 'milk'] 
+        : ['milk', 'dark'];
+
+    $('.modal-overlay').css('display', 'flex');
+    $('#resultPanel')
+        .css('display', 'flex')
+        .addClass(panelColorClass);
+    $('#resultTitle').text(
+        result === GameResultForPlayer.Draw
+            ? "Draw."
+            : "You win!"
+    ).addClass(fontButtonsColorClass);
+    $('#resultInfo')
+        .text(message)
+        .addClass(fontButtonsColorClass);
+    $('.result-ratings-title').addClass(fontButtonsColorClass);
+    $('.result-rating').addClass(fontButtonsColorClass);
+    $('.result-button').addClass(fontButtonsColorClass);
     playRatingsChangeAnimation(oldRating, newRating);
 }
 
@@ -135,15 +134,12 @@ function bindEventsToDrawOfferButtons(connection, gameId) {
 }
 
 function bindEventsToAnalyzeButtons() {
-    for (let $button of [$('#milkAnalyzeButton'), $('#darkAnalyzeButton')]) {
-        $button.on('click', () => {
-           $('.modal-overlay').css('display', 'none');
-           for (let $resultPanel of [$('#milkResultPanel'), $('#darkResultPanel')]) {
-               $resultPanel.addClass('close').one('animationend', () => {
-                   $resultPanel.removeClass('close');
-                   $resultPanel.css('display', 'none');
-               });
-           }
-        });
-    }
+    const $resultPanel = $('.result-panel');
+    $('#analyzeButton').on('click', () => {
+       $('.modal-overlay').css('display', 'none');
+        $resultPanel.addClass('close').one('animationend', () => {
+           $resultPanel.removeClass('close');
+           $resultPanel.css('display', 'none');
+       });
+    });
 }
