@@ -1,7 +1,8 @@
 ﻿export const GameActionType = Object.freeze({
     SendDrawOffer: 0,
-    DeclineDrawOffer: 1,
-    ReceiveDrawOffer: 2,
-    GetDrawOfferDeclination: 3,
-    Resign: 4
+    AcceptDrawOffer: 1,
+    DeclineDrawOffer: 2,
+    ReceiveDrawOffer: 3,
+    GetDrawOfferDeclination: 4,
+    Resign: 5
 })

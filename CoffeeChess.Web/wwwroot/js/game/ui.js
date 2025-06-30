@@ -44,7 +44,7 @@ export function updateGameResult(result, message, oldRating, newRating) {
         .css('display', 'flex')
         .addClass(panelColorClass);
     $('#resultTitle').text(
-        ['You win!', 'You lose...', 'Draw.'][result]
+        ['You win', 'You lose', 'Draw'][result]
     ).addClass(fontButtonsColorClass);
     $('#resultInfo')
         .text(message)
@@ -122,7 +122,7 @@ function bindEventsToDrawOfferButtons(connection, gameId) {
     });
     
     $('#acceptButton').on('click', () => {
-        // TODO: implement draw agreement
+        connection.invoke("PerformGameAction", gameId, GameActionType.AcceptDrawOffer);
     });
 
     $('#declineButton').on('click', () => {

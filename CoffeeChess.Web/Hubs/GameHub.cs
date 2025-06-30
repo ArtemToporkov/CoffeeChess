@@ -77,11 +77,11 @@ public class GameHub(IGameManagerService gameManager, UserManager<UserModel> use
             await Clients.Caller.SendAsync("CriticalError", "Game not found");
             return;
         }
-
+        
         var user = await GetUserAsync();
-        var clientToSendTo = game!.BlackPlayerInfo.Id == user.Id 
-            ? game.WhitePlayerInfo 
-            : game.BlackPlayerInfo;
+        var (callerPlayerInfo, receiverPlayerInfo) = user.Id == game!.WhitePlayerInfo.Id
+            ? (game.WhitePlayerInfo, game.BlackPlayerInfo)
+            : (game.BlackPlayerInfo, game.WhitePlayerInfo);
         switch (gameActionType)
         {
             case GameActionType.SendDrawOffer:
@@ -90,22 +90,41 @@ public class GameHub(IGameManagerService gameManager, UserManager<UserModel> use
                     GameActionType = GameActionType.ReceiveDrawOffer,
                     Message = $"{user.UserName} offers a draw."
                 };
-                await Clients.User(clientToSendTo.Id).SendAsync("PerformGameAction", actionPayload);
+                await Clients.User(receiverPlayerInfo.Id).SendAsync("PerformGameAction", actionPayload);
+                break;
+            
+            case GameActionType.AcceptDrawOffer:
+                await SendGameResultAfterDrawAgreement(callerPlayerInfo, receiverPlayerInfo);
                 break;
             case GameActionType.DeclineDrawOffer:
                 actionPayload = new GameActionPayloadModel
                 {
                     GameActionType = GameActionType.GetDrawOfferDeclination,
                 };
-                await Clients.User(clientToSendTo.Id).SendAsync("PerformGameAction", actionPayload);
+                await Clients.User(receiverPlayerInfo.Id).SendAsync("PerformGameAction", actionPayload);
                 break;
             case GameActionType.Resign:
-                await SendGameResultAfterResignation(user, clientToSendTo);
+                await SendGameResultAfterResignation(callerPlayerInfo, receiverPlayerInfo);
                 break;
         }
     }
 
-    private async Task SendGameResultAfterResignation(UserModel loser, PlayerInfoModel winner)
+    private async Task SendGameResultAfterDrawAgreement(PlayerInfoModel first, PlayerInfoModel second)
+    {
+        var payload = new GameResultPayloadModel
+        {
+            Result = GameResultForPlayer.Draw,
+            Message = "by agreement",
+            OldRating = first.Rating,
+            NewRating = first.Rating + 0,
+        };
+        await Clients.User(first.Id).SendAsync("UpdateGameResult", payload);
+        payload.OldRating = second.Rating;
+        payload.NewRating = second.Rating + 0;
+        await Clients.User(second.Id).SendAsync("UpdateGameResult", payload);
+    }
+
+    private async Task SendGameResultAfterResignation(PlayerInfoModel loser, PlayerInfoModel winner)
     {
         var loserPayload = new GameResultPayloadModel
         {
@@ -117,7 +136,7 @@ public class GameHub(IGameManagerService gameManager, UserManager<UserModel> use
         var winnerPayload = new GameResultPayloadModel
         {
             Result = GameResultForPlayer.Won,
-            Message = $"{loser.UserName} resigns.",
+            Message = $"{loser.Name} resigns.",
             OldRating = winner.Rating,
             NewRating = winner.Rating + 8
         };

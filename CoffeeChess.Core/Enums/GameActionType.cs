@@ -3,6 +3,7 @@
 public enum GameActionType
 {
     SendDrawOffer,
+    AcceptDrawOffer,
     DeclineDrawOffer,
     ReceiveDrawOffer,
     GetDrawOfferDeclination,
