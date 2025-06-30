@@ -23,21 +23,33 @@ public class GameModel
         var currentPlayerId = isWhiteTurn ? WhitePlayerInfo.Id : BlackPlayerInfo.Id;
         
         if (playerId != currentPlayerId)
-            return MoveResult.Fail("It's not your turn");
+            return MoveResult.NotYourTurn;
         
         ReduceTime(isWhiteTurn);
         if ((currentPlayerId == WhitePlayerInfo.Id && WhiteTimeLeft < TimeSpan.Zero) ||
             (currentPlayerId == BlackPlayerInfo.Id && BlackTimeLeft < TimeSpan.Zero))
-            return MoveResult.Fail("Time is ran out.");
+            return MoveResult.TimeRanOut;
 
         var promotionChar = promotion?[0];
 
         var move = new Move(from, to, isWhiteTurn ? Player.White : Player.Black, promotionChar);
         if (ChessGame.MakeMove(move, false) is MoveType.Invalid)
-            return MoveResult.Fail("Move is invalid.");
+            return MoveResult.Invalid;
+
+        if (ChessGame.ThreeFoldRepeatAndThisCanResultInDraw)
+            return MoveResult.ThreeFold;
+
+        if (ChessGame.FiftyMovesAndThisCanResultInDraw)
+            return MoveResult.FiftyMovesRule;
+        
+        if (ChessGame.IsCheckmated(Player.White) || ChessGame.IsCheckmated(Player.Black))
+            return MoveResult.Checkmate;
+        
+        if (ChessGame.IsStalemated(Player.White) || ChessGame.IsStalemated(Player.Black))
+            return MoveResult.Stalemate;
         
         DoIncrement(isWhiteTurn);
-        return MoveResult.Ok();
+        return MoveResult.Success;
     }
 
     public string GetPgn()
