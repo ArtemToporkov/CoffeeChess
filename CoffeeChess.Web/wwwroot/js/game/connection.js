@@ -1,6 +1,6 @@
 import { GameManager } from "./managers/GameManager.js";
 import { ChatManager } from "./managers/ChatManager.js";
-import { loadUi, receiveDrawOffer, turnButtonsBack, updateGameResult } from "./ui.js";
+import { loadUi, receiveDrawOffer, turnButtonsBack, updateGameResult, turnOffDrawResignInfo } from "./ui.js";
 import { GameActionType } from "./GameActionType.js";
 
 $(document).ready(() => {
@@ -49,6 +49,8 @@ $(document).ready(() => {
     });
     
     connection.on("UpdateGameResult", payload => {
+        gameManager.endGame();
+        turnOffDrawResignInfo();
         updateGameResult(payload.result, payload.message, payload.oldRating, payload.newRating);
     });
     

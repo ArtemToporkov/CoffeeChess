@@ -4,9 +4,10 @@ import { TimersManager } from "./TimersManager.js";
 export class GameManager {
     board;
     isWhite;
+    #timersManager;
+    #isGameOver;
     #shouldReturnToLive;
     #historyManager;
-    #timersManager;
     #game;
     #gameId;
     #connection;
@@ -26,6 +27,7 @@ export class GameManager {
         
         this.#shouldReturnToLive = false;
         this.#isWhiteTurn = true;
+        this.#isGameOver = false;
     }
     
     updateGameState(pgn, newWhiteMillisecondsLeft, newBlackMillisecondsLeft) {
@@ -45,6 +47,11 @@ export class GameManager {
         this.#historyManager.resetHistoryEvents();
     }
     
+    endGame() {
+        this.#isGameOver = true;
+        this.#timersManager.stop();
+    }
+    
     #isMyTurn() {
         return (this.isWhite && this.#isWhiteTurn) 
             || (!this.isWhite && !this.#isWhiteTurn)
@@ -58,6 +65,9 @@ export class GameManager {
         }
 
         const onDrop = (source, target) => {
+            if (this.#isGameOver)
+                return 'snapback';
+            
             if (this.#historyManager.currentPly !== this.#game.history().length) {
                 this.#shouldReturnToLive = true;
                 return;
@@ -71,7 +81,7 @@ export class GameManager {
 
             if (move === null)
                 return 'snapback';
-
+            
             this.#connection.invoke("MakeMove", this.#gameId, move.from, move.to, move.promotion);
         }
 

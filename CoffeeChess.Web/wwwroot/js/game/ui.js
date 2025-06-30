@@ -34,6 +34,10 @@ export function turnButtonsBack() {
     $('#drawOfferButton').css({});
 }
 
+export function turnOffDrawResignInfo() {
+    $('.resign-draw-info').css('display', 'none');
+}
+
 export function updateGameResult(result, message, oldRating, newRating) {
     const [panelColorClass, fontButtonsColorClass] = result === GameResultForPlayer.Lost 
         ? ['dark', 'milk'] 
