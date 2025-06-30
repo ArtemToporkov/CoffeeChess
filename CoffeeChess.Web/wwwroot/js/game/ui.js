@@ -44,9 +44,7 @@ export function updateGameResult(result, message, oldRating, newRating) {
         .css('display', 'flex')
         .addClass(panelColorClass);
     $('#resultTitle').text(
-        result === GameResultForPlayer.Draw
-            ? "Draw."
-            : "You win!"
+        ['You win!', 'You lose...', 'Draw.'][result]
     ).addClass(fontButtonsColorClass);
     $('#resultInfo')
         .text(message)
