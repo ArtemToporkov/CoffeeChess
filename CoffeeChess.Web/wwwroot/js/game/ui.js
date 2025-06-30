@@ -34,8 +34,7 @@ export function turnButtonsBack() {
     $('#drawOfferButton').css({});
 }
 
-export function updateGameResult(result, message) {
-    console.log(result);
+export function updateGameResult(result, message, oldRating, newRating) {
     switch (result) {
         case GameResultForPlayer.Draw:
         case GameResultForPlayer.Won:
@@ -43,7 +42,7 @@ export function updateGameResult(result, message) {
             $('#milkResultPanel').css('display', 'flex');
             $('#darkResultTitle').text(
                 result === GameResultForPlayer.Draw 
-                    ? "Draw" 
+                    ? "Draw." 
                     : "You win!"
             );
             $('#darkResultInfo').text(message);
@@ -55,6 +54,47 @@ export function updateGameResult(result, message) {
             $('#milkResultInfo').text(message);
             break;
     }
+    
+    playRatingsChangeAnimation(oldRating, newRating);
+}
+
+function playRatingsChangeAnimation(oldRating, newRating) {
+    const $oldRating = $('#oldRating');
+    const $newRating = $('#newRating');
+    const $ratingDelta = $('#ratingDelta');
+
+    $oldRating.text(oldRating);
+    const delta = newRating - oldRating;
+    $ratingDelta.text(delta < 0 ? delta : `+${delta}`)
+    const delay = 400;
+    
+    setTimeout(() => {
+       $oldRating.addClass('show'); 
+    }, delay);
+
+    setTimeout(() => {
+        $oldRating.addClass('strike');
+    }, delay * 2);
+
+    setTimeout(() => {
+        $ratingDelta.addClass('show');
+    }, delay * 3);
+
+    setTimeout(() => {
+        $newRating.addClass('show');
+        let current = oldRating;
+        const duration = 800;
+        const steps = duration / 16;
+        const step = (newRating - oldRating) / steps;
+        const timer = setInterval(() => {
+            current += step;
+            if ((step > 0 && current >= newRating) || (step < 0 && current <= newRating)) {
+                current = newRating;
+                clearInterval(timer);
+            }
+            $newRating.text(Math.round(current));
+        }, 16);
+    }, delay * 4);
 }
 
 function bindEventsToResignButton(connection, gameId) {

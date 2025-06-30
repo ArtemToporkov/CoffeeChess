@@ -100,25 +100,28 @@ public class GameHub(IGameManagerService gameManager, UserManager<UserModel> use
                 await Clients.User(clientToSendTo.Id).SendAsync("PerformGameAction", actionPayload);
                 break;
             case GameActionType.Resign:
-                await SendGameResultAfterResignation(user.UserName!, user.Id, clientToSendTo.Id);
+                await SendGameResultAfterResignation(user, clientToSendTo);
                 break;
         }
     }
 
-    private async Task SendGameResultAfterResignation(
-        string resignedPlayerUserName, string resignedPlayerId, string winnerId)
+    private async Task SendGameResultAfterResignation(UserModel loser, PlayerInfoModel winner)
     {
-        var resignedPayload = new GameResultPayloadModel
+        var loserPayload = new GameResultPayloadModel
         {
             Result = GameResultForPlayer.Lost,
-            Message = "due to resignation."
+            Message = "due to resignation.",
+            OldRating = loser.Rating,
+            NewRating = loser.Rating - 8
         };
         var winnerPayload = new GameResultPayloadModel
         {
             Result = GameResultForPlayer.Won,
-            Message = $"{resignedPlayerUserName} resigns."
+            Message = $"{loser.UserName} resigns.",
+            OldRating = winner.Rating,
+            NewRating = winner.Rating + 8
         };
-        await Clients.User(resignedPlayerId).SendAsync("UpdateGameResult", resignedPayload);
-        await Clients.User(winnerId).SendAsync("UpdateGameResult", winnerPayload);
+        await Clients.User(loser.Id).SendAsync("UpdateGameResult", loserPayload);
+        await Clients.User(winner.Id).SendAsync("UpdateGameResult", winnerPayload);
     }
 }

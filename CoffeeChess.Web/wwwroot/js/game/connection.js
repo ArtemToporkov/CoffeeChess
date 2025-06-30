@@ -49,8 +49,7 @@ $(document).ready(() => {
     });
     
     connection.on("UpdateGameResult", payload => {
-        console.log("should update");
-        updateGameResult(payload.result, payload.message);
+        updateGameResult(payload.result, payload.message, payload.oldRating, payload.newRating);
     });
     
     connection.start();
