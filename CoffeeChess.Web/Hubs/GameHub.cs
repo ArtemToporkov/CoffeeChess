@@ -10,7 +10,8 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace CoffeeChess.Web.Hubs;
 
-public class GameHub(IGameManagerService gameManager, UserManager<UserModel> userManager) : Hub
+public class GameHub(IGameManagerService gameManager, 
+    UserManager<UserModel> userManager, IRatingService ratingService) : Hub
 {
     private async Task<UserModel> GetUserAsync() 
         => await userManager.GetUserAsync(Context.User!) 
@@ -81,12 +82,13 @@ public class GameHub(IGameManagerService gameManager, UserManager<UserModel> use
                 await SendDrawResult(game.WhitePlayerInfo, game.BlackPlayerInfo, "by stalemate");
                 break;
             case MoveResult.Checkmate:
-                var (loser, winner) = Context.UserIdentifier == game.WhitePlayerInfo.Id
-                    ? (game.BlackPlayerInfo, game.WhitePlayerInfo)
-                    : (game.WhitePlayerInfo, game.BlackPlayerInfo);
+                var result = Context.UserIdentifier == game.WhitePlayerInfo.Id
+                    ? PlayerColor.White
+                    : PlayerColor.Black;
                 await SendWinResult(
-                    loser, 
-                    winner, 
+                    game.WhitePlayerInfo, 
+                    game.BlackPlayerInfo, 
+                    result,
                     "checkmate.",
                     "checkmate.");
                 break;
@@ -121,7 +123,7 @@ public class GameHub(IGameManagerService gameManager, UserManager<UserModel> use
             
             case GameActionType.AcceptDrawOffer:
                 game.ClaimDraw();
-                await SendDrawResult(callerPlayerInfo, receiverPlayerInfo, "by agreement.");
+                await SendDrawResult(game.WhitePlayerInfo, game.BlackPlayerInfo, "by agreement.");
                 break;
             case GameActionType.DeclineDrawOffer:
                 actionPayload = new GameActionPayloadModel
@@ -132,9 +134,13 @@ public class GameHub(IGameManagerService gameManager, UserManager<UserModel> use
                 break;
             case GameActionType.Resign:
                 game.Resign(game.WhitePlayerInfo == callerPlayerInfo ? PlayerColor.White : PlayerColor.Black);
+                var result = callerPlayerInfo == game.WhitePlayerInfo
+                    ? PlayerColor.Black
+                    : PlayerColor.White;
                 await SendWinResult(
-                    callerPlayerInfo, 
-                    receiverPlayerInfo, 
+                    game.WhitePlayerInfo, 
+                    game.BlackPlayerInfo,
+                    result,
                     "due to resignation.",
                     $"{callerPlayerInfo.Name} resigns.");
                 break;
@@ -149,39 +155,50 @@ public class GameHub(IGameManagerService gameManager, UserManager<UserModel> use
             MoveResult.Invalid => "Invalid move."
         };
 
-    private async Task SendDrawResult(PlayerInfoModel first, PlayerInfoModel second, string message) 
-        => await SendGameResult(first, second, 
-            GameResultForPlayer.Draw, GameResultForPlayer.Draw, 
-            message, message, 
-            0, 0);
+    private async Task SendDrawResult(PlayerInfoModel white, PlayerInfoModel black, string message) 
+        => await SendGameResult(white, black, 
+            Result.Draw, 
+            message, message);
 
-    private async Task SendWinResult(PlayerInfoModel loser, PlayerInfoModel winner, 
+    private async Task SendWinResult(PlayerInfoModel white, PlayerInfoModel black, PlayerColor winner,
         string loserMessage, string winnerMessage) 
-        => await SendGameResult(loser, winner,
-            GameResultForPlayer.Lost, GameResultForPlayer.Won,
-            loserMessage, winnerMessage,
-            -8, +8);
+        => await SendGameResult(white, black,
+            winner == PlayerColor.White ? Result.WhiteWins : Result.BlackWins,
+            loserMessage, winnerMessage);
 
-    private async Task SendGameResult(PlayerInfoModel first, PlayerInfoModel second, 
-        GameResultForPlayer resultForFirst, GameResultForPlayer resultForSecond,
-        string messageForFirst, string messageForSecond, 
-        int firstRatingDelta, int secondRatingDelta)
+    private async Task SendGameResult(PlayerInfoModel white, PlayerInfoModel black, 
+        Result result,
+        string messageForWhite, string messageForBlack)
     {
-        var firstPayload = new GameResultPayloadModel
+        var (whitesNewRating, blacksNewRating) = ratingService.CalculateNewRatings(
+            white.Rating, black.Rating, result);
+        var whitePayload = new GameResultPayloadModel
         {
-            Result = resultForFirst,
-            Message = messageForFirst,
-            OldRating = first.Rating,
-            NewRating = first.Rating + firstRatingDelta
+            Result = result switch
+            {
+                Result.WhiteWins => GameResultForPlayer.Won,
+                Result.BlackWins => GameResultForPlayer.Lost,
+                Result.Draw => GameResultForPlayer.Draw,
+                _ => throw new ArgumentException($"[GameHub.SendGameResult]: unexpected argument for {nameof(result)}")
+            },
+            Message = messageForWhite,
+            OldRating = white.Rating,
+            NewRating = whitesNewRating
         };
-        var secondPayload = new GameResultPayloadModel
+        var blackPayload = new GameResultPayloadModel
         {
-            Result = resultForSecond,
-            Message = messageForSecond,
-            OldRating = second.Rating,
-            NewRating = second.Rating + secondRatingDelta
+            Result = result switch
+            {
+                Result.WhiteWins => GameResultForPlayer.Lost,
+                Result.BlackWins => GameResultForPlayer.Won,
+                Result.Draw => GameResultForPlayer.Draw,
+                _ => throw new ArgumentException($"[GameHub.SendGameResult]: unexpected argument for {nameof(result)}")
+            },
+            Message = messageForBlack,
+            OldRating = black.Rating,
+            NewRating = blacksNewRating
         };
-        await Clients.User(first.Id).SendAsync("UpdateGameResult", firstPayload);
-        await Clients.User(second.Id).SendAsync("UpdateGameResult", secondPayload);
+        await Clients.User(white.Id).SendAsync("UpdateGameResult", whitePayload);
+        await Clients.User(black.Id).SendAsync("UpdateGameResult", blackPayload);
     }
 }

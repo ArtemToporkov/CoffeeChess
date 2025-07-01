@@ -25,6 +25,7 @@ builder.Services.AddIdentity<UserModel, IdentityRole>(options =>
 builder.Services.AddControllersWithViews();
 builder.Services.AddSignalR();
 builder.Services.AddSingleton<IGameManagerService, BaseGameManagerService>();
+builder.Services.AddSingleton<IRatingService, EloRatingService>();
 
 var app = builder.Build();
 
