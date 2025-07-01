@@ -48,6 +48,10 @@ $(document).ready(() => {
         }
     });
     
+    connection.on("PerformingGameActionFailed", (errorMessage) => {
+       // TODO: tell client that performing game action is impossible 
+    });
+    
     connection.on("UpdateGameResult", payload => {
         gameManager.endGame();
         turnOffDrawResignInfo();

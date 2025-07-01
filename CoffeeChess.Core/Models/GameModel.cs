@@ -10,11 +10,12 @@ public class GameModel
     public string GameId { get; set; }
     public PlayerInfoModel WhitePlayerInfo { get; set; }
     public PlayerInfoModel BlackPlayerInfo { get; set; }
+    public bool IsOver => ChessGame.GameResult != GameResult.OnGoing;
     public TimeSpan WhiteTimeLeft { get; set; }
     public TimeSpan BlackTimeLeft { get; set; }
     public TimeSpan Increment { get; set; }
     public DateTime LastMoveTime { get; set; } = DateTime.UtcNow;
-    public ChessGame ChessGame { get; set; } = new();
+    private ChessGame ChessGame { get; set; } = new();
     public ConcurrentQueue<ChatMessageModel> ChatMessages { get; } = new();
 
     public MoveResult MakeMove(string playerId, string from, string to, string? promotion)
@@ -66,6 +67,11 @@ public class GameModel
         return pgnBuilder.ToString().Trim();
     }
 
+    public void ClaimDraw() => ChessGame.ClaimDraw();
+
+    public void Resign(PlayerColor player) => ChessGame.Resign(player == PlayerColor.White 
+        ? Player.White : Player.Black);
+    
     private void ReduceTime(bool isWhiteTurn)
     {
         var deltaTime = DateTime.UtcNow - LastMoveTime;
