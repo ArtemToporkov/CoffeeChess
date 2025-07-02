@@ -9,8 +9,8 @@ public class GameRatingsCalculatedPersistenceHandler(UserManager<UserModel> user
 {
     public async Task Handle(GameResultCalculatedNotification notification, CancellationToken cancellationToken)
     {
-        await UpdateRating(notification.Game.WhitePlayerInfo.Id, notification.GameResultPayloadForWhite.NewRating);
-        await UpdateRating(notification.Game.BlackPlayerInfo.Id, notification.GameResultPayloadForBlack.NewRating);
+        await UpdateRating(notification.WhitePlayerInfo.Id, notification.GameResultPayloadForWhite.NewRating);
+        await UpdateRating(notification.BlackPlayerInfo.Id, notification.GameResultPayloadForBlack.NewRating);
     }
 
     private async Task UpdateRating(string userId, int? newRating)

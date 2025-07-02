@@ -6,7 +6,8 @@ namespace CoffeeChess.Web.Notifications;
 
 public class GameResultCalculatedNotification : INotification
 {
-    public GameModel Game { get; init; }
+    public PlayerInfoModel WhitePlayerInfo { get; init; }
+    public PlayerInfoModel BlackPlayerInfo { get; init; }
     public GameResultPayloadModel GameResultPayloadForWhite { get; init; }
     public GameResultPayloadModel GameResultPayloadForBlack { get; init; }
 }

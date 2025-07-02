@@ -15,9 +15,7 @@ public class GameCalculationHandler(IMediator mediator, IRatingService ratingSer
         var (messageForWhite, messageForBlack) = notification.Winner == PlayerColor.White
             ? (notification.WinReason, notification.LoseReason)
             : (notification.LoseReason, notification.WinReason);
-        var gameResultCalculatedNotification = CalculateGameResult(
-            notification.Game,
-            notification.Game.WhitePlayerInfo, notification.Game.BlackPlayerInfo,
+        var gameResultCalculatedNotification = CalculateGameResult(notification.WhitePlayerInfo, notification.BlackPlayerInfo,
             notification.Winner == PlayerColor.White ? Result.WhiteWins : Result.BlackWins,
             messageForWhite, messageForBlack);
         await mediator.Publish(gameResultCalculatedNotification, cancellationToken);
@@ -25,16 +23,13 @@ public class GameCalculationHandler(IMediator mediator, IRatingService ratingSer
 
     public async Task Handle(GameDrawnNotification notification, CancellationToken cancellationToken)
     {
-        var gameResultCalculatedNotification = CalculateGameResult(
-            notification.Game,
-            notification.Game.WhitePlayerInfo, notification.Game.BlackPlayerInfo,
+        var gameResultCalculatedNotification = CalculateGameResult(notification.WhitePlayerInfo, notification.BlackPlayerInfo,
             Result.Draw,
             notification.DrawReason, notification.DrawReason);
         await mediator.Publish(gameResultCalculatedNotification, cancellationToken);
     }
 
-    private GameResultCalculatedNotification CalculateGameResult(GameModel game, 
-        PlayerInfoModel white, PlayerInfoModel black, 
+    private GameResultCalculatedNotification CalculateGameResult(PlayerInfoModel white, PlayerInfoModel black, 
         Result result, 
         string messageForWhite, string messageForBlack)
     {
@@ -68,7 +63,8 @@ public class GameCalculationHandler(IMediator mediator, IRatingService ratingSer
         };
         return new GameResultCalculatedNotification
         {
-            Game = game,
+            WhitePlayerInfo = white,
+            BlackPlayerInfo = black,
             GameResultPayloadForWhite = whitePayload,
             GameResultPayloadForBlack = blackPayload
         };

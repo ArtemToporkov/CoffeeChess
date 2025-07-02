@@ -75,21 +75,19 @@ public class GameHub(IGameManagerService gameManager,
                 await Clients.Caller.SendAsync("MoveFailed", GetMessageByMoveResult(moveResult));
                 break;
             case MoveResult.ThreeFold:
-                await SendDrawResult(game, game.WhitePlayerInfo, game.BlackPlayerInfo, "by threefold repetition.");
+                await PublishDrawResult(game.WhitePlayerInfo, game.BlackPlayerInfo, "by threefold repetition.");
                 break;
             case MoveResult.FiftyMovesRule:
-                await SendDrawResult(game, game.WhitePlayerInfo, game.BlackPlayerInfo, "by 50-move rule.");
+                await PublishDrawResult(game.WhitePlayerInfo, game.BlackPlayerInfo, "by 50-move rule.");
                 break;
             case MoveResult.Stalemate:
-                await SendDrawResult(game, game.WhitePlayerInfo, game.BlackPlayerInfo, "by stalemate");
+                await PublishDrawResult(game.WhitePlayerInfo, game.BlackPlayerInfo, "by stalemate");
                 break;
             case MoveResult.Checkmate:
                 var result = Context.UserIdentifier == game.WhitePlayerInfo.Id
                     ? PlayerColor.White
                     : PlayerColor.Black;
-                await SendWinResult(game,
-                    game.WhitePlayerInfo, 
-                    game.BlackPlayerInfo, 
+                await PublishWinResult(game.WhitePlayerInfo, game.BlackPlayerInfo, 
                     result,
                     "checkmate.",
                     "checkmate.");
@@ -125,7 +123,7 @@ public class GameHub(IGameManagerService gameManager,
             
             case GameActionType.AcceptDrawOffer:
                 game.ClaimDraw();
-                await SendDrawResult(game, game.WhitePlayerInfo, game.BlackPlayerInfo, "by agreement.");
+                await PublishDrawResult(game.WhitePlayerInfo, game.BlackPlayerInfo, "by agreement.");
                 break;
             case GameActionType.DeclineDrawOffer:
                 actionPayload = new GameActionPayloadModel
@@ -139,9 +137,7 @@ public class GameHub(IGameManagerService gameManager,
                 var result = callerPlayerInfo == game.WhitePlayerInfo
                     ? PlayerColor.Black
                     : PlayerColor.White;
-                await SendWinResult(game,
-                    game.WhitePlayerInfo, 
-                    game.BlackPlayerInfo,
+                await PublishWinResult(game.WhitePlayerInfo, game.BlackPlayerInfo,
                     result,
                     "due to resignation.",
                     $"{callerPlayerInfo.Name} resigns.");
@@ -157,18 +153,18 @@ public class GameHub(IGameManagerService gameManager,
             MoveResult.Invalid => "Invalid move."
         };
 
-    private async Task SendDrawResult(GameModel game, PlayerInfoModel white, PlayerInfoModel black, string message) 
-        => await SendGameResult(game, white, black, 
+    private async Task PublishDrawResult(PlayerInfoModel white, PlayerInfoModel black, string message) 
+        => await PublishGameResult(white, black,
             Result.Draw, 
             message, message);
 
-    private async Task SendWinResult(GameModel game, PlayerInfoModel white, PlayerInfoModel black, PlayerColor winner,
+    private async Task PublishWinResult(PlayerInfoModel white, PlayerInfoModel black, PlayerColor winner,
         string loserMessage, string winnerMessage) 
-        => await SendGameResult(game, white, black,
+        => await PublishGameResult(white, black,
             winner == PlayerColor.White ? Result.WhiteWins : Result.BlackWins,
             loserMessage, winnerMessage);
 
-    private async Task SendGameResult(GameModel game, PlayerInfoModel white, PlayerInfoModel black, 
+    private async Task PublishGameResult(PlayerInfoModel white, PlayerInfoModel black, 
         Result result,
         string messageForWhite, string messageForBlack)
     {
@@ -180,7 +176,8 @@ public class GameHub(IGameManagerService gameManager,
                 : (messageForBlack, messageForWhite);
             await mediator.Publish(new GameEndedNotification
                 {
-                    Game = game,
+                    WhitePlayerInfo = white,
+                    BlackPlayerInfo = black,
                     Winner = winner,
                     WinReason = winnerMessage,
                     LoseReason = loserMessage
@@ -190,7 +187,8 @@ public class GameHub(IGameManagerService gameManager,
         {
             await mediator.Publish(new GameDrawnNotification
             {
-                Game = game,
+                WhitePlayerInfo = white,
+                BlackPlayerInfo = black,
                 DrawReason = messageForWhite
             });
         }
