@@ -7,7 +7,7 @@ using MediatR;
 
 namespace CoffeeChess.Web.Handlers;
 
-public class GameCalculationHandler(IMediator mediator, IRatingService ratingService)
+public class CalculateGameResultHandler(IMediator mediator, IRatingService ratingService)
     : INotificationHandler<GameEndedNotification>, INotificationHandler<GameDrawnNotification>
 {
     public async Task Handle(GameEndedNotification notification, CancellationToken cancellationToken)

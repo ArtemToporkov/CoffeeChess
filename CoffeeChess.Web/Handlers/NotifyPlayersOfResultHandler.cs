@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace CoffeeChess.Web.Handlers;
 
-public class GameResultCalculatedNotificationHandler(IHubContext<GameHub> hubContext) : INotificationHandler<GameResultCalculatedNotification>
+public class NotifyPlayersOfResultHandler(IHubContext<GameHub> hubContext) : INotificationHandler<GameResultCalculatedNotification>
 {
     public async Task Handle(GameResultCalculatedNotification notification, CancellationToken cancellationToken)
     {

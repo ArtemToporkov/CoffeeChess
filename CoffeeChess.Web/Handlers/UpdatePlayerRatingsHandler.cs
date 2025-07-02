@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace CoffeeChess.Web.Handlers;
 
-public class GameRatingsCalculatedPersistenceHandler(UserManager<UserModel> userManager) : INotificationHandler<GameResultCalculatedNotification>
+public class UpdatePlayerRatingsHandler(UserManager<UserModel> userManager) : INotificationHandler<GameResultCalculatedNotification>
 {
     public async Task Handle(GameResultCalculatedNotification notification, CancellationToken cancellationToken)
     {
