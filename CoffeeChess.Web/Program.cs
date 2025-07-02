@@ -22,6 +22,9 @@ builder.Services.AddIdentity<UserModel, IdentityRole>(options =>
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
 
+builder.Services.AddMediatR(config => 
+    config.RegisterServicesFromAssembly(typeof(Program).Assembly));
+
 builder.Services.AddControllersWithViews();
 builder.Services.AddSignalR();
 builder.Services.AddSingleton<IGameManagerService, BaseGameManagerService>();
