@@ -7,28 +7,19 @@ public class EloRatingService : IRatingService
 {
     private static int KFactor { get; set; } = 15;
 
-    public (int NewWhiteRating, int NewBlackRating) CalculateNewRatings(
-        int whiteRating, int blackRating, Result result)
+    public (int NewFirstRating, int NewSecondRating) CalculateNewRatingsAfterDraw(int firstRating, int secondRating)
+        => CalculateNewRatings(firstRating, secondRating, 0.5);
+    
+    public (int NewWinnerRating, int NewLoserRating) CalculateNewRatingsAfterWin(int winnerRating, int loserRating)
+        => CalculateNewRatings(winnerRating, loserRating, 1.0);
+    
+    private static (int NewFirstRating, int NewSecondRating) CalculateNewRatings(int firstRating, int secondRating, 
+        double firstPoints)
     {
-        var whitePoints = result switch
-        {
-            Result.WhiteWins => 1.0,
-            Result.BlackWins => 0.0,
-            Result.Draw => 0.5,
-            _ => throw new ArgumentException($"[EloRatingService.CalculateNewRatings]: " +
-                                             $"unexpected argument for {nameof(result)}.")
-        };
-        var blackPoints = 1 - whitePoints;
-        return (GetRatingForPlayer(whiteRating, blackRating, whitePoints),
-            GetRatingForPlayer(blackRating, whiteRating, blackPoints));
-    }
-
-    private static int GetRatingForPlayer(int playersRating, int opponentsRating, double playersPoints)
-    {
-        var expectedPoints = 1.0 / (1 + Math.Pow(10, ((double)opponentsRating - playersRating) / 400));
-        var rawDelta = KFactor * (playersPoints - expectedPoints);
+        var expectedPoints = 1.0 / (1 + Math.Pow(10, ((double)secondRating - firstRating) / 400));
+        var rawDelta = KFactor * (firstPoints - expectedPoints);
         var roundedDelta = (int)Math.Round(rawDelta, MidpointRounding.AwayFromZero);
-        
-        return playersRating + roundedDelta;
+
+        return (firstRating + roundedDelta, secondRating - roundedDelta);
     }
 }

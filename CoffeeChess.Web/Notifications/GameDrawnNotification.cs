@@ -5,8 +5,8 @@ namespace CoffeeChess.Web.Notifications;
 
 public class GameDrawnNotification : INotification
 {
-    public PlayerInfoModel WhitePlayerInfo { get; init; }
-    public PlayerInfoModel BlackPlayerInfo { get; init; }
+    public PlayerInfoModel FirstPlayer { get; init; }
+    public PlayerInfoModel SecondPlayer { get; init; }
     
     public string DrawReason { get; init; }
 }

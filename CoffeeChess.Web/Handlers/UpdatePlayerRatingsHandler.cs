@@ -9,8 +9,8 @@ public class UpdatePlayerRatingsHandler(UserManager<UserModel> userManager) : IN
 {
     public async Task Handle(GameResultCalculatedNotification notification, CancellationToken cancellationToken)
     {
-        await UpdateRating(notification.WhitePlayerInfo.Id, notification.GameResultPayloadForWhite.NewRating);
-        await UpdateRating(notification.BlackPlayerInfo.Id, notification.GameResultPayloadForBlack.NewRating);
+        await UpdateRating(notification.FirstPlayer.Id, notification.GameResultPayloadForFirst.NewRating);
+        await UpdateRating(notification.SecondPlayer.Id, notification.GameResultPayloadForSecond.NewRating);
     }
 
     private async Task UpdateRating(string userId, int? newRating)

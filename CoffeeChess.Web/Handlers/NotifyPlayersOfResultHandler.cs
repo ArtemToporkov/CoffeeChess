@@ -9,9 +9,9 @@ public class NotifyPlayersOfResultHandler(IHubContext<GameHub> hubContext) : INo
 {
     public async Task Handle(GameResultCalculatedNotification notification, CancellationToken cancellationToken)
     {
-        await hubContext.Clients.User(notification.WhitePlayerInfo.Id)
-            .SendAsync("UpdateGameResult", notification.GameResultPayloadForWhite, cancellationToken);
-        await hubContext.Clients.User(notification.BlackPlayerInfo.Id)
-            .SendAsync("UpdateGameResult", notification.GameResultPayloadForBlack, cancellationToken);
+        await hubContext.Clients.User(notification.FirstPlayer.Id)
+            .SendAsync("UpdateGameResult", notification.GameResultPayloadForFirst, cancellationToken);
+        await hubContext.Clients.User(notification.SecondPlayer.Id)
+            .SendAsync("UpdateGameResult", notification.GameResultPayloadForSecond, cancellationToken);
     }
 }

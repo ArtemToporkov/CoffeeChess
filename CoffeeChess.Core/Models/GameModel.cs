@@ -71,6 +71,18 @@ public class GameModel
 
     public void Resign(PlayerColor player) => ChessGame.Resign(player == PlayerColor.White 
         ? Player.White : Player.Black);
+
+    public (PlayerInfoModel? Winner, PlayerInfoModel? Loser) GetWinnerAndLoser()
+    {
+        if (!ChessGame.IsWinner(Player.White) && !ChessGame.IsWinner(Player.Black))
+        {
+            return (null, null);
+        }
+        var (winner, loser) = ChessGame.IsWinner(Player.White) 
+            ? (WhitePlayerInfo, BlackPlayerInfo)
+            : (BlackPlayerInfo, WhitePlayerInfo);
+        return (winner, loser);
+    }
     
     private void ReduceTime(bool isWhiteTurn)
     {

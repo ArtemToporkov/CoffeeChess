@@ -84,11 +84,11 @@ public class GameHub(IGameManagerService gameManager,
                 await PublishDrawResult(game.WhitePlayerInfo, game.BlackPlayerInfo, "by stalemate");
                 break;
             case MoveResult.Checkmate:
-                var result = Context.UserIdentifier == game.WhitePlayerInfo.Id
-                    ? PlayerColor.White
-                    : PlayerColor.Black;
-                await PublishWinResult(game.WhitePlayerInfo, game.BlackPlayerInfo, 
-                    result,
+                var (winner, loser) = game.GetWinnerAndLoser();
+                if (winner is null || loser is null)
+                    throw new InvalidOperationException(
+                        "[GameHub.MakeMove]: game.GetWinnerAndLoser() does not think the game is ended.");
+                await PublishWinResult(winner, loser,
                     "checkmate.",
                     "checkmate.");
                 break;
@@ -134,13 +134,13 @@ public class GameHub(IGameManagerService gameManager,
                 break;
             case GameActionType.Resign:
                 game.Resign(game.WhitePlayerInfo == callerPlayerInfo ? PlayerColor.White : PlayerColor.Black);
-                var result = callerPlayerInfo == game.WhitePlayerInfo
-                    ? PlayerColor.Black
-                    : PlayerColor.White;
-                await PublishWinResult(game.WhitePlayerInfo, game.BlackPlayerInfo,
-                    result,
-                    "due to resignation.",
-                    $"{callerPlayerInfo.Name} resigns.");
+                var (winner, loser) = game.GetWinnerAndLoser();
+                if (winner is null || loser is null)
+                    throw new InvalidOperationException(
+                        "[GameHub.MakeMove]: game.GetWinnerAndLoser() does not think the game is ended.");
+                await PublishWinResult(winner!, loser!,
+                    $"{callerPlayerInfo.Name} resigns.",
+                    "due to resignation.");
                 break;
         }
     }
@@ -153,44 +153,25 @@ public class GameHub(IGameManagerService gameManager,
             MoveResult.Invalid => "Invalid move."
         };
 
-    private async Task PublishDrawResult(PlayerInfoModel white, PlayerInfoModel black, string message) 
-        => await PublishGameResult(white, black,
-            Result.Draw, 
-            message, message);
-
-    private async Task PublishWinResult(PlayerInfoModel white, PlayerInfoModel black, PlayerColor winner,
-        string loserMessage, string winnerMessage) 
-        => await PublishGameResult(white, black,
-            winner == PlayerColor.White ? Result.WhiteWins : Result.BlackWins,
-            loserMessage, winnerMessage);
-
-    private async Task PublishGameResult(PlayerInfoModel white, PlayerInfoModel black, 
-        Result result,
-        string messageForWhite, string messageForBlack)
+    private async Task PublishDrawResult(PlayerInfoModel first, PlayerInfoModel second, string reason)
     {
-        if (result is Result.WhiteWins or Result.BlackWins)
+        await mediator.Publish(new GameDrawnNotification
         {
-            var winner = result == Result.WhiteWins ? PlayerColor.White : PlayerColor.Black;
-            var (winnerMessage, loserMessage) = winner == PlayerColor.White 
-                ? (messageForWhite, messageForBlack) 
-                : (messageForBlack, messageForWhite);
-            await mediator.Publish(new GameEndedNotification
-                {
-                    WhitePlayerInfo = white,
-                    BlackPlayerInfo = black,
-                    Winner = winner,
-                    WinReason = winnerMessage,
-                    LoseReason = loserMessage
-                });
-        }
-        else
+            FirstPlayer = first,
+            SecondPlayer = second,
+            DrawReason = reason
+        });
+    }
+
+    private async Task PublishWinResult(PlayerInfoModel winner, PlayerInfoModel loser,
+        string winReason, string loseReason)
+    {
+        await mediator.Publish(new GameEndedNotification
         {
-            await mediator.Publish(new GameDrawnNotification
-            {
-                WhitePlayerInfo = white,
-                BlackPlayerInfo = black,
-                DrawReason = messageForWhite
-            });
-        }
+            Winner = winner,
+            Loser = loser,
+            WinReason = winReason,
+            LoseReason = loseReason
+        });
     }
 }

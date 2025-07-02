@@ -8,65 +8,48 @@ using MediatR;
 namespace CoffeeChess.Web.Handlers;
 
 public class CalculateGameResultHandler(IMediator mediator, IRatingService ratingService)
-    : INotificationHandler<GameEndedNotification>, INotificationHandler<GameDrawnNotification>
+    : INotificationHandler<GameDrawnNotification>, INotificationHandler<GameEndedNotification>
 {
-    public async Task Handle(GameEndedNotification notification, CancellationToken cancellationToken)
-    {
-        var (messageForWhite, messageForBlack) = notification.Winner == PlayerColor.White
-            ? (notification.WinReason, notification.LoseReason)
-            : (notification.LoseReason, notification.WinReason);
-        var gameResultCalculatedNotification = CalculateGameResult(notification.WhitePlayerInfo, notification.BlackPlayerInfo,
-            notification.Winner == PlayerColor.White ? Result.WhiteWins : Result.BlackWins,
-            messageForWhite, messageForBlack);
-        await mediator.Publish(gameResultCalculatedNotification, cancellationToken);
-    }
-
     public async Task Handle(GameDrawnNotification notification, CancellationToken cancellationToken)
     {
-        var gameResultCalculatedNotification = CalculateGameResult(notification.WhitePlayerInfo, notification.BlackPlayerInfo,
-            Result.Draw,
-            notification.DrawReason, notification.DrawReason);
-        await mediator.Publish(gameResultCalculatedNotification, cancellationToken);
+        var (newFirstRating, newSecondRating) = ratingService.CalculateNewRatingsAfterDraw(
+            notification.FirstPlayer.Rating, notification.SecondPlayer.Rating);
+        await mediator.Publish(CalculateGameResult(
+                notification.FirstPlayer, notification.SecondPlayer,
+                newFirstRating, newSecondRating,
+                GameResultForPlayer.Draw, GameResultForPlayer.Draw,
+                notification.DrawReason, notification.DrawReason),
+            cancellationToken);
+    }
+    
+    public async Task Handle(GameEndedNotification notification, CancellationToken cancellationToken)
+    {
+        var (newWinnerRating, newLoserRating) = ratingService.CalculateNewRatingsAfterWin(
+            notification.Winner.Rating, notification.Loser.Rating);
+        await mediator.Publish(CalculateGameResult(
+            notification.Winner, notification.Loser,
+            newWinnerRating, newLoserRating,
+            GameResultForPlayer.Won, GameResultForPlayer.Lost,
+            notification.WinReason, notification.LoseReason), 
+            cancellationToken);
     }
 
-    private GameResultCalculatedNotification CalculateGameResult(PlayerInfoModel white, PlayerInfoModel black, 
-        Result result, 
-        string messageForWhite, string messageForBlack)
+    private GameResultCalculatedNotification CalculateGameResult(
+        PlayerInfoModel firstPlayer, PlayerInfoModel secondPlayer, 
+        int newFirstRating, int newSecondRating,
+        GameResultForPlayer resultForFirstPlayer, GameResultForPlayer resultForSecondPlayer, 
+        string messageForFirstPlayer, string messageForSecondPlayer)
     {
-        var (whitesNewRating, blacksNewRating) = ratingService.CalculateNewRatings(
-            white.Rating, black.Rating, result);
-        var whitePayload = new GameResultPayloadModel
-        {
-            Result = result switch
-            {
-                Result.WhiteWins => GameResultForPlayer.Won,
-                Result.BlackWins => GameResultForPlayer.Lost,
-                Result.Draw => GameResultForPlayer.Draw,
-                _ => throw new ArgumentException($"[GameHub.SendGameResult]: unexpected argument for {nameof(result)}")
-            },
-            Message = messageForWhite,
-            OldRating = white.Rating,
-            NewRating = whitesNewRating
-        };
-        var blackPayload = new GameResultPayloadModel
-        {
-            Result = result switch
-            {
-                Result.WhiteWins => GameResultForPlayer.Lost,
-                Result.BlackWins => GameResultForPlayer.Won,
-                Result.Draw => GameResultForPlayer.Draw,
-                _ => throw new ArgumentException($"[GameHub.SendGameResult]: unexpected argument for {nameof(result)}")
-            },
-            Message = messageForBlack,
-            OldRating = black.Rating,
-            NewRating = blacksNewRating
-        };
+        var firstPayLoad = new GameResultPayloadModel(resultForFirstPlayer, messageForFirstPlayer,
+            firstPlayer.Rating, newFirstRating);
+        var secondPayload = new GameResultPayloadModel(resultForSecondPlayer, messageForSecondPlayer,
+            secondPlayer.Rating, newSecondRating);
         return new GameResultCalculatedNotification
         {
-            WhitePlayerInfo = white,
-            BlackPlayerInfo = black,
-            GameResultPayloadForWhite = whitePayload,
-            GameResultPayloadForBlack = blackPayload
+            FirstPlayer = firstPlayer,
+            SecondPlayer = secondPlayer,
+            GameResultPayloadForFirst = firstPayLoad,
+            GameResultPayloadForSecond = secondPayload
         };
     }
 }
