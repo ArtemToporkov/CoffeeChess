@@ -15,11 +15,19 @@
     start() {
         this.#timer = setInterval(() => {
             if (this.#isWhiteTurn) {
-                this.whiteMillisecondsLeft -= 1000;
+                this.whiteMillisecondsLeft = Math.max(
+                    this.whiteMillisecondsLeft - 1000, 0
+                );
             } else {
-                this.blackMillisecondsLeft -= 1000;
+                this.blackMillisecondsLeft = Math.max(
+                    this.blackMillisecondsLeft - 1000, 0
+                );
             }
             this.updateTimers();
+            if (this.whiteMillisecondsLeft === 0 || this.blackMillisecondsLeft === 0) {
+                clearInterval(this.#timer);
+                this.#timer = null;
+            }
         }, 1000);
     }
     
