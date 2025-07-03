@@ -25,14 +25,14 @@
             }
             this.updateTimers();
             if (this.whiteMillisecondsLeft === 0 || this.blackMillisecondsLeft === 0) {
-                clearInterval(this.#timer);
-                this.#timer = null;
+                this.stop();
             }
         }, 1000);
     }
     
     stop() {
         clearInterval(this.#timer);
+        this.#timer = null;
     }
 
     updateTimers(whiteMillisecondsLeft = null, blackMillisecondsLeft = null, isWhiteTurn = null) {
