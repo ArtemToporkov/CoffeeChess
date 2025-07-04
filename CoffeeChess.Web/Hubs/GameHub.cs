@@ -15,12 +15,11 @@ namespace CoffeeChess.Web.Hubs;
 public class GameHub(
     IGameManagerService gameManager,
     UserManager<UserModel> userManager,
-    IRatingService ratingService,
     IMediator mediator) : Hub
 {
     private async Task<UserModel> GetUserAsync()
         => await userManager.GetUserAsync(Context.User!)
-           ?? throw new HubException("[GameHub.GetUserAsync]: User not found.");
+           ?? throw new HubException($"[{nameof(GameHub)}.{nameof(GetUserAsync)}]: User not found.");
 
     public async Task CreateOrJoinGame(GameSettingsModel settings)
     {
@@ -78,19 +77,17 @@ public class GameHub(
                 await Clients.Caller.SendAsync("MoveFailed", GetMessageByMoveResult(moveResult));
                 break;
             case MoveResult.ThreeFold:
-                await PublishDrawResult(game.WhitePlayerInfo, game.BlackPlayerInfo, "by threefold repetition.");
-                break;
             case MoveResult.FiftyMovesRule:
-                await PublishDrawResult(game.WhitePlayerInfo, game.BlackPlayerInfo, "by 50-move rule.");
-                break;
             case MoveResult.Stalemate:
-                await PublishDrawResult(game.WhitePlayerInfo, game.BlackPlayerInfo, "by stalemate");
+                await PublishDrawResult(game.WhitePlayerInfo, game.BlackPlayerInfo, 
+                    GetMessageByMoveResult(moveResult));
                 break;
             case MoveResult.Checkmate:
                 var (winner, loser) = game.GetWinnerAndLoser();
                 if (winner is null || loser is null)
                     throw new InvalidOperationException(
-                        "[GameHub.MakeMove]: game.GetWinnerAndLoser() does not think the game is ended.");
+                        $"[{nameof(GameHub)}.{nameof(MakeMove)}]: " +
+                        $"{nameof(game)}.{nameof(game.GetWinnerAndLoser)}() does not think the game is ended.");
                 await PublishWinResult(winner, loser,
                     "checkmate.",
                     "checkmate.");
@@ -163,9 +160,16 @@ public class GameHub(
     private string GetMessageByMoveResult(MoveResult moveResult)
         => moveResult switch
         {
-            MoveResult.NotYourTurn => "Not your turn.",
-            MoveResult.TimeRanOut => "Time is ran out.",
-            MoveResult.Invalid => "Invalid move."
+            MoveResult.NotYourTurn => "not your turn.",
+            MoveResult.TimeRanOut => "time is ran out.",
+            MoveResult.Invalid => "invalid move.",
+            MoveResult.Success => "success.",
+            MoveResult.Checkmate => "checkmate.",
+            MoveResult.ThreeFold => "by threefold repetition.",
+            MoveResult.FiftyMovesRule => "by 50-move rule.",
+            MoveResult.Stalemate => "stalemate.",
+            _ => throw new ArgumentException(
+                $"[{nameof(GameHub)}.{nameof(GetMessageByMoveResult)}]: unexpected MoveResult.")
         };
 
     private async Task PublishDrawResult(PlayerInfoModel first, PlayerInfoModel second, string reason)
