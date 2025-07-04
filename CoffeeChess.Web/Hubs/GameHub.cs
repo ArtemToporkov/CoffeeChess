@@ -96,10 +96,12 @@ public class GameHub(
                     "checkmate.");
                 break;
             case MoveResult.TimeRanOut:
+                await Clients.Caller.SendAsync("MoveFailed", "Sorry, your time is up.");
                 (winner, loser) = game.GetWinnerAndLoser();
                 if (winner is null || loser is null)
                     throw new InvalidOperationException(
-                        "[GameHub.MakeMove]: game.GetWinnerAndLoser() does not think the game is ended.");
+                        $"[{nameof(GameHub)}.{nameof(MakeMove)}]: " +
+                        $"{nameof(game)}.{nameof(game.GetWinnerAndLoser)}() does not think the game is ended.");
                 await PublishWinResult(winner, loser,
                     $"{loser.Name}'s time is up.",
                     $"your time is up.");
@@ -150,7 +152,7 @@ public class GameHub(
                 if (winner is null || loser is null)
                     throw new InvalidOperationException(
                         $"[{nameof(GameHub)}.{nameof(PerformGameAction)}]: " +
-                        $"game.{nameof(game.GetWinnerAndLoser)} does not think the game is ended.");
+                        $"game.{nameof(game.GetWinnerAndLoser)}() does not think the game is ended.");
                 await PublishWinResult(winner, loser,
                     $"{callerPlayerInfo.Name} resigns.",
                     "due to resignation.");

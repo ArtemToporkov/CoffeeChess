@@ -42,6 +42,11 @@ export class GameManager {
         this.#historyManager.resetHistoryEvents();
     }
     
+    undoLastMove() {
+        this.#game.undo();
+        this.board.position(this.#game.fen());
+    }
+    
     endGame() {
         this.#isGameOver = true;
         this.#timersManager.stop();

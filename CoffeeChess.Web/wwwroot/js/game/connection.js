@@ -26,7 +26,8 @@ $(document).ready(() => {
     });
     
     connection.on("MoveFailed", (errorMessage) => {
-        // TODO: undo move, display error message
+        gameManager.undoLastMove();
+        chatManager.addMessageToChat("CoffeeChess", errorMessage);
     });
     
     connection.on("CriticalError", (errorMessage) => {
