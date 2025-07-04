@@ -14,4 +14,6 @@ public interface IGameManagerService
     bool TryAddChatMessage(string gameId, string username, string message);
 
     public bool TryGetGame(string gameId, out GameModel? game);
+    
+    public IEnumerable<GameModel> GetActiveGames();
 }

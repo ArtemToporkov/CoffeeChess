@@ -12,13 +12,16 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace CoffeeChess.Web.Hubs;
 
-public class GameHub(IGameManagerService gameManager, 
-    UserManager<UserModel> userManager, IRatingService ratingService, IMediator mediator) : Hub
+public class GameHub(
+    IGameManagerService gameManager,
+    UserManager<UserModel> userManager,
+    IRatingService ratingService,
+    IMediator mediator) : Hub
 {
-    private async Task<UserModel> GetUserAsync() 
-        => await userManager.GetUserAsync(Context.User!) 
+    private async Task<UserModel> GetUserAsync()
+        => await userManager.GetUserAsync(Context.User!)
            ?? throw new HubException("[GameHub.GetUserAsync]: User not found.");
-    
+
     public async Task CreateOrJoinGame(GameSettingsModel settings)
     {
         var user = await GetUserAsync();
@@ -27,12 +30,12 @@ public class GameHub(IGameManagerService gameManager,
         {
             var game = gameManager.CreateGameBasedOnFoundChallenge(playerInfo, settings, foundChallenge!);
             var totalMillisecondsForOnePlayerLeft = game.WhiteTimeLeft.TotalMilliseconds;
-            
+
             await Clients.User(game.WhitePlayerInfo.Id).SendAsync(
-                "GameStarted", game.GameId, true, game.WhitePlayerInfo, game.BlackPlayerInfo, 
+                "GameStarted", game.GameId, true, game.WhitePlayerInfo, game.BlackPlayerInfo,
                 totalMillisecondsForOnePlayerLeft);
             await Clients.User(game.BlackPlayerInfo.Id).SendAsync(
-                "GameStarted", game.GameId, false, game.WhitePlayerInfo, game.BlackPlayerInfo, 
+                "GameStarted", game.GameId, false, game.WhitePlayerInfo, game.BlackPlayerInfo,
                 totalMillisecondsForOnePlayerLeft);
         }
         else
@@ -40,11 +43,11 @@ public class GameHub(IGameManagerService gameManager,
             gameManager.CreateGameChallenge(playerInfo, settings);
         }
     }
-    
+
     public async Task SendChatMessage(string gameId, string message)
     {
         var user = await GetUserAsync();
-        if (gameManager.TryGetGame(gameId, out var game) && 
+        if (gameManager.TryGetGame(gameId, out var game) &&
             gameManager.TryAddChatMessage(gameId, user.UserName!, message))
         {
             await Clients.Users(game!.WhitePlayerInfo.Id, game.BlackPlayerInfo.Id)
@@ -71,7 +74,7 @@ public class GameHub(IGameManagerService gameManager,
                 await Clients.Users(game.WhitePlayerInfo.Id, game.BlackPlayerInfo.Id).SendAsync(
                     "MakeMove", pgn, game.WhiteTimeLeft.TotalMilliseconds, game.BlackTimeLeft.TotalMilliseconds);
                 break;
-            case MoveResult.Invalid or MoveResult.TimeRanOut or MoveResult.NotYourTurn:
+            case MoveResult.Invalid or MoveResult.NotYourTurn:
                 await Clients.Caller.SendAsync("MoveFailed", GetMessageByMoveResult(moveResult));
                 break;
             case MoveResult.ThreeFold:
@@ -92,6 +95,15 @@ public class GameHub(IGameManagerService gameManager,
                     "checkmate.",
                     "checkmate.");
                 break;
+            case MoveResult.TimeRanOut:
+                (winner, loser) = game.GetWinnerAndLoser();
+                if (winner is null || loser is null)
+                    throw new InvalidOperationException(
+                        "[GameHub.MakeMove]: game.GetWinnerAndLoser() does not think the game is ended.");
+                await PublishWinResult(winner, loser,
+                    $"{loser.Name}'s time is up.",
+                    $"your time is up.");
+                break;
         }
     }
 
@@ -102,10 +114,10 @@ public class GameHub(IGameManagerService gameManager,
             await Clients.Caller.SendAsync("CriticalError", "Game not found");
             return;
         }
-        
+
         if (game!.IsOver)
             await Clients.Caller.SendAsync("PerformingGameActionFailed", "Game is over.");
-        
+
         var user = await GetUserAsync();
         var (callerPlayerInfo, receiverPlayerInfo) = user.Id == game.WhitePlayerInfo.Id
             ? (game.WhitePlayerInfo, game.BlackPlayerInfo)
@@ -120,7 +132,7 @@ public class GameHub(IGameManagerService gameManager,
                 };
                 await Clients.User(receiverPlayerInfo.Id).SendAsync("PerformGameAction", actionPayload);
                 break;
-            
+
             case GameActionType.AcceptDrawOffer:
                 game.ClaimDraw();
                 await PublishDrawResult(game.WhitePlayerInfo, game.BlackPlayerInfo, "by agreement.");
@@ -137,8 +149,9 @@ public class GameHub(IGameManagerService gameManager,
                 var (winner, loser) = game.GetWinnerAndLoser();
                 if (winner is null || loser is null)
                     throw new InvalidOperationException(
-                        "[GameHub.MakeMove]: game.GetWinnerAndLoser() does not think the game is ended.");
-                await PublishWinResult(winner!, loser!,
+                        $"[{nameof(GameHub)}.{nameof(PerformGameAction)}]: " +
+                        $"game.{nameof(game.GetWinnerAndLoser)} does not think the game is ended.");
+                await PublishWinResult(winner, loser,
                     $"{callerPlayerInfo.Name} resigns.",
                     "due to resignation.");
                 break;

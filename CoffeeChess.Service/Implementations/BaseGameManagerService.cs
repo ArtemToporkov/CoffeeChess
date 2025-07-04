@@ -42,15 +42,13 @@ public class BaseGameManagerService : IGameManagerService
         var (whitePlayerInfo, blackPlayerInfo) = connectingPlayerColor == ColorPreference.White
             ? (connectingPlayerInfo, gameChallenge.PlayerInfo)
             : (gameChallenge.PlayerInfo, connectingPlayerInfo);
-        var createdGame = new GameModel
-        {
-            GameId = Guid.NewGuid().ToString("N")[..8],
-            WhitePlayerInfo = whitePlayerInfo,
-            BlackPlayerInfo = blackPlayerInfo,
-            WhiteTimeLeft = TimeSpan.FromMinutes(settings.Minutes),
-            BlackTimeLeft = TimeSpan.FromMinutes(settings.Minutes),
-            Increment = TimeSpan.FromSeconds(settings.Increment)
-        };
+        var createdGame = new GameModel(
+            Guid.NewGuid().ToString("N")[..8],
+            whitePlayerInfo,
+            blackPlayerInfo,
+            TimeSpan.FromMinutes(settings.Minutes),
+            TimeSpan.FromSeconds(settings.Increment)
+        );
         _games.TryAdd(createdGame.GameId, createdGame);
         return createdGame;
     }
@@ -72,6 +70,9 @@ public class BaseGameManagerService : IGameManagerService
         return false;
     }
 
+    public IEnumerable<GameModel> GetActiveGames() => _games.Values
+        .Where(g => !g.IsOver);
+
     private static ColorPreference GetColor(GameSettingsModel settings)
         => settings.ColorPreference switch
         {
@@ -80,6 +81,7 @@ public class BaseGameManagerService : IGameManagerService
             ColorPreference.Any => Random.Next(0, 2) == 0
                 ? ColorPreference.White
                 : ColorPreference.Black,
-            _ => throw new ArgumentException("[BaseGameManageService.GetColor]: Unsupported color preference")
+            _ => throw new ArgumentException($"[{nameof(BaseGameManagerService)}.{nameof(GetColor)}]: " +
+                                             $"Unsupported color preference.")
         };
 }

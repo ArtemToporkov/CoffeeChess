@@ -5,83 +5,104 @@ using CoffeeChess.Core.Enums;
 
 namespace CoffeeChess.Core.Models;
 
-public class GameModel
+public class GameModel(
+    string gameId, 
+    PlayerInfoModel whitePlayerInfo,
+    PlayerInfoModel blackPlayerInfo, 
+    TimeSpan minutesLeftForPlayer,
+    TimeSpan increment)
 {
-    public string GameId { get; set; }
-    public PlayerInfoModel WhitePlayerInfo { get; set; }
-    public PlayerInfoModel BlackPlayerInfo { get; set; }
-    public bool IsOver => ChessGame.GameResult != GameResult.OnGoing;
-    public TimeSpan WhiteTimeLeft { get; set; }
-    public TimeSpan BlackTimeLeft { get; set; }
-    public TimeSpan Increment { get; set; }
+    public string GameId { get; init; } = gameId;
+    public PlayerInfoModel WhitePlayerInfo { get; init; } = whitePlayerInfo;
+    public PlayerInfoModel BlackPlayerInfo { get; init; } = blackPlayerInfo;
+    public bool IsOver => _chessGame.GameResult != GameResult.OnGoing;
+    public TimeSpan WhiteTimeLeft { get; private set; } = minutesLeftForPlayer;
+    public TimeSpan BlackTimeLeft { get; private set; } = minutesLeftForPlayer;
+    public TimeSpan Increment { get; init; } = increment;
     public DateTime LastMoveTime { get; set; } = DateTime.UtcNow;
-    private ChessGame ChessGame { get; set; } = new();
+    public DateTime TimeExpiresAt { get; private set; } = DateTime.UtcNow + minutesLeftForPlayer;
     public ConcurrentQueue<ChatMessageModel> ChatMessages { get; } = new();
+    public bool IsWhiteTurn => _chessGame.CurrentPlayer == Player.White;
+    private readonly ChessGame _chessGame = new();
+    private readonly Lock _lockObject = new();
 
     public MoveResult MakeMove(string playerId, string from, string to, string? promotion)
     {
-        var isWhiteTurn = ChessGame.CurrentPlayer == Player.White;
-        var currentPlayerId = isWhiteTurn ? WhitePlayerInfo.Id : BlackPlayerInfo.Id;
+        var currentPlayerId = IsWhiteTurn ? WhitePlayerInfo.Id : BlackPlayerInfo.Id;
         
         if (playerId != currentPlayerId)
             return MoveResult.NotYourTurn;
         
-        ReduceTime(isWhiteTurn);
-        if ((currentPlayerId == WhitePlayerInfo.Id && WhiteTimeLeft < TimeSpan.Zero) ||
-            (currentPlayerId == BlackPlayerInfo.Id && BlackTimeLeft < TimeSpan.Zero))
+        ReduceTime(IsWhiteTurn);
+        if (DateTime.UtcNow >= TimeExpiresAt)
+        {
+            LoseOnTimeOrThrow();
             return MoveResult.TimeRanOut;
+        }
 
         var promotionChar = promotion?[0];
 
-        var move = new Move(from, to, isWhiteTurn ? Player.White : Player.Black, promotionChar);
-        if (ChessGame.MakeMove(move, false) is MoveType.Invalid)
+        var move = new Move(from, to, IsWhiteTurn ? Player.White : Player.Black, promotionChar);
+        if (_chessGame.MakeMove(move, false) is MoveType.Invalid)
             return MoveResult.Invalid;
 
-        if (ChessGame.ThreeFoldRepeatAndThisCanResultInDraw)
+        if (_chessGame.ThreeFoldRepeatAndThisCanResultInDraw)
             return MoveResult.ThreeFold;
 
-        if (ChessGame.FiftyMovesAndThisCanResultInDraw)
+        if (_chessGame.FiftyMovesAndThisCanResultInDraw)
             return MoveResult.FiftyMovesRule;
         
-        if (ChessGame.IsCheckmated(Player.White) || ChessGame.IsCheckmated(Player.Black))
+        if (_chessGame.IsCheckmated(Player.White) || _chessGame.IsCheckmated(Player.Black))
             return MoveResult.Checkmate;
         
-        if (ChessGame.IsStalemated(Player.White) || ChessGame.IsStalemated(Player.Black))
+        if (_chessGame.IsStalemated(Player.White) || _chessGame.IsStalemated(Player.Black))
             return MoveResult.Stalemate;
         
-        DoIncrement(isWhiteTurn);
+        DoIncrement(IsWhiteTurn);
+        TimeExpiresAt = DateTime.UtcNow + (IsWhiteTurn ? WhiteTimeLeft : BlackTimeLeft);
         return MoveResult.Success;
     }
 
     public string GetPgn()
     {
         var pgnBuilder = new StringBuilder();
-        for (var i = 0; i < ChessGame.Moves.Count; i++)
+        for (var i = 0; i < _chessGame.Moves.Count; i++)
         {
             if (i % 2 == 0)
-                pgnBuilder.Append($"{i / 2 + 1}. {ChessGame.Moves[i].SAN} ");
+                pgnBuilder.Append($"{i / 2 + 1}. {_chessGame.Moves[i].SAN} ");
             else
-                pgnBuilder.Append($"{ChessGame.Moves[i].SAN} ");
+                pgnBuilder.Append($"{_chessGame.Moves[i].SAN} ");
         }
 
         return pgnBuilder.ToString().Trim();
     }
 
-    public void ClaimDraw() => ChessGame.ClaimDraw();
+    public void ClaimDraw() => _chessGame.ClaimDraw();
 
-    public void Resign(PlayerColor player) => ChessGame.Resign(player == PlayerColor.White 
+    public void Resign(PlayerColor player) => _chessGame.Resign(player == PlayerColor.White 
         ? Player.White : Player.Black);
 
     public (PlayerInfoModel? Winner, PlayerInfoModel? Loser) GetWinnerAndLoser()
     {
-        if (!ChessGame.IsWinner(Player.White) && !ChessGame.IsWinner(Player.Black))
-        {
+        if (!_chessGame.IsWinner(Player.White) && !_chessGame.IsWinner(Player.Black))
             return (null, null);
-        }
-        var (winner, loser) = ChessGame.IsWinner(Player.White) 
+        
+        var (winner, loser) = _chessGame.IsWinner(Player.White) 
             ? (WhitePlayerInfo, BlackPlayerInfo)
             : (BlackPlayerInfo, WhitePlayerInfo);
         return (winner, loser);
+    }
+
+    public void LoseOnTimeOrThrow()
+    {
+        lock (_lockObject)
+        {
+            if (IsOver)
+                return;
+            if (DateTime.UtcNow < TimeExpiresAt)
+                throw new InvalidOperationException($"[{nameof(LoseOnTimeOrThrow)}]: time is not up.");
+            Resign(IsWhiteTurn ? PlayerColor.White : PlayerColor.Black);
+        }
     }
     
     private void ReduceTime(bool isWhiteTurn)
@@ -89,9 +110,17 @@ public class GameModel
         var deltaTime = DateTime.UtcNow - LastMoveTime;
         LastMoveTime = DateTime.UtcNow;
         if (isWhiteTurn)
+        {
             WhiteTimeLeft -= deltaTime;
+            if (WhiteTimeLeft < TimeSpan.Zero)
+                WhiteTimeLeft = TimeSpan.Zero;
+        }
         else
+        {
             BlackTimeLeft -= deltaTime;
+            if (BlackTimeLeft < TimeSpan.Zero)
+                BlackTimeLeft = TimeSpan.Zero;
+        }
     }
 
     private void DoIncrement(bool isWhiteTurn)

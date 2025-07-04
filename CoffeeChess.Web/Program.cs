@@ -1,5 +1,6 @@
 using CoffeeChess.Service.Implementations;
 using CoffeeChess.Service.Interfaces;
+using CoffeeChess.Web.BackgroundWorkers;
 using CoffeeChess.Web.Data;
 using CoffeeChess.Web.Hubs;
 using CoffeeChess.Web.Models;
@@ -24,6 +25,7 @@ builder.Services.AddIdentity<UserModel, IdentityRole>(options =>
 
 builder.Services.AddMediatR(config => 
     config.RegisterServicesFromAssembly(typeof(Program).Assembly));
+builder.Services.AddHostedService<GameTimeoutBackgroundWorker>();
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddSignalR();

@@ -39,11 +39,6 @@ export class GameManager {
         this.#isWhiteTurn = this.#game.turn() === 'w';
 
         this.#timersManager.updateTimers(newWhiteMillisecondsLeft, newBlackMillisecondsLeft, this.#isWhiteTurn);
-        if (this.#timersManager.whiteMillisecondsLeft < 0 
-            || this.#timersManager.whiteMillisecondsLeft < 0) {
-            // TODO: implement losing game after time runs out
-        }
-
         this.#historyManager.resetHistoryEvents();
     }
     

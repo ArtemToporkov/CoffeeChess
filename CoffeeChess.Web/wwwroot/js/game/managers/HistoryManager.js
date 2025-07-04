@@ -84,7 +84,7 @@
         }).append(
             $('<div>', {
                 class: 'history-move-number',
-                text: number,
+                text: `${number}.`,
             }).css('cursor', 'default'),
             $('<div>', {
                 class: 'history-move',
