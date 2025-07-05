@@ -12,39 +12,45 @@ public class GameModel(
     TimeSpan minutesLeftForPlayer,
     TimeSpan increment)
 {
-    public string GameId { get; init; } = gameId;
-    public PlayerInfoModel WhitePlayerInfo { get; init; } = whitePlayerInfo;
-    public PlayerInfoModel BlackPlayerInfo { get; init; } = blackPlayerInfo;
-    public bool IsOver => _chessGame.GameResult != GameResult.OnGoing;
+    public string GameId { get; } = gameId;
+    public PlayerInfoModel WhitePlayerInfo { get; } = whitePlayerInfo;
+    public PlayerInfoModel BlackPlayerInfo { get; } = blackPlayerInfo;
+    public bool IsOver => _chessGame.GameResult != GameResult.OnGoing &&
+                          _chessGame.GameResult != GameResult.Check;
     public TimeSpan WhiteTimeLeft { get; private set; } = minutesLeftForPlayer;
     public TimeSpan BlackTimeLeft { get; private set; } = minutesLeftForPlayer;
-    public TimeSpan Increment { get; init; } = increment;
-    public DateTime LastMoveTime { get; set; } = DateTime.UtcNow;
-    public DateTime TimeExpiresAt { get; private set; } = DateTime.UtcNow + minutesLeftForPlayer;
+    public TimeSpan Increment { get; } = increment;
+    public DateTime LastTimeUpdate { get; set; } = DateTime.UtcNow;
     public ConcurrentQueue<ChatMessageModel> ChatMessages { get; } = new();
-    public bool IsWhiteTurn => _chessGame.CurrentPlayer == Player.White;
+    public PlayerColor CurrentPlayerColor => _chessGame.CurrentPlayer == Player.White 
+        ? PlayerColor.White 
+        : PlayerColor.Black;
+    
     private readonly ChessGame _chessGame = new();
     private readonly Lock _lockObject = new();
 
     public MoveResult MakeMove(string playerId, string from, string to, string? promotion)
     {
-        var currentPlayerId = IsWhiteTurn ? WhitePlayerInfo.Id : BlackPlayerInfo.Id;
+        var currentPlayerId = CurrentPlayerColor == PlayerColor.White 
+            ? WhitePlayerInfo.Id 
+            : BlackPlayerInfo.Id;
+        var currentPlayerColor = CurrentPlayerColor;
         
         if (playerId != currentPlayerId)
             return MoveResult.NotYourTurn;
-        
-        ReduceTime(IsWhiteTurn);
-        if (DateTime.UtcNow >= TimeExpiresAt)
-        {
-            LoseOnTimeOrThrow();
-            return MoveResult.TimeRanOut;
-        }
 
         var promotionChar = promotion?[0];
 
-        var move = new Move(from, to, IsWhiteTurn ? Player.White : Player.Black, promotionChar);
+        var move = new Move(from, to, CurrentPlayerColor == PlayerColor.White 
+            ? Player.White : Player.Black, promotionChar);
         if (_chessGame.MakeMove(move, false) is MoveType.Invalid)
             return MoveResult.Invalid;
+
+        if (UpdateTimeAndCheckTimeout(currentPlayerColor))
+        {
+            Resign(currentPlayerColor);
+            return MoveResult.TimeRanOut;
+        }
 
         if (_chessGame.ThreeFoldRepeatAndThisCanResultInDraw)
             return MoveResult.ThreeFold;
@@ -58,8 +64,7 @@ public class GameModel(
         if (_chessGame.IsStalemated(Player.White) || _chessGame.IsStalemated(Player.Black))
             return MoveResult.Stalemate;
         
-        DoIncrement(IsWhiteTurn);
-        TimeExpiresAt = DateTime.UtcNow + (IsWhiteTurn ? WhiteTimeLeft : BlackTimeLeft);
+        DoIncrement(currentPlayerColor);
         return MoveResult.Success;
     }
 
@@ -93,39 +98,34 @@ public class GameModel(
         return (winner, loser);
     }
 
-    public void LoseOnTimeOrThrow()
+    public bool UpdateTimeAndCheckTimeout(PlayerColor playerColor)
     {
         lock (_lockObject)
         {
-            if (IsOver)
-                return;
-            if (DateTime.UtcNow < TimeExpiresAt)
-                throw new InvalidOperationException($"[{nameof(LoseOnTimeOrThrow)}]: time is not up.");
-            Resign(IsWhiteTurn ? PlayerColor.White : PlayerColor.Black);
-        }
-    }
-    
-    private void ReduceTime(bool isWhiteTurn)
-    {
-        var deltaTime = DateTime.UtcNow - LastMoveTime;
-        LastMoveTime = DateTime.UtcNow;
-        if (isWhiteTurn)
-        {
-            WhiteTimeLeft -= deltaTime;
-            if (WhiteTimeLeft < TimeSpan.Zero)
+            var deltaTime = DateTime.UtcNow - LastTimeUpdate;
+            LastTimeUpdate = DateTime.UtcNow;
+            if (playerColor is PlayerColor.White)
+            {
+                WhiteTimeLeft -= deltaTime;
+                if (WhiteTimeLeft >= TimeSpan.Zero) return false;
+            
                 WhiteTimeLeft = TimeSpan.Zero;
-        }
-        else
-        {
-            BlackTimeLeft -= deltaTime;
-            if (BlackTimeLeft < TimeSpan.Zero)
+            }
+            else
+            {
+                BlackTimeLeft -= deltaTime;
+                if (BlackTimeLeft >= TimeSpan.Zero) return false;
+            
                 BlackTimeLeft = TimeSpan.Zero;
+            }
+
+            return true;   
         }
     }
 
-    private void DoIncrement(bool isWhiteTurn)
+    private void DoIncrement(PlayerColor playerColor)
     {
-        if (isWhiteTurn)
+        if (playerColor is PlayerColor.White)
             WhiteTimeLeft += Increment;
         else
             BlackTimeLeft += Increment;

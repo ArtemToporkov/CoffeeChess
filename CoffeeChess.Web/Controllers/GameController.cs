@@ -1,11 +1,10 @@
 ﻿using CoffeeChess.Core.Enums;
-using CoffeeChess.Service.Interfaces;
 using CoffeeChess.Web.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CoffeeChess.Web.Controllers;
 
-public class GameController(IGameManagerService gameManager) : Controller
+public class GameController() : Controller
 {
     public IActionResult GameCreation()
     {

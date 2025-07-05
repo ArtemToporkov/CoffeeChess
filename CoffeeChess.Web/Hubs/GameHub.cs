@@ -1,6 +1,4 @@
-﻿using System.Diagnostics;
-using ChessDotNetCore;
-using CoffeeChess.Core.Enums;
+﻿using CoffeeChess.Core.Enums;
 using CoffeeChess.Core.Models;
 using CoffeeChess.Core.Models.Payloads;
 using CoffeeChess.Service.Interfaces;
