@@ -1,5 +1,6 @@
 ﻿import { HistoryManager } from "./HistoryManager.js";
 import { TimersManager } from "./TimersManager.js";
+import { highlightSquares } from "../ui.js";
 
 export class GameManager {
     board;
@@ -40,6 +41,10 @@ export class GameManager {
 
         this.#timersManager.updateTimers(newWhiteMillisecondsLeft, newBlackMillisecondsLeft, this.#isWhiteTurn);
         this.#historyManager.resetHistoryEvents();
+        
+        const history = this.#game.history({ verbose: true });
+        const move = history[history.length - 1];
+        highlightSquares(move.from, move.to);
     }
     
     undoLastMove() {

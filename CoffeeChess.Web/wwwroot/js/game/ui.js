@@ -59,6 +59,16 @@ export function updateGameResult(result, message, oldRating, newRating) {
     playRatingsChangeAnimation(oldRating, newRating);
 }
 
+export function highlightSquares(from, to) {
+    unhighlightSquares();
+    $(`.square-${from}`).addClass('highlighted-square');
+    $(`.square-${to}`).addClass('highlighted-square');
+}
+
+export function unhighlightSquares() {
+    $('.highlighted-square').removeClass('highlighted-square');
+}
+
 function playRatingsChangeAnimation(oldRating, newRating) {
     const $oldRating = $('#oldRating');
     const $newRating = $('#newRating');

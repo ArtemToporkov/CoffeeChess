@@ -10,8 +10,10 @@
     --dark-coffee: #2B1100;
     --milk-coffee-unselected: #aa917f;
     --dark-coffee-unselected: #806655;
-    --milk-coffee-chess-square: #FFE6D4;
+    --milk-coffee-chess-square: rgb(255, 230, 212);
     --dark-coffee-chess-square: rgb(171, 129, 99);
+    --milk-coffee-chess-square-highlighted: rgb(222, 185, 155);
+    --dark-coffee-chess-square-highlighted: rgb(138, 101, 75);
 }
 
 html, 

@@ -55,3 +55,11 @@
     flex-direction: row;
     gap: 0;
 }
+
+.white-1e1d7.highlighted-square {
+    background-color: var(--milk-coffee-chess-square-highlighted);
+}
+
+.black-3c85d.highlighted-square {
+    background-color: var(--dark-coffee-chess-square-highlighted);
+}

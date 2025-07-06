@@ -1,4 +1,6 @@
-﻿export class HistoryManager {
+﻿import { highlightSquares, unhighlightSquares } from "../ui.js";
+
+export class HistoryManager {
     #game;
     #historyViewGame;
     #board;
@@ -12,13 +14,21 @@
         $(document).on('keydown', e => {
             switch (e.key) {
                 case 'ArrowLeft':
-                    if (this.currentPly > 1) {
-                        this.#moveToPly(this.currentPly - 1);
+                    if (this.currentPly > 0) {
+                        const ply = this.currentPly;
+                        this.#moveToPly(ply - 1);
+                        if (ply === 1) {
+                            unhighlightSquares();
+                        } else {
+                            this.highlightMoveByPly(ply - 1);
+                        }
                     }
                     break;
                 case 'ArrowRight':
                     if (this.currentPly < this.#game.history().length) {
-                        this.#moveToPly(this.currentPly + 1);
+                        const ply = this.currentPly;
+                        this.#moveToPly(ply + 1);
+                        this.highlightMoveByPly(ply + 1);
                     }
                     break;
             }
@@ -37,10 +47,12 @@
 
             historyRow.children().eq(1).on('click', () => {
                 this.#moveToPly(i + 1);
+                this.highlightMoveByPly(i + 1)
             });
             if (blackMove !== '') {
                 historyRow.children().eq(2).on('click', () => {
                     this.#moveToPly(i + 2);
+                    this.highlightMoveByPly(i + 2);
                 });
             }
 
@@ -61,6 +73,27 @@
                 $(this).removeClass('show');
             })
         }
+    }
+    
+    highlightMoveByPly(ply) {
+        const move = this.getMoveByPly(ply);
+        if (move === null)
+            return;
+        
+        highlightSquares(move.from, move.to);
+    }
+    
+    getMoveByPly(ply) {
+        const history = this.#historyViewGame.history({ verbose: true });
+        return this.#getMoveByPlyAndHistory(history, ply);
+    }
+   
+    #getMoveByPlyAndHistory(history, ply) {
+        if (ply > history.length || ply < 0) {
+            return null;
+        }
+        
+        return history[ply - 1];
     }
 
     #moveToPly(ply) {
