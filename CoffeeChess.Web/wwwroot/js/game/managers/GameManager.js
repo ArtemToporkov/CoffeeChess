@@ -59,12 +59,15 @@ export class GameManager {
     
     #getConfig() {
         const onDragStart = (source, piece, position, orientation) => {
+            $('.piece-417db').addClass('grabbing');
             if ((!this.#isMyTurn() || this.#game.game_over()) 
                 && this.#historyManager.currentPly === this.#game.history().length)
                 return false;
         }
 
         const onDrop = (source, target) => {
+            $('.piece-417db').removeClass('grabbing');
+            
             if (this.#isGameOver)
                 return 'snapback';
             

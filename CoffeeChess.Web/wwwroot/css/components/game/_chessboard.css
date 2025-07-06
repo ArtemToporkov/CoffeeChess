@@ -36,6 +36,14 @@
     transition: box-shadow 0.1s ease;
 }
 
+.piece-417db {
+    cursor: grab;
+}
+
+.piece-417db.grabbing {
+    cursor: grabbing;
+}
+
 .board-b72b1 {
     display: flex;
     flex-direction: column;
