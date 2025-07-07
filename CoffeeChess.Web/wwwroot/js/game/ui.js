@@ -15,6 +15,8 @@ export function loadUi(connection, gameManager, gameId) {
         $('.game-middle-panel').addClass('flipped');
     }
     
+    $('#promotionPanelCloseButton').on('click', () => $('#promotionPanel').css('display', 'none'));
+    
     bindEventsToResignButton(connection, gameId);
     bindEventsToDrawOfferButtons(connection, gameId);
     bindEventsToAnalyzeButtons();
@@ -67,6 +69,47 @@ export function highlightSquares(from, to) {
 
 export function unhighlightSquares() {
     $('.highlighted-square').removeClass('highlighted-square');
+}
+
+export function showPromotionDialog(square, isWhite, promotionCallback) {
+    const $panel = $('#promotionPanel');
+    $panel.find(`.promotion-piece.${isWhite ? "white-piece" : "black-piece"}`)
+        .show();
+    
+    const squareEl = $(`.square-${square}`);
+    if (squareEl.length === 0) return;
+
+    const squareSize = squareEl.width();
+    const squareOffset = squareEl.offset();
+
+    const pieceWidth = 66;
+    const pieceHeight = 66;
+
+    const squareCenterX = squareOffset.left + squareSize / 2;
+    const squareCenterY = squareOffset.top + squareSize / 2;
+
+    const left = squareCenterX - pieceWidth / 2;
+
+    let top;
+    if (isWhite) {
+        top = squareCenterY - pieceHeight / 2;
+    }
+    else {
+        const panelHeight = pieceHeight * 4;
+        top = squareCenterY + pieceHeight / 2 - panelHeight;
+    }
+
+    $panel.css({
+        top: `${top}px`,
+        left: `${left}px`,
+        display: 'flex'
+    });
+
+    $panel.find('.promotion-piece').one('click', function() {
+        const promotionPiece = $(this).data('promotionChar');
+        $panel.hide();
+        promotionCallback(promotionPiece);
+    });
 }
 
 function playRatingsChangeAnimation(oldRating, newRating) {

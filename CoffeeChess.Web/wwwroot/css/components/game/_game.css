@@ -1,4 +1,6 @@
-﻿.game-left-panel {
+﻿@import "parts/_promotion-panel.css";
+
+.game-left-panel {
     position: absolute;
     top: 54.5%;
     left: calc((50% - 570px / 2) / 2);

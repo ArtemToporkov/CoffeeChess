@@ -1,0 +1,38 @@
+﻿.promotion-panel {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    
+    background-color: var(--milk-coffee-chess-square);
+    box-shadow:
+            0 0 0 4px var(--dark-coffee),
+            0 0 0 6px var(--milk-coffee);
+    border-radius: 20px;
+    
+    overflow: hidden;
+}
+
+.promotion-piece,
+.promotion-cross {
+    width: 66px;
+    height: 66px;
+    
+    border-radius: 15px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.promotion-piece {
+    display: none;
+}
+
+.promotion-piece:hover,
+.promotion-cross:hover {
+    background-color: var(--milk-coffee-chess-square-highlighted);
+    transform: scale(1.05);
+}

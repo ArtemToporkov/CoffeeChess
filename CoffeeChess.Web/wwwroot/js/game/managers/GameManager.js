@@ -1,6 +1,6 @@
 ﻿import { HistoryManager } from "./HistoryManager.js";
 import { TimersManager } from "./TimersManager.js";
-import { highlightSquares } from "../ui.js";
+import { highlightSquares, showPromotionDialog } from "../ui.js";
 
 export class GameManager {
     board;
@@ -81,10 +81,25 @@ export class GameManager {
                 return;
             }
 
+            const piece = this.#game.get(source);
+            const isPawn = piece.type === 'p';
+            const isPromotion = isPawn && 
+                (
+                    (piece.color === 'w' && target.endsWith('8')) 
+                    || (piece.color === 'b' && target.endsWith('1'))
+                );
+
+            if (isPromotion) {
+                showPromotionDialog(target, piece.color === 'w', (promoPiece) => {
+                    this.#connection.invoke("MakeMove", this.#gameId, source, target, promoPiece);
+                });
+                return 'snapback';
+            }
+
             const move = this.#game.move({
                 from: source,
                 to: target,
-                promotion: 'q'
+                promotion: undefined
             });
 
             if (move === null)
