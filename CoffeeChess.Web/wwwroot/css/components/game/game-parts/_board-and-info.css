@@ -1,0 +1,99 @@
+﻿.game-board-container {
+    width: 100%;
+    height: auto;
+
+    box-sizing: border-box;
+    padding: 10px;
+
+    background-color: var(--milk-coffee);
+    border-radius: 50px;
+    box-shadow:
+            0 0 0 8px var(--dark-coffee),
+            0 0 0 12px var(--milk-coffee);
+}
+
+#myBoard {
+    width: 100%;
+    height: 100%;
+}
+
+.player-info {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+}
+
+.player-avatar {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    padding: 3px;
+
+    background: var(--dark-coffee);
+
+    border-radius: 10px;
+    border: 4px solid var(--milk-coffee);
+    box-sizing: border-box;
+
+    width: 30px;
+    height: 30px;
+}
+
+.player-avatar img {
+    width: 100%;
+    height: 100%;
+}
+
+.player-nick-and-rating {
+    background-color: var(--dark-coffee);
+
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    padding-left: 7px;
+    padding-right: 7px;
+    gap: 7px;
+
+    border-radius: 10px;
+    border: 4px solid var(--milk-coffee);
+    box-sizing: border-box;
+
+    height: 30px;
+}
+
+.player-nick {
+    font-family: 'Montserrat', sans-serif;
+    color: var(--milk-coffee);
+}
+
+.player-rating {
+    font-family: 'Montserrat', sans-serif;
+    color: var(--milk-coffee-unselected);
+}
+
+.info-container {
+    background-color: var(--dark-coffee);
+
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    padding-left: 7px;
+    padding-right: 7px;
+    gap: 7px;
+
+    border-radius: 10px;
+    border: 4px solid var(--milk-coffee);
+    box-sizing: border-box;
+
+    height: 30px;
+}
+
+.info {
+    font-family: 'Caprasimo', sans-serif;
+    color: var(--milk-coffee);
+}

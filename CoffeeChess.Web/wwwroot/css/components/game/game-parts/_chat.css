@@ -1,0 +1,104 @@
+﻿.chat-panel {
+    flex: 1 1 auto;
+    min-height: 0;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    gap: 20px;
+    box-sizing: border-box;
+
+    width: 100%;
+    background-color: var(--dark-coffee);
+
+    border-radius: 50px;
+    box-shadow:
+            0 0 0 8px var(--milk-coffee),
+            0 0 0 12px var(--dark-coffee);
+}
+
+.chat-title {
+    flex: 0 0 auto;
+    font-family: 'Caprasimo', sans-serif;
+    font-size: 30px;
+    color: var(--milk-coffee);
+    margin: 0;
+}
+
+#chatMessages {
+    flex: 1 1 auto;
+    min-height: 0;
+
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+
+    width: 100%;
+    overflow-y: auto;
+}
+
+#chatMessages::-webkit-scrollbar,
+.history::-webkit-scrollbar {
+    width: 10px;
+}
+
+#chatMessages::-webkit-scrollbar-thumb,
+.history::-webkit-scrollbar-thumb {
+    background-color: var(--milk-coffee);
+    border-radius: 6px;
+}
+
+#chatMessages::-webkit-scrollbar-thumb:hover,
+.history::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(255, 230, 212, 0.6);
+}
+
+#chatMessages::-webkit-scrollbar-track,
+.history::-webkit-scrollbar-track {
+    background-color: var(--milk-coffee-unselected);
+    border-radius: 6px;
+}
+
+.chat-message-sender {
+    font-family: 'Caprasimo', sans-serif;
+    color: var(--milk-coffee);
+}
+
+.chat-message-text {
+    font-family: 'Montserrat', sans-serif;
+    color: var(--milk-coffee);
+    word-break: break-word;
+}
+
+#chatInput {
+    flex: 0 0 auto;
+
+    width: 90%;
+    height: 40px;
+    padding: 0 10px;
+
+    font-family: 'Montserrat', sans-serif;
+    background-color: var(--milk-coffee);
+    color: var(--dark-coffee);
+
+    border: none;
+    outline: none;
+    border-radius: 50px;
+    box-sizing: border-box;
+
+    transition: box-shadow 0.3s ease;
+    box-shadow:
+            0 0 0 2px transparent,
+            0 0 0 4px transparent;
+}
+
+#chatInput::placeholder {
+    color: var(--dark-coffee-unselected);
+}
+
+#chatInput:focus {
+    box-shadow:
+            0 0 0 2px var(--dark-coffee),
+            0 0 0 4px var(--milk-coffee);
+}
