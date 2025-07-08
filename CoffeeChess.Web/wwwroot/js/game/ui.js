@@ -45,7 +45,7 @@ export function updateGameResult(result, message, oldRating, newRating) {
         ? ['dark', 'milk'] 
         : ['milk', 'dark'];
 
-    $('.modal-overlay').addClass('show');
+    $('#modalOverlay').addClass('show');
     $('#resultPanel')
         .css('display', 'flex')
         .addClass(panelColorClass);
@@ -83,8 +83,11 @@ export function showPromotionDialog(square, isWhite, promotionCallback) {
     $panel.css({
         top: `${squareOffset.top}px`,
         left: `${squareOffset.left}px`,
-        display: 'flex'
+        display: 'grid'
     });
+    
+    $('#modalOverlay').addClass('show');
+    $panel.addClass('show');
 
     $panel.find('.promotion-piece')
         .off('click')
@@ -96,7 +99,8 @@ export function showPromotionDialog(square, isWhite, promotionCallback) {
 }
 
 function hidePromotionModal() {
-    $('#promotionPanel').css('display', 'none');
+    $('#modalOverlay').removeClass('show');
+    $('#promotionPanel').removeClass('show');
 }
 
 function playRatingsChangeAnimation(oldRating, newRating) {
@@ -178,7 +182,7 @@ function bindEventsToDrawOfferButtons(connection, gameId) {
 function bindEventsToAnalyzeButtons() {
     const $resultPanel = $('.result-panel');
     $('#analyzeButton').on('click', () => {
-       $('.modal-overlay').removeClass('show');
+       $('#modalOverlay').removeClass('show');
         $resultPanel.addClass('close').one('animationend', () => {
            $resultPanel.removeClass('close');
            $resultPanel.css('display', 'none');
