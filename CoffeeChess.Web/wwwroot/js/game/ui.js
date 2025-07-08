@@ -76,32 +76,13 @@ export function showPromotionDialog(square, isWhite, promotionCallback) {
     $panel.find(`.promotion-piece.${isWhite ? "white-piece" : "black-piece"}`)
         .show();
     
-    const squareEl = $(`.square-${square}`);
-    if (squareEl.length === 0) return;
-
-    const squareSize = squareEl.width();
-    const squareOffset = squareEl.offset();
-
-    const pieceWidth = 66;
-    const pieceHeight = 66;
-
-    const squareCenterX = squareOffset.left + squareSize / 2;
-    const squareCenterY = squareOffset.top + squareSize / 2;
-
-    const left = squareCenterX - pieceWidth / 2;
-
-    let top;
-    if (isWhite) {
-        top = squareCenterY - pieceHeight / 2;
-    }
-    else {
-        const panelHeight = pieceHeight * 4;
-        top = squareCenterY + pieceHeight / 2 - panelHeight;
-    }
-
+    const squareOffset = $(`.square-${square}`).offset();
+    if (squareOffset === undefined)
+        return;
+    
     $panel.css({
-        top: `${top}px`,
-        left: `${left}px`,
+        top: `${squareOffset.top}px`,
+        left: `${squareOffset.left}px`,
         display: 'flex'
     });
 
