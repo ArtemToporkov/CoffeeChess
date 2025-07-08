@@ -86,7 +86,9 @@ export function showPromotionDialog(square, isWhite, promotionCallback) {
         display: 'flex'
     });
 
-    $panel.find('.promotion-piece').one('click', function() {
+    $panel.find('.promotion-piece')
+        .off('click')
+        .one('click', function() {
         const promotionPiece = $(this).data('promotionChar');
         $panel.hide();
         promotionCallback(promotionPiece);
