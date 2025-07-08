@@ -15,7 +15,7 @@ export function loadUi(connection, gameManager, gameId) {
         $('.game-middle-panel').addClass('flipped');
     }
     
-    $('#promotionPanelCloseButton').on('click', () => $('#promotionPanel').css('display', 'none'));
+    $('#promotionPanelCloseButton').on('click', hidePromotionModal);
     
     bindEventsToResignButton(connection, gameId);
     bindEventsToDrawOfferButtons(connection, gameId);
@@ -90,9 +90,13 @@ export function showPromotionDialog(square, isWhite, promotionCallback) {
         .off('click')
         .one('click', function() {
         const promotionPiece = $(this).data('promotionChar');
-        $panel.hide();
+        hidePromotionModal();
         promotionCallback(promotionPiece);
     });
+}
+
+function hidePromotionModal() {
+    $('#promotionPanel').css('display', 'none');
 }
 
 function playRatingsChangeAnimation(oldRating, newRating) {
