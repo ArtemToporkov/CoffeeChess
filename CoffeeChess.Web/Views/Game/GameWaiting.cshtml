@@ -5,40 +5,5 @@
 @await Html.PartialAsync("_GameWaiting");
 @section Scripts
 {
-    <script type="module">
-        import { GameHubMethods } from "/js/game/enums/GameHubMethods.js";
-
-        const connection = new signalR.HubConnectionBuilder()
-            .withUrl("/gameHub")
-            .configureLogging(signalR.LogLevel.Information)
-            .build();
-
-        const gameSettings = {
-            minutes: @Model.Minutes,
-            increment: @Model.Increment,
-            colorPreference: @((int)Model.ColorPreference),
-            minRating: @Model.MinRating,
-            maxRating: @Model.MaxRating
-        };
-
-        connection.on(GameHubMethods.GameStarted, (gameId, isWhite, whitePlayerInfo, 
-                                      blackPlayerInfo, totalMillisecondsLeft) => {
-            localStorage.setItem("totalMillisecondsLeft", totalMillisecondsLeft);
-            localStorage.setItem("isWhite", isWhite);
-            localStorage.setItem("whitePlayerInfo", JSON.stringify(whitePlayerInfo));
-            localStorage.setItem("blackPlayerInfo", JSON.stringify(blackPlayerInfo));
-            window.location.href = `/Game/Play/${gameId}`;
-        });
-
-        async function startSignalR() {
-            try {
-                await connection.start();
-                await connection.invoke(GameHubMethods.CreateOrJoinGame, gameSettings);
-            } catch (err) {
-                console.error(err.toString());
-            }
-        }
-
-        startSignalR();
-    </script>
+    <script type="module" src="~/js/game/waiting.js" asp-append-version="true"></script>
 }
