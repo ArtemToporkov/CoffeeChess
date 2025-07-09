@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace CoffeeChess.Web.Services;
 
-public class SignalRGameFinisherService(IHubContext<GameHub> hubContext, 
+public class SignalRGameFinisherService(IHubContext<GameHub, IGameClient> hubContext, 
     UserManager<UserModel> userManager, IRatingService ratingService) : IGameFinisherService
 {
     public async Task SendDrawResultAndSave(PlayerInfoModel first, PlayerInfoModel second, string reason)
@@ -44,8 +44,8 @@ public class SignalRGameFinisherService(IHubContext<GameHub> hubContext,
         var secondPayload =
             new GameResultPayloadModel(secondResult, secondReason, second.Rating, secondNewRating);
 
-        await hubContext.Clients.User(first.Id).SendAsync("UpdateGameResult", firstPayload);
-        await hubContext.Clients.User(second.Id).SendAsync("UpdateGameResult", secondPayload);
+        await hubContext.Clients.User(first.Id).UpdateGameResult(firstPayload);
+        await hubContext.Clients.User(second.Id).UpdateGameResult(secondPayload);
     }
 
     private async Task UpdateRating(string userId, int newRating)
