@@ -10,8 +10,8 @@ namespace CoffeeChess.Web.Hubs;
 
 public class GameHub(
     IGameManagerService gameManager,
-    UserManager<UserModel> userManager,
-    IRatingService ratingService) : Hub
+    IGameFinisherService gameFinisher,
+    UserManager<UserModel> userManager) : Hub
 {
     private async Task<UserModel> GetUserAsync()
         => await userManager.GetUserAsync(Context.User!)
@@ -75,7 +75,7 @@ public class GameHub(
             case MoveResult.ThreeFold:
             case MoveResult.FiftyMovesRule:
             case MoveResult.Stalemate:
-                await SendDrawResultAndSave(game.WhitePlayerInfo, game.BlackPlayerInfo,
+                await gameFinisher.SendDrawResultAndSave(game.WhitePlayerInfo, game.BlackPlayerInfo,
                     GetMessageByMoveResult(moveResult));
                 break;
             case MoveResult.Checkmate:
@@ -84,7 +84,7 @@ public class GameHub(
                     throw new InvalidOperationException(
                         $"[{nameof(GameHub)}.{nameof(MakeMove)}]: " +
                         $"{nameof(game)}.{nameof(game.GetWinnerAndLoser)}() does not think the game is ended.");
-                await SendWinResultAndSave(winner, loser,
+                await gameFinisher.SendWinResultAndSave(winner, loser,
                     "checkmate.",
                     "checkmate.");
                 break;
@@ -95,7 +95,7 @@ public class GameHub(
                     throw new InvalidOperationException(
                         $"[{nameof(GameHub)}.{nameof(MakeMove)}]: " +
                         $"{nameof(game)}.{nameof(game.GetWinnerAndLoser)}() does not think the game is ended.");
-                await SendWinResultAndSave(winner, loser,
+                await gameFinisher.SendWinResultAndSave(winner, loser,
                     $"{loser.Name}'s time is up.",
                     $"your time is up.");
                 break;
@@ -130,7 +130,7 @@ public class GameHub(
 
             case GameActionType.AcceptDrawOffer:
                 game.ClaimDraw();
-                await SendDrawResultAndSave(game.WhitePlayerInfo, game.BlackPlayerInfo, "by agreement.");
+                await gameFinisher.SendDrawResultAndSave(game.WhitePlayerInfo, game.BlackPlayerInfo, "by agreement.");
                 break;
             case GameActionType.DeclineDrawOffer:
                 actionPayload = new GameActionPayloadModel
@@ -146,7 +146,7 @@ public class GameHub(
                     throw new InvalidOperationException(
                         $"[{nameof(GameHub)}.{nameof(PerformGameAction)}]: " +
                         $"game.{nameof(game.GetWinnerAndLoser)}() does not think the game is ended.");
-                await SendWinResultAndSave(winner, loser,
+                await gameFinisher.SendWinResultAndSave(winner, loser,
                     $"{callerPlayerInfo.Name} resigns.",
                     "due to resignation.");
                 break;
@@ -167,49 +167,4 @@ public class GameHub(
             _ => throw new ArgumentException(
                 $"[{nameof(GameHub)}.{nameof(GetMessageByMoveResult)}]: unexpected MoveResult.")
         };
-
-    private async Task SendDrawResultAndSave(PlayerInfoModel first, PlayerInfoModel second, string reason)
-    {
-        var (firstNewRating, secondNewRating) = ratingService
-            .CalculateNewRatingsAfterDraw(first.Rating, second.Rating);
-        await SendResultAndSave(first, second,
-            GameResultForPlayer.Draw, GameResultForPlayer.Draw,
-            reason, reason,
-            firstNewRating, secondNewRating);
-    }
-
-    private async Task SendWinResultAndSave(PlayerInfoModel winner, PlayerInfoModel loser,
-        string winReason, string loseReason)
-    {
-        var (winnerNewRating, loserNewRating) = ratingService.CalculateNewRatingsAfterWin(winner.Rating, loser.Rating);
-        await SendResultAndSave(winner, loser, 
-            GameResultForPlayer.Won, GameResultForPlayer.Lost,
-            winReason, loseReason, 
-            winnerNewRating, loserNewRating);
-    }
-
-    private async Task SendResultAndSave(PlayerInfoModel first, PlayerInfoModel second, 
-        GameResultForPlayer firstResult, GameResultForPlayer secondResult,
-        string firstReason, string secondReason,
-        int firstNewRating, int secondNewRating)
-    {
-        await UpdateRating(first.Id, firstNewRating);
-        await UpdateRating(second.Id, secondNewRating);
-
-        var firstPayload = new GameResultPayloadModel(firstResult, firstReason, first.Rating, firstNewRating);
-        var secondPayload =
-            new GameResultPayloadModel(secondResult, secondReason, second.Rating, secondNewRating);
-
-        await Clients.User(first.Id).SendAsync("UpdateGameResult", firstPayload);
-        await Clients.User(second.Id).SendAsync("UpdateGameResult", secondPayload);
-    }
-
-    private async Task UpdateRating(string userId, int newRating)
-    {
-        var user = await userManager.FindByIdAsync(userId);
-        if (user is null)
-            return;
-        user.Rating = newRating;
-        await userManager.UpdateAsync(user);
-    }
 }

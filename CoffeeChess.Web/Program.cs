@@ -4,6 +4,7 @@ using CoffeeChess.Web.BackgroundWorkers;
 using CoffeeChess.Web.Data;
 using CoffeeChess.Web.Hubs;
 using CoffeeChess.Web.Models;
+using CoffeeChess.Web.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -29,6 +30,7 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddSignalR();
 builder.Services.AddSingleton<IGameManagerService, BaseGameManagerService>();
 builder.Services.AddSingleton<IRatingService, EloRatingService>();
+builder.Services.AddScoped<IGameFinisherService, SignalRGameFinisherService>();
 
 var app = builder.Build();
 
