@@ -37,6 +37,7 @@
             -3px 3px 0 var(--milk-coffee),
             -5px 5px 0 var(--dark-coffee);
     margin: 0;
+    transition: width 0.3s ease;
 }
 
 .conditions {

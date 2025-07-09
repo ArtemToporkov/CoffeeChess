@@ -1,6 +1,9 @@
 ﻿import { GameHubMethods } from "./enums/GameHubMethods.js";
+import { animateSearching } from "./ui.js";
 
-$(document).ready(() => {
+$(async () => {
+    await document.fonts.ready;
+    animateSearching();
     
     const connection = new signalR.HubConnectionBuilder()
         .withUrl("/gameHub")
@@ -28,5 +31,5 @@ $(document).ready(() => {
         }
     }
     
-    startSignalR();
+    await startSignalR();
 });

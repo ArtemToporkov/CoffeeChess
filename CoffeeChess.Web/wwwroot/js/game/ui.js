@@ -98,6 +98,25 @@ export function showPromotionDialog(square, isWhite, promotionCallback) {
     });
 }
 
+export function animateSearching() {
+    const $title = $('#waitingTitle');
+    const widths = [];
+    $title.text("Searching.");
+    widths.push($title.width());
+    $title.text("Searching..");
+    widths.push($title.width());
+    $title.text("Searching...");
+    widths.push($title.width());
+    $title.text("Searching.");
+    
+    let idx = 0;
+    setInterval(() => {
+        $title.text(`Searching${'.'.repeat(idx + 1)}`);
+        $title.css('width', widths[idx]);
+        idx = (idx + 1) % 3;
+    }, 600);
+}
+
 function hidePromotionModal() {
     $('#modalOverlay').removeClass('show');
     $('#promotionPanel').removeClass('show');
