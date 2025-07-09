@@ -1,7 +1,8 @@
 import { GameManager } from "./managers/GameManager.js";
 import { ChatManager } from "./managers/ChatManager.js";
 import { loadUi, receiveDrawOffer, turnButtonsBack, updateGameResult, turnOffDrawResignInfo } from "./ui.js";
-import { GameActionType } from "./GameActionType.js";
+import { GameActionType } from "./enums/GameActionType.js";
+import { GameHubMethods } from "./enums/GameHubMethods.js";
 
 $(document).ready(() => {
     const connection = new signalR.HubConnectionBuilder()
@@ -21,24 +22,24 @@ $(document).ready(() => {
     const chatManager = new ChatManager(connection, gameId);
     loadUi(connection, gameManager, gameId);
     
-    connection.on("MakeMove", (pgn, newWhiteMillisecondsLeft, newBlackMillisecondsLeft) => {
+    connection.on(GameHubMethods.MakeMove, (pgn, newWhiteMillisecondsLeft, newBlackMillisecondsLeft) => {
         gameManager.updateGameState(pgn, newWhiteMillisecondsLeft, newBlackMillisecondsLeft);
     });
     
-    connection.on("MoveFailed", (errorMessage) => {
+    connection.on(GameHubMethods.MoveFailed, (errorMessage) => {
         gameManager.undoLastMove();
         chatManager.addMessageToChat("CoffeeChess", errorMessage);
     });
     
-    connection.on("CriticalError", (errorMessage) => {
+    connection.on(GameHubMethods.CriticalError, (errorMessage) => {
         // TODO: raise 500 with errorMessage
     });
 
-    connection.on("ReceiveChatMessage", (user, message) => {
+    connection.on(GameHubMethods.ReceiveChatMessage, (user, message) => {
         chatManager.addMessageToChat(user, message);
     });
     
-    connection.on("PerformGameAction", payload => {
+    connection.on(GameHubMethods.PerformGameAction, payload => {
         switch (payload.gameActionType) {
             case GameActionType.ReceiveDrawOffer:
                 receiveDrawOffer(connection, payload.message);
@@ -49,11 +50,11 @@ $(document).ready(() => {
         }
     });
     
-    connection.on("PerformingGameActionFailed", (errorMessage) => {
+    connection.on(GameHubMethods.PerformingGameActionFailed, (errorMessage) => {
        // TODO: tell client that performing game action is impossible 
     });
     
-    connection.on("UpdateGameResult", payload => {
+    connection.on(GameHubMethods.UpdateGameResult, payload => {
         gameManager.endGame();
         turnOffDrawResignInfo();
         updateGameResult(payload.result, payload.message, payload.oldRating, payload.newRating);

@@ -1,6 +1,7 @@
 ﻿import { HistoryManager } from "./HistoryManager.js";
 import { TimersManager } from "./TimersManager.js";
 import { highlightSquares, showPromotionDialog } from "../ui.js";
+import { GameHubMethods } from "../enums/GameHubMethods.js";
 
 export class GameManager {
     board;
@@ -91,7 +92,7 @@ export class GameManager {
 
             if (isPromotion) {
                 showPromotionDialog(target, piece.color === 'w', (promoPiece) => {
-                    this.#connection.invoke("MakeMove", this.#gameId, source, target, promoPiece);
+                    this.#connection.invoke(GameHubMethods.MakeMove, this.#gameId, source, target, promoPiece);
                 });
                 return 'snapback';
             }
@@ -105,7 +106,7 @@ export class GameManager {
             if (move === null)
                 return 'snapback';
             
-            this.#connection.invoke("MakeMove", this.#gameId, move.from, move.to, move.promotion);
+            this.#connection.invoke(GameHubMethods.MakeMove, this.#gameId, move.from, move.to, move.promotion);
         }
 
         const onSnapEnd = () => {

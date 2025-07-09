@@ -1,5 +1,5 @@
-﻿import { GameActionType } from "./GameActionType.js";
-import { GameResultForPlayer } from "./GameResultForPlayer.js";
+﻿import { GameActionType } from "./enums/GameActionType.js";
+import { GameResultForPlayer } from "./enums/GameResultForPlayer.js";
 
 export function loadUi(connection, gameManager, gameId) {
     const whitePlayerInfo = JSON.parse(localStorage.getItem('whitePlayerInfo'));

@@ -1,4 +1,6 @@
-﻿export class ChatManager {
+﻿import { GameHubMethods } from "../enums/GameHubMethods.js";
+
+export class ChatManager {
     #connection;
     #gameId;
     #chatInput;
@@ -15,7 +17,7 @@
                 e.preventDefault();
                 const messageText = this.#chatInput.val().trim();
                 if (messageText) {
-                    this.#connection.invoke("SendChatMessage", this.#gameId, messageText);
+                    this.#connection.invoke(GameHubMethods.SendChatMessage, this.#gameId, messageText);
                     this.#chatInput.val('');
                 }
             }
