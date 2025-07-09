@@ -23,8 +23,6 @@ builder.Services.AddIdentity<UserModel, IdentityRole>(options =>
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
 
-builder.Services.AddMediatR(config => 
-    config.RegisterServicesFromAssembly(typeof(Program).Assembly));
 builder.Services.AddHostedService<GameTimeoutBackgroundWorker>();
 
 builder.Services.AddControllersWithViews();
