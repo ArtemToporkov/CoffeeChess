@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using ChessDotNetCore;
 using CoffeeChess.Core.Enums;
@@ -20,14 +21,15 @@ public class BaseGameManagerService : IGameManagerService
         return gameChallenge;
     }
 
-    public bool TryFindChallenge(PlayerInfoModel playerInfo, out GameChallengeModel? foundChallenge)
+    public bool TryFindChallenge(PlayerInfoModel playerInfo, 
+        [NotNullWhen(true)] out GameChallengeModel? foundChallenge)
     {
         foreach (var (gameChallengeId, gameChallenge) in _gamesChallenges)
         {
             if (gameChallenge.PlayerInfo.Id != playerInfo.Id)
             {
                 _gamesChallenges.TryRemove(gameChallengeId, out foundChallenge);
-                return true;
+                return foundChallenge is not null;
             }
         }
 
@@ -61,7 +63,7 @@ public class BaseGameManagerService : IGameManagerService
         return true;
     }
 
-    public bool TryGetGame(string gameId, out GameModel? game)
+    public bool TryGetGame(string gameId, [NotNullWhen(true)] out GameModel? game)
     {
         if (_games.TryGetValue(gameId, out game))
             return true;

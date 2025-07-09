@@ -23,7 +23,7 @@ public class GameHub(
         var playerInfo = new PlayerInfoModel(user.Id, user.UserName!, user.Rating);
         if (gameManager.TryFindChallenge(playerInfo, out var foundChallenge))
         {
-            var game = gameManager.CreateGameBasedOnFoundChallenge(playerInfo, settings, foundChallenge!);
+            var game = gameManager.CreateGameBasedOnFoundChallenge(playerInfo, settings, foundChallenge);
             var totalMillisecondsForOnePlayerLeft = game.WhiteTimeLeft.TotalMilliseconds;
 
             await Clients.User(game.WhitePlayerInfo.Id).GameStarted(
@@ -45,7 +45,7 @@ public class GameHub(
         if (gameManager.TryGetGame(gameId, out var game) &&
             gameManager.TryAddChatMessage(gameId, user.UserName!, message))
         {
-            await Clients.Users(game!.WhitePlayerInfo.Id, game.BlackPlayerInfo.Id)
+            await Clients.Users(game.WhitePlayerInfo.Id, game.BlackPlayerInfo.Id)
                 .ReceiveChatMessage(user.UserName!, message);
         }
     }
@@ -58,7 +58,7 @@ public class GameHub(
             return;
         }
 
-        if (game!.IsOver)
+        if (game.IsOver)
             await Clients.Caller.MoveFailed( "Game is over.");
 
         var moveResult = game.MakeMove(Context.UserIdentifier!, from, to, promotion);
@@ -110,7 +110,7 @@ public class GameHub(
             return;
         }
 
-        if (game!.IsOver)
+        if (game.IsOver)
             await Clients.Caller.PerformingGameActionFailed("Game is over.");
 
         var user = await GetUserAsync();

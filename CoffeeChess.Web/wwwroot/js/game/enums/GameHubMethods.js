@@ -1,4 +1,5 @@
 ﻿export const GameHubMethods = Object.freeze({
+    CreateOrJoinGame: "CreateOrJoinGame",
     GameStarted: "GameStarted",
     SendChatMessage: "SendChatMessage",
     ReceiveChatMessage: "ReceiveChatMessage",

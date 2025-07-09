@@ -5,7 +5,9 @@
 @await Html.PartialAsync("_GameWaiting");
 @section Scripts
 {
-    <script>
+    <script type="module">
+        import { GameHubMethods } from "/js/game/enums/GameHubMethods.js";
+
         const connection = new signalR.HubConnectionBuilder()
             .withUrl("/gameHub")
             .configureLogging(signalR.LogLevel.Information)
@@ -19,7 +21,7 @@
             maxRating: @Model.MaxRating
         };
 
-        connection.on("GameStarted", (gameId, isWhite, whitePlayerInfo, 
+        connection.on(GameHubMethods.GameStarted, (gameId, isWhite, whitePlayerInfo, 
                                       blackPlayerInfo, totalMillisecondsLeft) => {
             localStorage.setItem("totalMillisecondsLeft", totalMillisecondsLeft);
             localStorage.setItem("isWhite", isWhite);
@@ -31,7 +33,7 @@
         async function startSignalR() {
             try {
                 await connection.start();
-                await connection.invoke("CreateOrJoinGame", gameSettings);
+                await connection.invoke(GameHubMethods.CreateOrJoinGame, gameSettings);
             } catch (err) {
                 console.error(err.toString());
             }
