@@ -25,8 +25,8 @@ public class GameModel(
     public PlayerColor CurrentPlayerColor => _chessGame.CurrentPlayer == Player.White 
         ? PlayerColor.White 
         : PlayerColor.Black;
-
-    private PlayerColor? PlayerWithDrawOffer { get; set; }
+    public PlayerColor? PlayerWithDrawOffer { get; private set; }
+    
     private readonly ChessGame _chessGame = new();
     private readonly Lock _lockObject = new();
 
@@ -122,8 +122,6 @@ public class GameModel(
     }
 
     public void ClearDrawOffer() => PlayerWithDrawOffer = null;
-
-    public bool HasPendingDrawOffer() => PlayerWithDrawOffer.HasValue;
 
     public void ClaimDraw() => _chessGame.ClaimDraw();
 

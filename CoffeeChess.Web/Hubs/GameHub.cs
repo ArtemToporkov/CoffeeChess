@@ -65,7 +65,8 @@ public class GameHub(
         switch (moveResult)
         {
             case MoveResult.Success:
-                if (game.HasPendingDrawOffer())
+                if (game.PlayerWithDrawOffer.HasValue 
+                    && game.GetColorById(Context.UserIdentifier!) != game.PlayerWithDrawOffer.Value)
                 {
                     var (sender, receiver) = Context.UserIdentifier! == game.WhitePlayerInfo.Id
                         ? (game.WhitePlayerInfo, game.BlackPlayerInfo)

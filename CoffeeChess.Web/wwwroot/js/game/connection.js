@@ -33,7 +33,7 @@ $(document).ready(() => {
     });
     
     connection.on(GameHubMethods.CriticalError, (errorMessage) => {
-        // TODO: raise 500 with errorMessage
+        console.error(errorMessage);
     });
 
     connection.on(GameHubMethods.ReceiveChatMessage, (user, message) => {
