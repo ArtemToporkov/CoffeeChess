@@ -82,40 +82,51 @@ export class GameManager {
                 return;
             }
 
+            const tryMakeMove = (promotionPiece) => {
+                const move = this.#game.move({
+                    from: source,
+                    to: target,
+                    promotion: promotionPiece
+                });
+
+                if (move === null)
+                    return false;
+
+                this.#connection.invoke(GameHubMethods.MakeMove, this.#gameId, move.from, move.to, move.promotion);
+                return true;
+            };
+
             const piece = this.#game.get(source);
+
+            if (!piece)
+                return 'snapback';
+
             const isPawn = piece.type === 'p';
-            const isPromotion = isPawn && 
+            const isPromotion = isPawn &&
                 (
-                    (piece.color === 'w' && target.endsWith('8')) 
-                    || (piece.color === 'b' && target.endsWith('1'))
+                    (piece.color === 'w' && target.endsWith('8')) ||
+                    (piece.color === 'b' && target.endsWith('1'))
                 );
 
             if (isPromotion) {
                 showPromotionDialog(target, piece.color === 'w', (promoPiece) => {
-                    this.#connection.invoke(GameHubMethods.MakeMove, this.#gameId, source, target, promoPiece);
+                    tryMakeMove(promoPiece);
                 });
+
                 return 'snapback';
             }
 
-            const move = this.#game.move({
-                from: source,
-                to: target,
-                promotion: undefined
-            });
-
-            if (move === null)
+            if (!tryMakeMove(undefined))
                 return 'snapback';
-            
-            this.#connection.invoke(GameHubMethods.MakeMove, this.#gameId, move.from, move.to, move.promotion);
-        }
+        };
 
         const onSnapEnd = () => {
             if (this.#shouldReturnToLive) {
                 $('.history-selected').removeClass('history-selected');
                 this.#shouldReturnToLive = false;
                 this.#historyManager.moveToLastMove();
+                this.board.position(this.#game.fen());
             }
-            this.board.position(this.#game.fen());
         }
 
         return {
