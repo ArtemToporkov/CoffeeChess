@@ -71,7 +71,7 @@ public class GameHub(
                     var (sender, receiver) = Context.UserIdentifier! == game.WhitePlayerInfo.Id
                         ? (game.WhitePlayerInfo, game.BlackPlayerInfo)
                         : (game.BlackPlayerInfo, game.WhitePlayerInfo);
-                    await DeclineDrawOffer(game, sender, receiver);
+                    await SendDrawOfferDeclination(game, sender, receiver);
                 }
                 var pgn = game.GetPgn();
                 await Clients.Users(game.WhitePlayerInfo.Id, game.BlackPlayerInfo.Id).MakeMove(
@@ -119,7 +119,10 @@ public class GameHub(
         }
 
         if (game.IsOver)
+        {
             await Clients.Caller.PerformingGameActionFailed("Game is over.");
+            return;
+        }
 
         var user = await GetUserAsync();
         var (callerPlayerInfo, receiverPlayerInfo) = user.Id == game.WhitePlayerInfo.Id
@@ -135,18 +138,10 @@ public class GameHub(
                 await gameFinisher.SendDrawResultAndSave(game.WhitePlayerInfo, game.BlackPlayerInfo, "by agreement.");
                 break;
             case GameActionType.DeclineDrawOffer:
-                await DeclineDrawOffer(game, callerPlayerInfo, receiverPlayerInfo);
+                await SendDrawOfferDeclination(game, callerPlayerInfo, receiverPlayerInfo);
                 break;
             case GameActionType.Resign:
-                game.Resign(game.WhitePlayerInfo == callerPlayerInfo ? PlayerColor.White : PlayerColor.Black);
-                var (winner, loser) = game.GetWinnerAndLoser();
-                if (winner is null || loser is null)
-                    throw new InvalidOperationException(
-                        $"[{nameof(GameHub)}.{nameof(PerformGameAction)}]: " +
-                        $"game.{nameof(game.GetWinnerAndLoser)}() does not think the game is ended.");
-                await gameFinisher.SendWinResultAndSave(winner, loser,
-                    $"{callerPlayerInfo.Name} resigns.",
-                    "due to resignation.");
+                await SendResignationResult(game, callerPlayerInfo);
                 break;
         }
     }
@@ -173,7 +168,7 @@ public class GameHub(
         await Clients.User(sender.Id).PerformGameAction(sendingPayload);
     }
 
-    private async Task DeclineDrawOffer(GameModel game, PlayerInfoModel sender, PlayerInfoModel receiver)
+    private async Task SendDrawOfferDeclination(GameModel game, PlayerInfoModel sender, PlayerInfoModel receiver)
     {
         var senderColor = game.GetColorById(sender.Id);
         if (!senderColor.HasValue)
@@ -189,6 +184,19 @@ public class GameHub(
         await Clients.User(receiver.Id).PerformGameAction(declinationPayload);
         var declinePayload = new GameActionPayloadModel { GameActionType = GameActionType.DeclineDrawOffer };
         await Clients.User(sender.Id).PerformGameAction(declinePayload);
+    }
+
+    private async Task SendResignationResult(GameModel game, PlayerInfoModel caller)
+    {
+        game.Resign(game.WhitePlayerInfo == caller ? PlayerColor.White : PlayerColor.Black);
+        var (winner, loser) = game.GetWinnerAndLoser();
+        if (winner is null || loser is null)
+            throw new InvalidOperationException(
+                $"[{nameof(GameHub)}.{nameof(SendResignationResult)}]: " +
+                $"game.{nameof(game.GetWinnerAndLoser)}() does not think the game is ended.");
+        await gameFinisher.SendWinResultAndSave(winner, loser,
+            $"{caller.Name} resigns.",
+            "due to resignation.");
     }
 
     private string GetMessageByMoveResult(MoveResult moveResult)
