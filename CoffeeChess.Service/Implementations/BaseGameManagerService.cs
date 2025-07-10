@@ -1,7 +1,5 @@
 ﻿using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
-using System.Drawing;
-using ChessDotNetCore;
 using CoffeeChess.Core.Enums;
 using CoffeeChess.Core.Models;
 using CoffeeChess.Service.Interfaces;
@@ -12,47 +10,18 @@ public class BaseGameManagerService : IGameManagerService
 {
     private readonly ConcurrentDictionary<string, GameChallengeModel> _gamesChallenges = new();
     private readonly ConcurrentDictionary<string, GameModel> _games = new();
-    private static readonly Random Random = new(); 
+    private static readonly Random Random = new();
+    private static readonly Lock Lock = new();
 
-    public GameChallengeModel CreateGameChallenge(PlayerInfoModel creatorInfo, GameSettingsModel settings)
+    public GameModel? CreateGameOrQueueChallenge(PlayerInfoModel playerInfo, GameSettingsModel settings)
     {
-        var gameChallenge = new GameChallengeModel(creatorInfo, settings);
-        _gamesChallenges.TryAdd(creatorInfo.Id, gameChallenge);
-        return gameChallenge;
-    }
-
-    public bool TryFindChallenge(PlayerInfoModel playerInfo, 
-        [NotNullWhen(true)] out GameChallengeModel? foundChallenge)
-    {
-        foreach (var (gameChallengeId, gameChallenge) in _gamesChallenges)
+        lock (Lock)
         {
-            if (gameChallenge.PlayerInfo.Id != playerInfo.Id)
-            {
-                _gamesChallenges.TryRemove(gameChallengeId, out foundChallenge);
-                return foundChallenge is not null;
-            }
+            if (TryFindChallenge(playerInfo, out var foundChallenge))
+                return CreateGameBasedOnFoundChallenge(playerInfo, settings, foundChallenge);
+            CreateGameChallenge(playerInfo, settings);
+            return null;
         }
-
-        foundChallenge = null;
-        return false;
-    }
-
-    public GameModel CreateGameBasedOnFoundChallenge(PlayerInfoModel connectingPlayerInfo, 
-        GameSettingsModel settings, GameChallengeModel gameChallenge)
-    {
-        var connectingPlayerColor = GetColor(settings);
-        var (whitePlayerInfo, blackPlayerInfo) = connectingPlayerColor == ColorPreference.White
-            ? (connectingPlayerInfo, gameChallenge.PlayerInfo)
-            : (gameChallenge.PlayerInfo, connectingPlayerInfo);
-        var createdGame = new GameModel(
-            Guid.NewGuid().ToString("N")[..8],
-            whitePlayerInfo,
-            blackPlayerInfo,
-            TimeSpan.FromMinutes(settings.Minutes),
-            TimeSpan.FromSeconds(settings.Increment)
-        );
-        _games.TryAdd(createdGame.GameId, createdGame);
-        return createdGame;
     }
     
     public bool TryAddChatMessage(string gameId, string username, string message)
@@ -74,6 +43,46 @@ public class BaseGameManagerService : IGameManagerService
 
     public IEnumerable<GameModel> GetActiveGames() => _games.Values
         .Where(g => !g.IsOver);
+    
+    private GameModel CreateGameBasedOnFoundChallenge(PlayerInfoModel connectingPlayerInfo, 
+        GameSettingsModel settings, GameChallengeModel gameChallenge)
+    {
+        var connectingPlayerColor = GetColor(settings);
+        var (whitePlayerInfo, blackPlayerInfo) = connectingPlayerColor == ColorPreference.White
+            ? (connectingPlayerInfo, gameChallenge.PlayerInfo)
+            : (gameChallenge.PlayerInfo, connectingPlayerInfo);
+        var createdGame = new GameModel(
+            Guid.NewGuid().ToString("N")[..8],
+            whitePlayerInfo,
+            blackPlayerInfo,
+            TimeSpan.FromMinutes(settings.Minutes),
+            TimeSpan.FromSeconds(settings.Increment)
+        );
+        _games.TryAdd(createdGame.GameId, createdGame);
+        return createdGame;
+    }
+    
+    private void CreateGameChallenge(PlayerInfoModel creatorInfo, GameSettingsModel settings)
+    {
+        var gameChallenge = new GameChallengeModel(creatorInfo, settings);
+        _gamesChallenges.TryAdd(creatorInfo.Id, gameChallenge);
+    }
+
+    private bool TryFindChallenge(PlayerInfoModel playerInfo, 
+        [NotNullWhen(true)] out GameChallengeModel? foundChallenge)
+    {
+        foreach (var (gameChallengeId, gameChallenge) in _gamesChallenges)
+        {
+            if (gameChallenge.PlayerInfo.Id != playerInfo.Id)
+            {
+                _gamesChallenges.TryRemove(gameChallengeId, out foundChallenge);
+                return foundChallenge is not null;
+            }
+        }
+
+        foundChallenge = null;
+        return false;
+    }
 
     private static ColorPreference GetColor(GameSettingsModel settings)
         => settings.ColorPreference switch

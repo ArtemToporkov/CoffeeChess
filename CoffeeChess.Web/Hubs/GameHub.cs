@@ -21,22 +21,20 @@ public class GameHub(
     {
         var user = await GetUserAsync();
         var playerInfo = new PlayerInfoModel(user.Id, user.UserName!, user.Rating);
-        if (gameManager.TryFindChallenge(playerInfo, out var foundChallenge))
-        {
-            var game = gameManager.CreateGameBasedOnFoundChallenge(playerInfo, settings, foundChallenge);
-            var totalMillisecondsForOnePlayerLeft = game.WhiteTimeLeft.TotalMilliseconds;
+        var game = gameManager.CreateGameOrQueueChallenge(playerInfo, settings);
+        
+        if (game is null)
+            return;
+        
+        var totalMillisecondsForOnePlayerLeft = game.WhiteTimeLeft.TotalMilliseconds;
 
-            await Clients.User(game.WhitePlayerInfo.Id).GameStarted(
-                game.GameId, true, game.WhitePlayerInfo, game.BlackPlayerInfo,
-                totalMillisecondsForOnePlayerLeft);
-            await Clients.User(game.BlackPlayerInfo.Id).GameStarted(
-                game.GameId, false, game.WhitePlayerInfo, game.BlackPlayerInfo,
-                totalMillisecondsForOnePlayerLeft);
-        }
-        else
-        {
-            gameManager.CreateGameChallenge(playerInfo, settings);
-        }
+        await Clients.User(game.WhitePlayerInfo.Id).GameStarted(
+            game.GameId, true, game.WhitePlayerInfo, game.BlackPlayerInfo,
+            totalMillisecondsForOnePlayerLeft);
+        await Clients.User(game.BlackPlayerInfo.Id).GameStarted(
+            game.GameId, false, game.WhitePlayerInfo, game.BlackPlayerInfo,
+            totalMillisecondsForOnePlayerLeft);
+    
     }
 
     public async Task SendChatMessage(string gameId, string message)
