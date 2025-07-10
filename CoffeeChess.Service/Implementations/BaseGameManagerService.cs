@@ -89,10 +89,16 @@ public class BaseGameManagerService : IGameManagerService
         {
             ColorPreference.White => ColorPreference.White,
             ColorPreference.Black => ColorPreference.Black,
-            ColorPreference.Any => Random.Next(0, 2) == 0
-                ? ColorPreference.White
-                : ColorPreference.Black,
+            ColorPreference.Any => GetRandomColor(),
             _ => throw new ArgumentException($"[{nameof(BaseGameManagerService)}.{nameof(GetColor)}]: " +
                                              $"Unsupported color preference.")
         };
+
+    private static ColorPreference GetRandomColor()
+    {
+        lock (Lock)
+            return Random.Next(0, 2) == 0
+                ? ColorPreference.White
+                : ColorPreference.Black;
+    }
 }
