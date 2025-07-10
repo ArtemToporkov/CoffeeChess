@@ -148,11 +148,8 @@ public class GameHub(
 
     private async Task SendDrawOffer(GameModel game, PlayerInfoModel sender, PlayerInfoModel receiver)
     {
-        var senderColor = game.GetColorById(sender.Id);
-        if (!senderColor.HasValue)
-            throw new InvalidOperationException(
-                $"[{nameof(GameHub)}.{nameof(SendDrawOffer)}]: no such player in game {game.GameId}");
-        var sendingResult = game.SendDrawOffer(senderColor.Value);
+        var sendingResult = GetDrawOfferResultOrThrow(game, sender, 
+            (gameModel, color) => gameModel.SendDrawOffer(color));
         if (!sendingResult.Success)
         {
             await Clients.User(sender.Id).CriticalError(sendingResult.Message);
@@ -170,20 +167,27 @@ public class GameHub(
 
     private async Task SendDrawOfferDeclination(GameModel game, PlayerInfoModel sender, PlayerInfoModel receiver)
     {
-        var senderColor = game.GetColorById(sender.Id);
-        if (!senderColor.HasValue)
-            throw new InvalidOperationException(
-                $"[{nameof(GameHub)}.{nameof(SendDrawOffer)}]: no such player in game {game.GameId}");
-        var sendingResult = game.DeclineDrawOffer(senderColor.Value);
-        if (!sendingResult.Success)
+        var declinationResult = GetDrawOfferResultOrThrow(game, sender, 
+            (gameModel, color) => gameModel.DeclineDrawOffer(color));
+        if (!declinationResult.Success)
         {
-            await Clients.User(sender.Id).CriticalError(sendingResult.Message);
+            await Clients.User(sender.Id).CriticalError(declinationResult.Message);
             return;
         }
         var declinationPayload = new GameActionPayloadModel { GameActionType = GameActionType.GetDrawOfferDeclination };
         await Clients.User(receiver.Id).PerformGameAction(declinationPayload);
         var declinePayload = new GameActionPayloadModel { GameActionType = GameActionType.DeclineDrawOffer };
         await Clients.User(sender.Id).PerformGameAction(declinePayload);
+    }
+
+    private DrawOfferResult GetDrawOfferResultOrThrow(GameModel game, PlayerInfoModel sender, 
+        Func<GameModel, PlayerColor, DrawOfferResult> getDrawResult)
+    {
+        var senderColor = game.GetColorById(sender.Id);
+        if (!senderColor.HasValue)
+            throw new InvalidOperationException(
+                $"[{nameof(GameHub)}.{nameof(GetDrawOfferResultOrThrow)}]: no such player in game {game.GameId}");
+        return getDrawResult(game, senderColor.Value);
     }
 
     private async Task SendResignationResult(GameModel game, PlayerInfoModel caller)

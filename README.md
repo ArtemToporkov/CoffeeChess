@@ -13,9 +13,3 @@ Implementing cute chess website using asp.net mvc, signalr.
 ## Description
 
 This project is being done for educational purposes to practice creating projects using asp net.
-
----
-### TODO:
-- fix promotion modal position for black
-- fix "not your turn" error after promotion
----

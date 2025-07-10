@@ -1,7 +1,10 @@
-﻿namespace CoffeeChess.Core.Enums;
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace CoffeeChess.Core.Enums;
 
 public class DrawOfferResult
 {
+    [MemberNotNullWhen(false, nameof(Message))]
     public bool Success { get; private init; }
     public string? Message { get; private init; }
 

@@ -10,7 +10,7 @@ public interface IGameClient
 
     public Task ReceiveChatMessage(string username, string message);
 
-    public Task CriticalError(string? message);
+    public Task CriticalError(string message);
 
     public Task MakeMove(string pgn, double whiteMillisecondsLeft, double blackMillisecondsLeft);
 
