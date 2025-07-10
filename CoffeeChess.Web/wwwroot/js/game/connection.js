@@ -1,6 +1,7 @@
 import { GameManager } from "./managers/GameManager.js";
 import { ChatManager } from "./managers/ChatManager.js";
-import { loadUi, receiveDrawOffer, turnButtonsBack, updateGameResult, turnOffDrawResignInfo } from "./ui.js";
+import { loadUi, receiveDrawOffer, turnButtonsBack, 
+    updateGameResult, turnOffDrawResignInfo, setDrawOfferInactive, setDrawOfferActive } from "./ui.js";
 import { GameActionType } from "./enums/GameActionType.js";
 import { GameHubMethods } from "./enums/GameHubMethods.js";
 
@@ -41,11 +42,17 @@ $(document).ready(() => {
     
     connection.on(GameHubMethods.PerformGameAction, payload => {
         switch (payload.gameActionType) {
+            case GameActionType.SendDrawOffer:
+                setDrawOfferInactive();
+                break;
             case GameActionType.ReceiveDrawOffer:
                 receiveDrawOffer(connection, payload.message);
                 break;
-            case GameActionType.GetDrawOfferDeclination:
+            case GameActionType.DeclineDrawOffer:
                 turnButtonsBack();
+                break;
+            case GameActionType.GetDrawOfferDeclination:
+                setDrawOfferActive();
                 break;
         }
     });

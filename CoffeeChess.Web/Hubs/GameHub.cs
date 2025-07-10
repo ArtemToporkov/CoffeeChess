@@ -65,6 +65,13 @@ public class GameHub(
         switch (moveResult)
         {
             case MoveResult.Success:
+                if (game.HasPendingDrawOffer())
+                {
+                    var (sender, receiver) = Context.UserIdentifier! == game.WhitePlayerInfo.Id
+                        ? (game.WhitePlayerInfo, game.BlackPlayerInfo)
+                        : (game.BlackPlayerInfo, game.WhitePlayerInfo);
+                    await DeclineDrawOffer(game, sender, receiver);
+                }
                 var pgn = game.GetPgn();
                 await Clients.Users(game.WhitePlayerInfo.Id, game.BlackPlayerInfo.Id).MakeMove(
                     pgn, game.WhiteTimeLeft.TotalMilliseconds, game.BlackTimeLeft.TotalMilliseconds);
@@ -120,24 +127,14 @@ public class GameHub(
         switch (gameActionType)
         {
             case GameActionType.SendDrawOffer:
-                var actionPayload = new GameActionPayloadModel
-                {
-                    GameActionType = GameActionType.ReceiveDrawOffer,
-                    Message = $"{user.UserName} offers a draw."
-                };
-                await Clients.User(receiverPlayerInfo.Id).PerformGameAction(actionPayload);
+                await SendDrawOffer(game, callerPlayerInfo, receiverPlayerInfo);
                 break;
-
             case GameActionType.AcceptDrawOffer:
                 game.ClaimDraw();
                 await gameFinisher.SendDrawResultAndSave(game.WhitePlayerInfo, game.BlackPlayerInfo, "by agreement.");
                 break;
             case GameActionType.DeclineDrawOffer:
-                actionPayload = new GameActionPayloadModel
-                {
-                    GameActionType = GameActionType.GetDrawOfferDeclination,
-                };
-                await Clients.User(receiverPlayerInfo.Id).PerformGameAction(actionPayload);
+                await DeclineDrawOffer(game, callerPlayerInfo, receiverPlayerInfo);
                 break;
             case GameActionType.Resign:
                 game.Resign(game.WhitePlayerInfo == callerPlayerInfo ? PlayerColor.White : PlayerColor.Black);
@@ -151,6 +148,46 @@ public class GameHub(
                     "due to resignation.");
                 break;
         }
+    }
+
+    private async Task SendDrawOffer(GameModel game, PlayerInfoModel sender, PlayerInfoModel receiver)
+    {
+        var senderColor = game.GetColorById(sender.Id);
+        if (!senderColor.HasValue)
+            throw new InvalidOperationException(
+                $"[{nameof(GameHub)}.{nameof(SendDrawOffer)}]: no such player in game {game.GameId}");
+        var sendingResult = game.SendDrawOffer(senderColor.Value);
+        if (!sendingResult.Success)
+        {
+            await Clients.User(sender.Id).CriticalError(sendingResult.Message);
+            return;
+        }
+        var offerPayload = new GameActionPayloadModel
+        {
+            GameActionType = GameActionType.ReceiveDrawOffer,
+            Message = $"{sender.Name} offers a draw."
+        };
+        await Clients.User(receiver.Id).PerformGameAction(offerPayload);
+        var sendingPayload = new GameActionPayloadModel { GameActionType = GameActionType.SendDrawOffer };
+        await Clients.User(sender.Id).PerformGameAction(sendingPayload);
+    }
+
+    private async Task DeclineDrawOffer(GameModel game, PlayerInfoModel sender, PlayerInfoModel receiver)
+    {
+        var senderColor = game.GetColorById(sender.Id);
+        if (!senderColor.HasValue)
+            throw new InvalidOperationException(
+                $"[{nameof(GameHub)}.{nameof(SendDrawOffer)}]: no such player in game {game.GameId}");
+        var sendingResult = game.DeclineDrawOffer(senderColor.Value);
+        if (!sendingResult.Success)
+        {
+            await Clients.User(sender.Id).CriticalError(sendingResult.Message);
+            return;
+        }
+        var declinationPayload = new GameActionPayloadModel { GameActionType = GameActionType.GetDrawOfferDeclination };
+        await Clients.User(receiver.Id).PerformGameAction(declinationPayload);
+        var declinePayload = new GameActionPayloadModel { GameActionType = GameActionType.DeclineDrawOffer };
+        await Clients.User(sender.Id).PerformGameAction(declinePayload);
     }
 
     private string GetMessageByMoveResult(MoveResult moveResult)

@@ -25,7 +25,8 @@ public class GameModel(
     public PlayerColor CurrentPlayerColor => _chessGame.CurrentPlayer == Player.White 
         ? PlayerColor.White 
         : PlayerColor.Black;
-    
+
+    private PlayerColor? PlayerWithDrawOffer { get; set; }
     private readonly ChessGame _chessGame = new();
     private readonly Lock _lockObject = new();
 
@@ -81,6 +82,48 @@ public class GameModel(
 
         return pgnBuilder.ToString().Trim();
     }
+    
+    public DrawOfferResult SendDrawOffer(PlayerColor playerColor)
+    {
+        if (PlayerWithDrawOffer.HasValue)
+            return DrawOfferResult.Fail("Draw offer already exists.");
+        PlayerWithDrawOffer = playerColor;
+        return DrawOfferResult.Ok();
+    }
+
+    public DrawOfferResult AcceptDrawOffer(PlayerColor playerColor)
+    {
+        if (!PlayerWithDrawOffer.HasValue)
+            return DrawOfferResult.Fail("There's no pending draw offers.");
+        if (PlayerWithDrawOffer == playerColor)
+            return DrawOfferResult.Fail("The same side tries to offer and accept a draw.");
+        ClaimDraw();
+        PlayerWithDrawOffer = null;
+        return DrawOfferResult.Ok();
+    }
+
+    public DrawOfferResult DeclineDrawOffer(PlayerColor playerColor)
+    {
+        if (!PlayerWithDrawOffer.HasValue)
+            return DrawOfferResult.Fail("There's no pending draw offers.");
+        if (PlayerWithDrawOffer == playerColor)
+            return DrawOfferResult.Fail("The same side tries to offer and decline a draw.");
+        PlayerWithDrawOffer = null;
+        return DrawOfferResult.Ok();
+    }
+    
+    public PlayerColor? GetColorById(string playerId)
+    {
+        if (playerId == WhitePlayerInfo.Id)
+            return PlayerColor.White;
+        if (playerId == BlackPlayerInfo.Id)
+            return PlayerColor.Black;
+        return null;
+    }
+
+    public void ClearDrawOffer() => PlayerWithDrawOffer = null;
+
+    public bool HasPendingDrawOffer() => PlayerWithDrawOffer.HasValue;
 
     public void ClaimDraw() => _chessGame.ClaimDraw();
 

@@ -1,5 +1,6 @@
 ﻿import { GameActionType } from "./enums/GameActionType.js";
 import { GameResultForPlayer } from "./enums/GameResultForPlayer.js";
+import {ButtonStyle} from "./enums/ButtonStyle.js";
 
 export function loadUi(connection, gameManager, gameId) {
     const whitePlayerInfo = JSON.parse(localStorage.getItem('whitePlayerInfo'));
@@ -26,6 +27,14 @@ export function receiveDrawOffer(connection, message) {
     $('#resignDrawMessage').text(message);
     $('#resignDrawButtonsContainer').css('display', 'none');
     $('#drawOfferContainer').css('display', 'flex');
+}
+
+export function setDrawOfferInactive() {
+    $('#drawOfferButton').css(ButtonStyle.Inactive);
+}
+
+export function setDrawOfferActive() {
+    $('#drawOfferButton').css(ButtonStyle.Active);
 }
 
 export function turnButtonsBack() {
@@ -179,12 +188,6 @@ function bindEventsToResignButton(connection, gameId) {
 
 function bindEventsToDrawOfferButtons(connection, gameId) {
     $('#drawOfferButton').on('click', () => {
-        $('#drawOfferButton').css({
-            'background-color': 'var(--milk-coffee-unselected)',
-            'box-shadow': '-2px 2px 0 var(--dark-coffee), -3px 3px 0 var(--milk-coffee-unselected)',
-            'pointer-events': 'none'
-        });
-        
         connection.invoke('PerformGameAction', gameId, GameActionType.SendDrawOffer);
     });
     
@@ -193,7 +196,6 @@ function bindEventsToDrawOfferButtons(connection, gameId) {
     });
 
     $('#declineButton').on('click', () => {
-        turnButtonsBack();
         connection.invoke('PerformGameAction', gameId, GameActionType.DeclineDrawOffer);
     });
 }
