@@ -1,6 +1,6 @@
 ﻿import { HistoryManager } from "./HistoryManager.js";
 import { TimersManager } from "./TimersManager.js";
-import { highlightSquares, showPromotionDialog } from "../ui.js";
+import {highlightSquares, showPromotionDialog, unhighlightSquares} from "../ui.js";
 import { GameHubMethods } from "../enums/GameHubMethods.js";
 
 export class GameManager {
@@ -63,6 +63,20 @@ export class GameManager {
             || (!this.isWhite && !this.#isWhiteTurn)
     }
     
+    #returnToLive() {
+        this.#shouldReturnToLive = false;
+        $('.history-selected').removeClass('history-selected');
+        this.#historyManager.moveToLastMove();
+        this.board.position(this.#game.fen());
+        const history = this.#game.history({ verbose: true });
+        if (history.length > 0) {
+            const lastMove = history[history.length - 1];
+            highlightSquares(lastMove.from, lastMove.to);
+        } else {
+            unhighlightSquares();
+        }
+    }
+    
     #getConfig() {
         const onDragStart = (source, piece, position, orientation) => {
             $('.piece-417db').addClass('grabbing');
@@ -122,10 +136,7 @@ export class GameManager {
 
         const onSnapEnd = () => {
             if (this.#shouldReturnToLive) {
-                $('.history-selected').removeClass('history-selected');
-                this.#shouldReturnToLive = false;
-                this.#historyManager.moveToLastMove();
-                this.board.position(this.#game.fen());
+                this.#returnToLive();
             }
         }
 
