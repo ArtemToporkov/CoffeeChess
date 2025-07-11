@@ -34,7 +34,6 @@ public class GameHub(
         await Clients.User(game.BlackPlayerInfo.Id).GameStarted(
             game.GameId, false, game.WhitePlayerInfo, game.BlackPlayerInfo,
             totalMillisecondsForOnePlayerLeft);
-    
     }
 
     public async Task SendChatMessage(string gameId, string message)

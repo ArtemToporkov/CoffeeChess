@@ -100,9 +100,13 @@ export class HistoryManager {
         $('#myBoard .piece-417db, body > img.piece-417db').stop(true, true);
 
         $('.history-selected').removeClass('history-selected');
-        const childNumber = ply % 2 === 0 ? 2 : 1;
-        const moveNumber = Math.ceil(ply / 2);
-        $('#history').children().eq(moveNumber).children().eq(childNumber).addClass('history-selected');
+        
+        if (ply > 0) {
+            const childNumber = ply % 2 === 0 ? 2 : 1;
+            const moveNumber = Math.ceil(ply / 2);
+            $('#history').children().eq(moveNumber).children().eq(childNumber).addClass('history-selected');
+        }
+        
         this.#historyViewGame.reset();
         for (let i = 0; i < ply; i++) {
             this.#historyViewGame.move(this.#game.history()[i]);
