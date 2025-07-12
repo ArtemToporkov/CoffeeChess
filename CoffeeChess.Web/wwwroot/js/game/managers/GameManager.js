@@ -1,6 +1,6 @@
 ﻿import { HistoryManager } from "./HistoryManager.js";
 import { TimersManager } from "./TimersManager.js";
-import {highlightSquares, showPromotionDialog, unhighlightSquares} from "../ui.js";
+import { highlightSquares, showPromotionDialog, unhighlightSquares } from "../ui.js";
 import { GameHubMethods } from "../enums/GameHubMethods.js";
 
 export class GameManager {
@@ -23,7 +23,7 @@ export class GameManager {
         this.#connection = connection;
         
         this.#game = new Chess();
-        this.#historyManager = new HistoryManager(this.#game, this.board);
+        this.#historyManager = new HistoryManager(this.board);
         this.#timersManager = new TimersManager(totalMillisecondsLeft);
         this.#timersManager.start();
         
@@ -41,10 +41,10 @@ export class GameManager {
         this.#isWhiteTurn = this.#game.turn() === 'w';
 
         this.#timersManager.updateTimers(newWhiteMillisecondsLeft, newBlackMillisecondsLeft, this.#isWhiteTurn);
-        this.#historyManager.resetHistoryEvents();
         
         const history = this.#game.history({ verbose: true });
         const move = history[history.length - 1];
+        this.#historyManager.update(move, this.#game.fen());
         highlightSquares(move.from, move.to);
     }
     

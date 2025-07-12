@@ -1,121 +1,78 @@
 ﻿import { highlightSquares, unhighlightSquares } from "../ui.js";
 
 export class HistoryManager {
-    #game;
-    #historyViewGame;
-    #board;
-    currentPly = 0;
+    currentPly;
+    board;
+    #movesHistory;
     
-    constructor(game, board) {
-        this.#game = game;
-        this.#board = board;
-        this.#historyViewGame = new Chess();
-
-        $(document).on('keydown', e => {
-            switch (e.key) {
-                case 'ArrowLeft':
-                    if (this.currentPly > 0) {
-                        const ply = this.currentPly;
-                        this.#moveToPly(ply - 1);
-                        if (ply === 1) {
-                            unhighlightSquares();
-                        } else {
-                            this.highlightMoveByPly(ply - 1);
-                        }
-                    }
-                    break;
-                case 'ArrowRight':
-                    if (this.currentPly < this.#game.history().length) {
-                        const ply = this.currentPly;
-                        this.#moveToPly(ply + 1);
-                        this.highlightMoveByPly(ply + 1);
-                    }
-                    break;
-            }
-        });
+    constructor(board, fromFen="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq — 0 1") {
+        this.#bindArrowKeys();
+        this.board = board;
+        this.currentPly = 0;
+        this.#movesHistory = [{move: null, fen: fromFen}];
     }
-
-    resetHistoryEvents() {
-        this.currentPly = this.#game.history().length;
-        const history = $('#history');
-        history.children().slice(1).remove();
-        const moves = this.#game.history();
-        for (let i = 0; i < moves.length; i += 2) {
-            const whiteMove = moves[i];
-            const blackMove = i + 1 < moves.length ? moves[i + 1] : '';
-            let historyRow = this.#getHistoryRow(i / 2 + 1, whiteMove, blackMove);
-
-            historyRow.children().eq(1).on('click', () => {
-                this.#moveToPly(i + 1);
-                this.highlightMoveByPly(i + 1)
-            });
-            if (blackMove !== '') {
-                historyRow.children().eq(2).on('click', () => {
-                    this.#moveToPly(i + 2);
-                    this.highlightMoveByPly(i + 2);
-                });
-            }
-
-            history.append(historyRow);
-        }
-        this.moveToLastMove();
-    }
-
+    
     moveToLastMove() {
-        const history = $('#history');
-        const moves = this.#game.history();
-        this.currentPly = moves.length;
-        if (moves.length > 0) {
-            const lastRow = history.children().last();
-            const lastMoveElement = (moves.length % 2 === 0) ? lastRow.children().eq(2) : lastRow.children().eq(1);
-            lastMoveElement.addClass('history-selected');
-            lastMoveElement.addClass('show').one('animationend', () => {
-                $(this).removeClass('show');
-            })
-        }
+        this.currentPly = this.#movesHistory.length - 1;
+        this.#moveToPlyAndHighlight(this.currentPly);
     }
     
-    highlightMoveByPly(ply) {
-        const move = this.getMoveByPly(ply);
-        if (move === null)
-            return;
-        
-        highlightSquares(move.from, move.to);
-    }
-    
-    getMoveByPly(ply) {
-        const history = this.#historyViewGame.history({ verbose: true });
-        return this.#getMoveByPlyAndHistory(history, ply);
-    }
-   
-    #getMoveByPlyAndHistory(history, ply) {
-        if (ply > history.length || ply < 0) {
-            return null;
-        }
-        
-        return history[ply - 1];
-    }
-
-    #moveToPly(ply) {
-        $('#myBoard .piece-417db, body > img.piece-417db').stop(true, true);
-
+    update(move, fen) {
         $('.history-selected').removeClass('history-selected');
+        this.#movesHistory.push({move: move, fen: fen});
+        this.currentPly = this.#movesHistory.length - 1;
         
-        if (ply > 0) {
-            const childNumber = ply % 2 === 0 ? 2 : 1;
-            const moveNumber = Math.ceil(ply / 2);
-            $('#history').children().eq(moveNumber).children().eq(childNumber).addClass('history-selected');
+        const plyToMoveTo = this.currentPly;
+        const moveCallback = () => this.#moveToPlyAndHighlight(plyToMoveTo);
+        
+        const $lastRow = this.#getLastRow();
+        
+        if ($lastRow !== null && !this.#checkBlackMoveInRow($lastRow)) {
+            $lastRow.children()
+                .last()
+                .text(move.san)
+                .addClass('history-selected')
+                .css('cursor', 'pointer')
+                .on('click', moveCallback);
+            return;
         }
         
-        this.#historyViewGame.reset();
-        for (let i = 0; i < ply; i++) {
-            this.#historyViewGame.move(this.#game.history()[i]);
-        }
+        const $row = this.#getNewHistoryRow(Math.ceil(this.currentPly / 2), move);
+        $row.children()
+            .eq(1)
+            .addClass('history-selected')
+            .on('click', moveCallback);
+        $('#history').append($row);
+    }
+    
+    #getLastRow() {
+        const $children = $('#history').children();
+        if ($children.length <= 1)
+            return null;
+        return $children.last();
+    }
+    
+    #checkBlackMoveInRow($row) {
+        return $row.children().last().text() !== '';
+    }
+    
+    #moveToPlyAndHighlight(ply) {
+        $('#myBoard .piece-417db, body > img.piece-417db').stop(true, true);
+        $('.history-selected').removeClass('history-selected');
+        this.board.position(this.#movesHistory[ply].fen);
         this.currentPly = ply;
-        this.#board.position(this.#historyViewGame.fen());
+        unhighlightSquares();
+        if (ply > 0) {
+            const $row = $('#history').children().eq(Math.ceil(this.currentPly / 2));
+            const toSelect = ply % 2 === 0 ? 2 : 1;
+            $row.children().eq(toSelect).addClass('history-selected');
+            
+            const move = this.#movesHistory[ply].move;
+            highlightSquares(move.from, move.to);
+        }
     }
 
-    #getHistoryRow(number, whiteMove, blackMove) {
+    #getNewHistoryRow(number, move) {
         return $('<div>', {
             class: 'history-row'
         }).append(
@@ -125,12 +82,32 @@ export class HistoryManager {
             }).css('cursor', 'default'),
             $('<div>', {
                 class: 'history-move',
-                text: whiteMove
-            }).css('cursor', whiteMove === 'White' ? 'default' : 'pointer'),
+                text: move.san
+            }).css('cursor', 'pointer'),
             $('<div>', {
                 class: 'history-move',
-                text: blackMove
-            }).css('cursor', ['', 'Black'].includes(blackMove) ? 'default' : 'pointer')
+                text: ''
+            })
         );
+    }
+    
+    #bindArrowKeys() {
+        $(document).on('keydown', e => {
+            e.preventDefault();
+            switch (e.key) {
+                case 'ArrowLeft':
+                    if (this.currentPly > 0) {
+                        const ply = this.currentPly;
+                        this.#moveToPlyAndHighlight(ply - 1);
+                    }
+                    break;
+                case 'ArrowRight':
+                    if (this.currentPly < this.#movesHistory.length - 1) {
+                        const ply = this.currentPly;
+                        this.#moveToPlyAndHighlight(ply + 1);
+                    }
+                    break;
+            }
+        });
     }
 }
