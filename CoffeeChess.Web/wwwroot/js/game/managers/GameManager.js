@@ -23,7 +23,7 @@ export class GameManager {
         this.#connection = connection;
         
         this.#game = new Chess();
-        this.#historyManager = new HistoryManager(this.board);
+        this.#historyManager = new HistoryManager(fen => this.board.position(fen));
         this.#timersManager = new TimersManager(totalMillisecondsLeft);
         this.#timersManager.start();
         

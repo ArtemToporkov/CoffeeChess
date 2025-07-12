@@ -2,12 +2,12 @@
 
 export class HistoryManager {
     currentPly;
-    board;
     #movesHistory;
+    #viewHistory;
     
-    constructor(board, fromFen="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq — 0 1") {
+    constructor(viewHistoryCallback, fromFen="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq — 0 1") {
         this.#bindArrowKeys();
-        this.board = board;
+        this.#viewHistory = viewHistoryCallback;
         this.currentPly = 0;
         this.#movesHistory = [{move: null, fen: fromFen}];
     }
@@ -27,7 +27,7 @@ export class HistoryManager {
         
         const $lastRow = this.#getLastRow();
         
-        if ($lastRow !== null && !this.#checkBlackMoveInRow($lastRow)) {
+        if ($lastRow !== null && this.#movesHistory.length % 2 !== 0) {
             $lastRow.children()
                 .last()
                 .text(move.san)
@@ -52,14 +52,10 @@ export class HistoryManager {
         return $children.last();
     }
     
-    #checkBlackMoveInRow($row) {
-        return $row.children().last().text() !== '';
-    }
-    
     #moveToPlyAndHighlight(ply) {
         $('#myBoard .piece-417db, body > img.piece-417db').stop(true, true);
         $('.history-selected').removeClass('history-selected');
-        this.board.position(this.#movesHistory[ply].fen);
+        this.#viewHistory(this.#movesHistory[ply].fen);
         this.currentPly = ply;
         unhighlightSquares();
         if (ply > 0) {
