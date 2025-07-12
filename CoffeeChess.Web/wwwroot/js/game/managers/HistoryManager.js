@@ -43,6 +43,7 @@ export class HistoryManager {
             .addClass('history-selected')
             .on('click', moveCallback);
         $('#history').append($row);
+        $row.addClass('show').one('animationend', () => $row.removeClass('show'));
     }
     
     #getLastRow() {

@@ -48,6 +48,19 @@
     width: 100%;
 }
 
+.history-row.show {
+    animation: showRow 0.3s ease;
+}
+
+@keyframes showRow {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
 .history-move-number,
 .history-subtitle-number {
     display: flex;
@@ -69,7 +82,7 @@
 }
 
 .history-move {
-    transition: background-color 0.2s ease, color 0.2s ease;
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .history-selected {
