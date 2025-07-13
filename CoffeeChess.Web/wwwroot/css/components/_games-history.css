@@ -1,0 +1,223 @@
+﻿.games-history-panel {
+    background-color: var(--milk-coffee);
+
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    position: absolute;
+
+    box-sizing: border-box;
+    padding: 20px 50px;
+
+    width: 550px;
+    height: 550px;
+    top: 55%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+    border-radius: 50px;
+    box-shadow:
+            0 0 0 8px var(--dark-coffee),
+            0 0 0 12px var(--milk-coffee);
+}
+
+.games-history-title {
+    font-family: 'Caprasimo', sans-serif;
+    color: var(--dark-coffee);
+    font-size: 60px;
+    text-shadow:
+            -3px 3px 0 var(--milk-coffee),
+            -6px 6px 0 var(--dark-coffee);
+    margin: 0;
+}
+
+.games-history {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 25px;
+}
+
+.game-info-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+
+    box-sizing: border-box;
+    padding: 10px 20px;
+    
+    position: relative;
+    width: 100%;
+    border-radius: 30px;
+}
+
+.game-info-container.win-or-draw {
+    background-color: var(--milk-coffee);
+    box-shadow:
+            0 0 0 3px var(--dark-coffee),
+            0 0 0 6px var(--milk-coffee);
+}
+
+.game-info-container.lose {
+    background-color: var(--dark-coffee);
+    box-shadow:
+            0 0 0 3px var(--milk-coffee),
+            0 0 0 6px var(--dark-coffee);
+}
+
+.names-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 5px;
+}
+
+.name-rating-container {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 5px;
+}
+
+.name {
+    font-family: Caprasimo, sans-serif;
+    font-size: 15px;
+}
+
+.lose .name {
+    color: var(--milk-coffee);
+}
+
+.win-or-draw .name {
+    color: var(--dark-coffee);
+}
+
+.rating {
+    font-family: Montserrat, sans-serif;
+    font-size: 15px;
+}
+
+.lose .rating {
+    color: var(--dark-coffee-unselected);
+}
+
+.win-or-draw .rating {
+    color: var(--dark-coffee-unselected);
+}
+
+.result-rating-change-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+}
+
+.result-container,
+.rating-change-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.lose .rating-change-container span {
+    font-family: Montserrat, sans-serif;
+    color: var(--milk-coffee-unselected);
+    font-size: 14px;
+}
+
+.win-or-draw .rating-change-container span {
+    font-family: Montserrat, sans-serif;
+    color: var(--dark-coffee-unselected);
+    font-size: 14px;
+}
+
+.lose .result-container {
+    font-family: Caprasimo, sans-serif;
+    color: var(--milk-coffee);
+}
+
+.win-or-draw .result-container {
+    font-family: Caprasimo, sans-serif;
+    color: var(--dark-coffee);
+}
+
+.games-history-time-control,
+.games-history-date {
+    font-family: Caprasimo, sans-serif;
+    font-size: 14px;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.games-history-time-control {
+    top: 5px;
+}
+
+.games-history-date {
+    bottom: 5px;
+}
+
+.lose .games-history-time-control,
+.lose .games-history-date {
+    color: var(--milk-coffee);
+}
+
+.win-or-draw .games-history-time-control,
+.win-or-draw .games-history-date {
+    color: var(--dark-coffee);
+}
+
+.pagination-panel {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    gap: 10px;
+}
+
+.pagination-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    border-radius: 10px;
+    background-color: var(--dark-coffee);
+    
+    font-family: Caprasimo, sans-serif;
+    font-size: 15px;
+    color: var(--milk-coffee);
+    box-shadow:
+            -2px 2px 0 var(--milk-coffee),
+            -4px 4px 0 var(--dark-coffee);
+    
+    text-decoration: none;
+    
+    width: 40px;
+    height: 30px;
+    
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.pagination-button:active,
+.pagination-button.current {
+    transform: translate(-4px, 4px);
+    box-shadow: none;
+}
+
+.ellipsis {
+    cursor: default;
+    font-family: Caprasimo, sans-serif;
+    font-size: 14px;
+    color: var(--dark-coffee);
+    transform: translateX(-2px);
+}

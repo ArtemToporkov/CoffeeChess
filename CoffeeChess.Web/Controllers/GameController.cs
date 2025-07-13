@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace CoffeeChess.Web.Controllers;
 
-public class GameController() : Controller
+public class GameController : Controller
 {
     public IActionResult GameCreation()
     {
