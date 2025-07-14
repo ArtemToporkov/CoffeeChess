@@ -17,20 +17,20 @@ public class BasePgnBuilderService : IPgnBuilderService
         PlayerInfoModel white, 
         PlayerInfoModel black)
     {
-        _pgnBuilder.Append($"[UTCDate \"{utcDateTime.ToString("yyyy-MM-dd")}\"]\n")
-            .Append($"[UTCEndTime \"{utcDateTime.ToString("hh:mm:ss")}\"]\n")
+        _pgnBuilder.Append($"[UTCDate \"{utcDateTime:yyyy-MM-dd)}\"]\n")
+            .Append($"[UTCEndTime \"{utcDateTime:hh:mm:ss}\"]\n")
             .Append($"[White \"{white.Name}\"]\n")
             .Append($"[Black \"{black.Name}\"]\n")
-            .Append($"[Result \"?\"]")
+            .Append($"[Result \"?\"]\n")
             .Append($"[WhiteElo \"{white.Rating}\"]\n")
             .Append($"[BlackElo \"{black.Rating}\"]\n")
-            .Append($"[TimeControl \"{timeControl.TotalSeconds}+{increment}\"]\n");
+            .Append($"[TimeControl \"{(int)timeControl.TotalSeconds}+{(int)increment.TotalSeconds}\"]\n");
     }
     
     public void AppendMove(string moveSan, TimeSpan timeLeft)
     {
-        var minutesLeft = timeLeft.Minutes < 10 ? "00" : $"{timeLeft.Minutes}";
-        var secondsLeft = timeLeft.Seconds < 10 ? "00" : $"{timeLeft.Seconds}";
+        var minutesLeft = timeLeft.Minutes.ToString("D2");
+        var secondsLeft = timeLeft.Seconds.ToString("D2");
         var lastMoveWasBlack = _pliesCount % 2 == 0;
         _pliesCount++;
         var (lineBreak, moveNumber) = lastMoveWasBlack

@@ -6,6 +6,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoffeeChess.Service", "Coff
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoffeeChess.Core", "CoffeeChess.Core\CoffeeChess.Core.csproj", "{4F06C64B-4E15-4185-B690-948728C9D07C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoffeeChess.Tests", "CoffeeChess.Tests\CoffeeChess.Tests.csproj", "{F48310DD-E9CB-4F9D-9832-215C3B2E1A9C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,5 +26,9 @@ Global
 		{4F06C64B-4E15-4185-B690-948728C9D07C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4F06C64B-4E15-4185-B690-948728C9D07C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4F06C64B-4E15-4185-B690-948728C9D07C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F48310DD-E9CB-4F9D-9832-215C3B2E1A9C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F48310DD-E9CB-4F9D-9832-215C3B2E1A9C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F48310DD-E9CB-4F9D-9832-215C3B2E1A9C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F48310DD-E9CB-4F9D-9832-215C3B2E1A9C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
