@@ -30,6 +30,7 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddSignalR();
 builder.Services.AddSingleton<IGameManagerService, BaseGameManagerService>();
 builder.Services.AddSingleton<IRatingService, EloRatingService>();
+builder.Services.AddSingleton<IPgnBuilderService, BasePgnBuilderService>();
 builder.Services.AddScoped<IGameFinisherService, SignalRGameFinisherService>();
 
 var app = builder.Build();
