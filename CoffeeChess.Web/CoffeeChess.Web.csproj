@@ -58,7 +58,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.5" />
+      <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.7" />
       <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.2.0" />
       <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.5">
         <PrivateAssets>all</PrivateAssets>
@@ -72,8 +72,8 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\CoffeeChess.Core\CoffeeChess.Core.csproj" />
-      <ProjectReference Include="..\CoffeeChess.Service\CoffeeChess.Service.csproj" />
+      <ProjectReference Include="..\CoffeeChess.Application\CoffeeChess.Application.csproj" />
+      <ProjectReference Include="..\CoffeeChess.Infrastructure\CoffeeChess.Infrastructure.csproj" />
     </ItemGroup>
 
 </Project>

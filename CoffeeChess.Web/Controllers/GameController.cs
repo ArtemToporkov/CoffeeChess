@@ -1,5 +1,6 @@
-﻿using CoffeeChess.Core.Enums;
+﻿using CoffeeChess.Domain.Enums;
 using CoffeeChess.Web.Models;
+using CoffeeChess.Web.Models.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CoffeeChess.Web.Controllers;

@@ -19,8 +19,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\CoffeeChess.Core\CoffeeChess.Core.csproj" />
-      <ProjectReference Include="..\CoffeeChess.Service\CoffeeChess.Service.csproj" />
+      <ProjectReference Include="..\CoffeeChess.Infrastructure\CoffeeChess.Infrastructure.csproj" />
     </ItemGroup>
 
 </Project>

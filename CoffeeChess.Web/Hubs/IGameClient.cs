@@ -1,12 +1,12 @@
-﻿using CoffeeChess.Core.Models;
-using CoffeeChess.Core.Models.Payloads;
+﻿using CoffeeChess.Application.Payloads;
+using CoffeeChess.Domain.Aggregates;
 
 namespace CoffeeChess.Web.Hubs;
 
 public interface IGameClient
 {
     public Task GameStarted(string gameId, bool isWhite, 
-        PlayerInfoModel whitePlayerInfo, PlayerInfoModel blackPlayerInfo, double totalMillisecondsForOnePlayerLeft);
+        PlayerInfo whitePlayerInfo, PlayerInfo blackPlayerInfo, double totalMillisecondsForOnePlayerLeft);
 
     public Task ReceiveChatMessage(string username, string message);
 

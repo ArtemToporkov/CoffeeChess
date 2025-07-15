@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
+using CoffeeChess.Infrastructure.Identity;
 
 namespace CoffeeChess.Web.Controllers
 {

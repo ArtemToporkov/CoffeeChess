@@ -1,8 +1,9 @@
-﻿using CoffeeChess.Core.Enums;
-using CoffeeChess.Core.Models;
-using CoffeeChess.Core.Models.Payloads;
-using CoffeeChess.Service.Interfaces;
-using CoffeeChess.Web.Models;
+﻿using CoffeeChess.Application.Interfaces;
+using CoffeeChess.Application.Payloads;
+using CoffeeChess.Domain.Aggregates;
+using CoffeeChess.Domain.Enums;
+using CoffeeChess.Domain.ValueObjects;
+using CoffeeChess.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.SignalR;
 
@@ -17,10 +18,10 @@ public class GameHub(
         => await userManager.GetUserAsync(Context.User!)
            ?? throw new HubException($"[{nameof(GameHub)}.{nameof(GetUserAsync)}]: User not found.");
 
-    public async Task CreateOrJoinGame(GameSettingsModel settings)
+    public async Task CreateOrJoinGame(GameSettings settings)
     {
         var user = await GetUserAsync();
-        var playerInfo = new PlayerInfoModel(user.Id, user.UserName!, user.Rating);
+        var playerInfo = new PlayerInfo(user.Id, user.UserName!, user.Rating);
         var game = gameManager.CreateGameOrQueueChallenge(playerInfo, settings);
         
         if (game is null)
@@ -143,7 +144,7 @@ public class GameHub(
         }
     }
 
-    private async Task SendDrawOffer(GameModel game, PlayerInfoModel sender, PlayerInfoModel receiver)
+    private async Task SendDrawOffer(Game game, PlayerInfo sender, PlayerInfo receiver)
     {
         var sendingResult = GetDrawOfferResultOrThrow(game, sender, 
             (gameModel, color) => gameModel.SendDrawOffer(color));
@@ -162,7 +163,7 @@ public class GameHub(
         await Clients.User(sender.Id).PerformGameAction(sendingPayload);
     }
 
-    private async Task SendDrawOfferDeclination(GameModel game, PlayerInfoModel sender, PlayerInfoModel receiver)
+    private async Task SendDrawOfferDeclination(Game game, PlayerInfo sender, PlayerInfo receiver)
     {
         var declinationResult = GetDrawOfferResultOrThrow(game, sender, 
             (gameModel, color) => gameModel.DeclineDrawOffer(color));
@@ -177,8 +178,8 @@ public class GameHub(
         await Clients.User(sender.Id).PerformGameAction(declinePayload);
     }
 
-    private DrawOfferResult GetDrawOfferResultOrThrow(GameModel game, PlayerInfoModel sender, 
-        Func<GameModel, PlayerColor, DrawOfferResult> getDrawResult)
+    private DrawOfferResult GetDrawOfferResultOrThrow(Game game, PlayerInfo sender, 
+        Func<Game, PlayerColor, DrawOfferResult> getDrawResult)
     {
         var senderColor = game.GetColorById(sender.Id);
         if (!senderColor.HasValue)
@@ -187,7 +188,7 @@ public class GameHub(
         return getDrawResult(game, senderColor.Value);
     }
 
-    private async Task SendResignationResult(GameModel game, PlayerInfoModel caller)
+    private async Task SendResignationResult(Game game, PlayerInfo caller)
     {
         game.Resign(game.WhitePlayerInfo == caller ? PlayerColor.White : PlayerColor.Black);
         var (winner, loser) = game.GetWinnerAndLoser();

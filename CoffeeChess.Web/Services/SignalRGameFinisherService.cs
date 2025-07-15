@@ -1,9 +1,10 @@
-﻿using CoffeeChess.Core.Enums;
-using CoffeeChess.Core.Models;
-using CoffeeChess.Core.Models.Payloads;
-using CoffeeChess.Service.Interfaces;
+﻿using CoffeeChess.Application.Interfaces;
+using CoffeeChess.Application.Payloads;
+using CoffeeChess.Domain.Aggregates;
+using CoffeeChess.Domain.Enums;
+using CoffeeChess.Domain.Interfaces;
+using CoffeeChess.Infrastructure.Identity;
 using CoffeeChess.Web.Hubs;
-using CoffeeChess.Web.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.SignalR;
 
@@ -12,7 +13,7 @@ namespace CoffeeChess.Web.Services;
 public class SignalRGameFinisherService(IHubContext<GameHub, IGameClient> hubContext, 
     UserManager<UserModel> userManager, IRatingService ratingService) : IGameFinisherService
 {
-    public async Task SendDrawResultAndSave(PlayerInfoModel first, PlayerInfoModel second, string reason)
+    public async Task SendDrawResultAndSave(PlayerInfo first, PlayerInfo second, string reason)
     {
         var (firstNewRating, secondNewRating) = ratingService
             .CalculateNewRatingsAfterDraw(first.Rating, second.Rating);
@@ -22,7 +23,7 @@ public class SignalRGameFinisherService(IHubContext<GameHub, IGameClient> hubCon
             firstNewRating, secondNewRating);
     }
 
-    public async Task SendWinResultAndSave(PlayerInfoModel winner, PlayerInfoModel loser,
+    public async Task SendWinResultAndSave(PlayerInfo winner, PlayerInfo loser,
         string winReason, string loseReason)
     {
         var (winnerNewRating, loserNewRating) = ratingService.CalculateNewRatingsAfterWin(winner.Rating, loser.Rating);
@@ -32,7 +33,7 @@ public class SignalRGameFinisherService(IHubContext<GameHub, IGameClient> hubCon
             winnerNewRating, loserNewRating);
     }
 
-    private async Task SendResultAndSave(PlayerInfoModel first, PlayerInfoModel second, 
+    private async Task SendResultAndSave(PlayerInfo first, PlayerInfo second, 
         GameResultForPlayer firstResult, GameResultForPlayer secondResult,
         string firstReason, string secondReason,
         int firstNewRating, int secondNewRating)

@@ -1,8 +1,8 @@
 ﻿using CoffeeChess.Domain.Enums;
 
-namespace CoffeeChess.Web.Models.ViewModels;
+namespace CoffeeChess.Domain.ValueObjects;
 
-public class GameSettingsViewModel
+public class GameSettings
 {
     public int Minutes { get; set; }
     public int Increment { get; set; }

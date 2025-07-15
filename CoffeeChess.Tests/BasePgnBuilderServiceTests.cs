@@ -1,5 +1,5 @@
-﻿using CoffeeChess.Core.Models;
-using CoffeeChess.Service.Implementations;
+﻿using CoffeeChess.Domain.Aggregates;
+using CoffeeChess.Infrastructure.Services;
 
 namespace CoffeeChess.Tests;
 
@@ -8,8 +8,8 @@ public class BasePgnBuilderServiceTests
     [Fact]
     public void Get_DrawResult_ReturnsCorrectPgn()
     {
-        var white = new PlayerInfoModel("xxx", "White", 1980);
-        var black = new PlayerInfoModel("xxx", "Black", 1980);
+        var white = new PlayerInfo("xxx", "White", 1980);
+        var black = new PlayerInfo("xxx", "Black", 1980);
         var date = DateTime.UtcNow;
         var timeControl = TimeSpan.FromMinutes(3);
         var increment = TimeSpan.FromSeconds(2);

@@ -1,4 +1,4 @@
-﻿using CoffeeChess.Service.Interfaces;
+﻿using CoffeeChess.Application.Interfaces;
 
 namespace CoffeeChess.Web.BackgroundWorkers;
 
