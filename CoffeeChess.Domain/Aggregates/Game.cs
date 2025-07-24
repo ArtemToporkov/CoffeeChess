@@ -2,6 +2,7 @@
 using System.Text;
 using ChessDotNetCore;
 using CoffeeChess.Domain.Enums;
+using CoffeeChess.Domain.Events;
 using CoffeeChess.Domain.ValueObjects;
 
 namespace CoffeeChess.Domain.Aggregates;
@@ -21,17 +22,21 @@ public class Game(
     public TimeSpan WhiteTimeLeft { get; private set; } = minutesLeftForPlayer;
     public TimeSpan BlackTimeLeft { get; private set; } = minutesLeftForPlayer;
     public TimeSpan Increment { get; } = increment;
-    public DateTime LastTimeUpdate { get; set; } = DateTime.UtcNow;
+    public DateTime LastTimeUpdate { get; private set; } = DateTime.UtcNow;
     public ConcurrentQueue<ChatMessage> ChatMessages { get; } = new();
     public PlayerColor CurrentPlayerColor => _chessGame.CurrentPlayer == Player.White 
         ? PlayerColor.White 
         : PlayerColor.Black;
     public PlayerColor? PlayerWithDrawOffer { get; private set; }
+    public IReadOnlyCollection<IDomainEvent> DomainEvents => _domainEvents.AsReadOnly();
     
     private readonly ChessGame _chessGame = new();
     private readonly Lock _lockObject = new();
-
-    public MoveResult MakeMove(string playerId, string from, string to, string? promotion)
+    private readonly List<IDomainEvent> _domainEvents = [];
+    
+    public void ClearDomainEvents() => _domainEvents.Clear();
+    
+    public MoveResult ApplyMove(string playerId, string from, string to, string? promotion)
     {
         var currentPlayerId = CurrentPlayerColor == PlayerColor.White 
             ? WhitePlayerInfo.Id 
@@ -172,4 +177,6 @@ public class Game(
         else
             BlackTimeLeft += Increment;
     }
+
+    private void AddDomainEvent(IDomainEvent @event) => _domainEvents.Add(@event);
 }

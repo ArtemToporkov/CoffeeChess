@@ -59,7 +59,7 @@ public class GameHub(
         if (game.IsOver)
             await Clients.Caller.MoveFailed( "Game is over.");
 
-        var moveResult = game.MakeMove(Context.UserIdentifier!, from, to, promotion);
+        var moveResult = game.ApplyMove(Context.UserIdentifier!, from, to, promotion);
         switch (moveResult)
         {
             case MoveResult.Success:
