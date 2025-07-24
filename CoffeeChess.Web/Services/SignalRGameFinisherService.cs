@@ -2,7 +2,7 @@
 using CoffeeChess.Application.Payloads;
 using CoffeeChess.Domain.Aggregates;
 using CoffeeChess.Domain.Enums;
-using CoffeeChess.Domain.Interfaces;
+using CoffeeChess.Domain.Services.Interfaces;
 using CoffeeChess.Infrastructure.Identity;
 using CoffeeChess.Web.Hubs;
 using Microsoft.AspNetCore.Identity;

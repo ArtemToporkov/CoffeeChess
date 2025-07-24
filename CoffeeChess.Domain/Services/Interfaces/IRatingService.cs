@@ -1,4 +1,4 @@
-﻿namespace CoffeeChess.Domain.Interfaces;
+﻿namespace CoffeeChess.Domain.Services.Interfaces;
 
 public interface IRatingService
 {

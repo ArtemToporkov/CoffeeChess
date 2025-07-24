@@ -9,8 +9,4 @@ public interface IGameManagerService
     public Game? CreateGameOrQueueChallenge(PlayerInfo player, GameSettings settings);
     
     bool TryAddChatMessage(string gameId, string username, string message);
-
-    public bool TryGetGame(string gameId, [NotNullWhen(true)] out Game? game);
-    
-    public IEnumerable<Game> GetActiveGames();
 }

@@ -1,4 +1,4 @@
-﻿using CoffeeChess.Domain.Interfaces;
+﻿using CoffeeChess.Domain.Services.Interfaces;
 
 namespace CoffeeChess.Infrastructure.Services;
 

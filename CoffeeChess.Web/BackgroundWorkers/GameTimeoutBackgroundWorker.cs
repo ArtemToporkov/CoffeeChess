@@ -1,4 +1,5 @@
 ﻿using CoffeeChess.Application.Interfaces;
+using CoffeeChess.Domain.Repositories.Interfaces;
 
 namespace CoffeeChess.Web.BackgroundWorkers;
 
@@ -18,8 +19,9 @@ public class GameTimeoutBackgroundWorker(IServiceProvider serviceProvider) : Bac
         using var scope = serviceProvider.CreateScope();
         var gameManager = scope.ServiceProvider.GetRequiredService<IGameManagerService>();
         var gameFinisher = scope.ServiceProvider.GetRequiredService<IGameFinisherService>();
+        var gameRepository = scope.ServiceProvider.GetRequiredService<IGameRepository>();
         
-        foreach (var game in gameManager.GetActiveGames())
+        foreach (var game in gameRepository.GetActiveGames())
         {
             if (!game.UpdateTimeAndCheckTimeout(game.CurrentPlayerColor)) continue;
             game.Resign(game.CurrentPlayerColor);

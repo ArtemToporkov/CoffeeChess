@@ -1,7 +1,7 @@
 ﻿using System.Text;
 using CoffeeChess.Domain.Aggregates;
 using CoffeeChess.Domain.Enums;
-using CoffeeChess.Domain.Interfaces;
+using CoffeeChess.Domain.Services.Interfaces;
 
 namespace CoffeeChess.Infrastructure.Services;
 

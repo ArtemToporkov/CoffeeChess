@@ -2,6 +2,7 @@
 using CoffeeChess.Application.Payloads;
 using CoffeeChess.Domain.Aggregates;
 using CoffeeChess.Domain.Enums;
+using CoffeeChess.Domain.Repositories.Interfaces;
 using CoffeeChess.Domain.ValueObjects;
 using CoffeeChess.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity;
@@ -10,6 +11,7 @@ using Microsoft.AspNetCore.SignalR;
 namespace CoffeeChess.Web.Hubs;
 
 public class GameHub(
+    IGameRepository gameRepository,
     IGameManagerService gameManager,
     IGameFinisherService gameFinisher,
     UserManager<UserModel> userManager) : Hub<IGameClient>
@@ -40,7 +42,7 @@ public class GameHub(
     public async Task SendChatMessage(string gameId, string message)
     {
         var user = await GetUserAsync();
-        if (gameManager.TryGetGame(gameId, out var game) &&
+        if (gameRepository.TryGetValue(gameId, out var game) &&
             gameManager.TryAddChatMessage(gameId, user.UserName!, message))
         {
             await Clients.Users(game.WhitePlayerInfo.Id, game.BlackPlayerInfo.Id)
@@ -50,7 +52,7 @@ public class GameHub(
 
     public async Task MakeMove(string gameId, string from, string to, string? promotion)
     {
-        if (!gameManager.TryGetGame(gameId, out var game))
+        if (!gameRepository.TryGetValue(gameId, out var game))
         {
             await Clients.Caller.CriticalError("Game not found");
             return;
@@ -110,7 +112,7 @@ public class GameHub(
 
     public async Task PerformGameAction(string gameId, GameActionType gameActionType)
     {
-        if (!gameManager.TryGetGame(gameId, out var game))
+        if (!gameRepository.TryGetValue(gameId, out var game))
         {
             await Clients.Caller.CriticalError("Game not found");
             return;

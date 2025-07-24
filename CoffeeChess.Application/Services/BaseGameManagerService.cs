@@ -3,14 +3,15 @@ using System.Diagnostics.CodeAnalysis;
 using CoffeeChess.Application.Interfaces;
 using CoffeeChess.Domain.Aggregates;
 using CoffeeChess.Domain.Enums;
+using CoffeeChess.Domain.Repositories.Interfaces;
 using CoffeeChess.Domain.ValueObjects;
 
 namespace CoffeeChess.Application.Services;
 
-public class BaseGameManagerService : IGameManagerService
+public class BaseGameManagerService(
+    IChallengeRepository challengeRepository, 
+    IGameRepository gameRepository) : IGameManagerService
 {
-    private readonly ConcurrentDictionary<string, GameChallenge> _gamesChallenges = new();
-    private readonly ConcurrentDictionary<string, Game> _games = new();
     private static readonly Random Random = new();
     private static readonly Lock Lock = new();
 
@@ -27,7 +28,7 @@ public class BaseGameManagerService : IGameManagerService
     
     public bool TryAddChatMessage(string gameId, string username, string message)
     {
-        if (!_games.TryGetValue(gameId, out var game)) 
+        if (!gameRepository.TryGetValue(gameId, out var game)) 
             return false;
         game.ChatMessages.Enqueue(new ChatMessage { Username = username, Message = message });
         return true;
@@ -35,15 +36,12 @@ public class BaseGameManagerService : IGameManagerService
 
     public bool TryGetGame(string gameId, [NotNullWhen(true)] out Game? game)
     {
-        if (_games.TryGetValue(gameId, out game))
+        if (gameRepository.TryGetValue(gameId, out game))
             return true;
 
         game = null;
         return false;
     }
-
-    public IEnumerable<Game> GetActiveGames() => _games.Values
-        .Where(g => !g.IsOver);
     
     private Game CreateGameBasedOnFoundChallenge(PlayerInfo connectingPlayerInfo, 
         GameSettings settings, GameChallenge gameChallenge)
@@ -59,24 +57,24 @@ public class BaseGameManagerService : IGameManagerService
             TimeSpan.FromMinutes(settings.Minutes),
             TimeSpan.FromSeconds(settings.Increment)
         );
-        _games.TryAdd(createdGame.GameId, createdGame);
+        gameRepository.TryAdd(createdGame.GameId, createdGame);
         return createdGame;
     }
     
     private void CreateGameChallenge(PlayerInfo creatorInfo, GameSettings settings)
     {
         var gameChallenge = new GameChallenge(creatorInfo, settings);
-        _gamesChallenges.TryAdd(creatorInfo.Id, gameChallenge);
+        challengeRepository.TryAdd(creatorInfo.Id, gameChallenge);
     }
 
     private bool TryFindChallenge(PlayerInfo playerInfo, 
         [NotNullWhen(true)] out GameChallenge? foundChallenge)
     {
-        foreach (var (gameChallengeId, gameChallenge) in _gamesChallenges)
+        foreach (var (gameChallengeId, gameChallenge) in challengeRepository.GetAll())
         {
             if (gameChallenge.PlayerInfo.Id != playerInfo.Id)
             {
-                _gamesChallenges.TryRemove(gameChallengeId, out foundChallenge);
+                challengeRepository.TryRemove(gameChallengeId, out foundChallenge);
                 return foundChallenge is not null;
             }
         }

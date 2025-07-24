@@ -1,6 +1,8 @@
 using CoffeeChess.Application.Interfaces;
 using CoffeeChess.Application.Services;
-using CoffeeChess.Domain.Interfaces;
+using CoffeeChess.Domain.Repositories.Implementations;
+using CoffeeChess.Domain.Repositories.Interfaces;
+using CoffeeChess.Domain.Services.Interfaces;
 using CoffeeChess.Infrastructure.Identity;
 using CoffeeChess.Infrastructure.Services;
 using CoffeeChess.Web.BackgroundWorkers;
@@ -30,6 +32,8 @@ builder.Services.AddHostedService<GameTimeoutBackgroundWorker>();
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddSignalR();
+builder.Services.AddSingleton<IGameRepository, BaseGameRepository>();
+builder.Services.AddSingleton<IChallengeRepository, BaseChallengeRepository>();
 builder.Services.AddSingleton<IGameManagerService, BaseGameManagerService>();
 builder.Services.AddSingleton<IRatingService, EloRatingService>();
 builder.Services.AddScoped<IGameFinisherService, SignalRGameFinisherService>();
