@@ -3,7 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using CoffeeChess.Domain.Aggregates;
 using CoffeeChess.Domain.Repositories.Interfaces;
 
-namespace CoffeeChess.Domain.Repositories.Implementations;
+namespace CoffeeChess.Infrastructure.Repositories.Implementations;
 
 public class BaseChallengeRepository : IChallengeRepository
 {

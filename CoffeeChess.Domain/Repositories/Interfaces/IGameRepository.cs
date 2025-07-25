@@ -1,5 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using CoffeeChess.Domain.Aggregates;
+﻿using CoffeeChess.Domain.Aggregates;
 
 namespace CoffeeChess.Domain.Repositories.Interfaces;
 

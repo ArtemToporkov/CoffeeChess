@@ -1,9 +1,9 @@
 using CoffeeChess.Application.Interfaces;
 using CoffeeChess.Application.Services;
-using CoffeeChess.Domain.Repositories.Implementations;
 using CoffeeChess.Domain.Repositories.Interfaces;
 using CoffeeChess.Domain.Services.Interfaces;
 using CoffeeChess.Infrastructure.Identity;
+using CoffeeChess.Infrastructure.Repositories.Implementations;
 using CoffeeChess.Infrastructure.Services;
 using CoffeeChess.Web.BackgroundWorkers;
 using CoffeeChess.Web.Data;
