@@ -33,15 +33,6 @@ public class BaseGameManagerService(
         game.ChatMessages.Enqueue(new ChatMessage { Username = username, Message = message });
         return true;
     }
-
-    public bool TryGetGame(string gameId, [NotNullWhen(true)] out Game? game)
-    {
-        if (gameRepository.TryGetValue(gameId, out game))
-            return true;
-
-        game = null;
-        return false;
-    }
     
     private Game CreateGameBasedOnFoundChallenge(PlayerInfo connectingPlayerInfo, 
         GameSettings settings, GameChallenge gameChallenge)

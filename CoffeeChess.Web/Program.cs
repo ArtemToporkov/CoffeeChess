@@ -1,3 +1,4 @@
+using CoffeeChess.Application.EventHandlers;
 using CoffeeChess.Application.Interfaces;
 using CoffeeChess.Application.Services;
 using CoffeeChess.Domain.Repositories.Interfaces;
@@ -5,7 +6,6 @@ using CoffeeChess.Domain.Services.Interfaces;
 using CoffeeChess.Infrastructure.Identity;
 using CoffeeChess.Infrastructure.Repositories.Implementations;
 using CoffeeChess.Infrastructure.Services;
-using CoffeeChess.Web.BackgroundWorkers;
 using CoffeeChess.Web.Data;
 using CoffeeChess.Web.Hubs;
 using CoffeeChess.Web.Services;
@@ -28,11 +28,13 @@ builder.Services.AddIdentity<UserModel, IdentityRole>(options =>
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
 
-builder.Services.AddHostedService<GameTimeoutBackgroundWorker>();
-
 builder.Services.AddControllersWithViews();
 builder.Services.AddSignalR();
+builder.Services.AddMediatR(cfg => 
+    cfg.RegisterServicesFromAssembly(typeof(MoveMadeHandler).Assembly));
+
 builder.Services.AddSingleton<IGameRepository, BaseGameRepository>();
+builder.Services.AddSingleton<IGameEventNotifier, GameHub>();
 builder.Services.AddSingleton<IChallengeRepository, BaseChallengeRepository>();
 builder.Services.AddSingleton<IGameManagerService, BaseGameManagerService>();
 builder.Services.AddSingleton<IRatingService, EloRatingService>();

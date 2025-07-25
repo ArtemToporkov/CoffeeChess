@@ -14,7 +14,7 @@ public class GameHub(
     IGameRepository gameRepository,
     IGameManagerService gameManager,
     IGameFinisherService gameFinisher,
-    UserManager<UserModel> userManager) : Hub<IGameClient>
+    UserManager<UserModel> userManager) : Hub<IGameClient>, IGameEventNotifier
 {
     private async Task<UserModel> GetUserAsync()
         => await userManager.GetUserAsync(Context.User!)
@@ -61,53 +61,8 @@ public class GameHub(
         if (game.IsOver)
             await Clients.Caller.MoveFailed( "Game is over.");
 
-        var moveResult = game.ApplyMove(Context.UserIdentifier!, from, to, promotion);
-        switch (moveResult)
-        {
-            case MoveResult.Success:
-                if (game.PlayerWithDrawOffer.HasValue 
-                    && game.GetColorById(Context.UserIdentifier!) != game.PlayerWithDrawOffer.Value)
-                {
-                    var (sender, receiver) = Context.UserIdentifier! == game.WhitePlayerInfo.Id
-                        ? (game.WhitePlayerInfo, game.BlackPlayerInfo)
-                        : (game.BlackPlayerInfo, game.WhitePlayerInfo);
-                    await SendDrawOfferDeclination(game, sender, receiver);
-                }
-                var pgn = game.GetPgn();
-                await Clients.Users(game.WhitePlayerInfo.Id, game.BlackPlayerInfo.Id).MakeMove(
-                    pgn, game.WhiteTimeLeft.TotalMilliseconds, game.BlackTimeLeft.TotalMilliseconds);
-                break;
-            case MoveResult.Invalid or MoveResult.NotYourTurn:
-                await Clients.Caller.MoveFailed(GetMessageByMoveResult(moveResult));
-                break;
-            case MoveResult.ThreeFold:
-            case MoveResult.FiftyMovesRule:
-            case MoveResult.Stalemate:
-                await gameFinisher.SendDrawResultAndSave(game.WhitePlayerInfo, game.BlackPlayerInfo,
-                    GetMessageByMoveResult(moveResult));
-                break;
-            case MoveResult.Checkmate:
-                var (winner, loser) = game.GetWinnerAndLoser();
-                if (winner is null || loser is null)
-                    throw new InvalidOperationException(
-                        $"[{nameof(GameHub)}.{nameof(MakeMove)}]: " +
-                        $"{nameof(game)}.{nameof(game.GetWinnerAndLoser)}() does not think the game is ended.");
-                await gameFinisher.SendWinResultAndSave(winner, loser,
-                    "checkmate.",
-                    "checkmate.");
-                break;
-            case MoveResult.TimeRanOut:
-                await Clients.Caller.MoveFailed("Sorry, your time is up.");
-                (winner, loser) = game.GetWinnerAndLoser();
-                if (winner is null || loser is null)
-                    throw new InvalidOperationException(
-                        $"[{nameof(GameHub)}.{nameof(MakeMove)}]: " +
-                        $"{nameof(game)}.{nameof(game.GetWinnerAndLoser)}() does not think the game is ended.");
-                await gameFinisher.SendWinResultAndSave(winner, loser,
-                    $"{loser.Name}'s time is up.",
-                    $"your time is up.");
-                break;
-        }
+        game.ApplyMove(Context.UserIdentifier!, from, to, promotion);
+        gameRepository.SaveChanges(game);
     }
 
     public async Task PerformGameAction(string gameId, GameActionType gameActionType)
@@ -125,96 +80,72 @@ public class GameHub(
         }
 
         var user = await GetUserAsync();
-        var (callerPlayerInfo, receiverPlayerInfo) = user.Id == game.WhitePlayerInfo.Id
-            ? (game.WhitePlayerInfo, game.BlackPlayerInfo)
-            : (game.BlackPlayerInfo, game.WhitePlayerInfo);
         switch (gameActionType)
         {
             case GameActionType.SendDrawOffer:
-                await SendDrawOffer(game, callerPlayerInfo, receiverPlayerInfo);
+                game.OfferADraw(user.Id);
+                gameRepository.SaveChanges(game);
                 break;
             case GameActionType.AcceptDrawOffer:
-                game.ClaimDraw();
-                await gameFinisher.SendDrawResultAndSave(game.WhitePlayerInfo, game.BlackPlayerInfo, "by agreement.");
+                game.AcceptDrawOffer(user.Id);
+                gameRepository.SaveChanges(game);
                 break;
             case GameActionType.DeclineDrawOffer:
-                await SendDrawOfferDeclination(game, callerPlayerInfo, receiverPlayerInfo);
+                game.DeclineDrawOffer(user.Id);
+                gameRepository.SaveChanges(game);
                 break;
             case GameActionType.Resign:
-                await SendResignationResult(game, callerPlayerInfo);
+                game.Resign(user.Id);
+                gameRepository.SaveChanges(game);
                 break;
         }
     }
 
-    private async Task SendDrawOffer(Game game, PlayerInfo sender, PlayerInfo receiver)
+    public async Task NotifyMoveMade(string whiteId, 
+        string blackId, string pgn, double whiteTimeLeft, double blackTimeLeft)
     {
-        var sendingResult = GetDrawOfferResultOrThrow(game, sender, 
-            (gameModel, color) => gameModel.SendDrawOffer(color));
-        if (!sendingResult.Success)
+        await Clients.Users(whiteId, blackId).MakeMove(pgn, whiteTimeLeft, blackTimeLeft);
+    }
+
+    public async Task NotifyMoveFailed(string moverId, string reason)
+    {
+        await Clients.User(moverId).MoveFailed(reason);
+    }
+
+    public async Task NotifyGameResultUpdated(PlayerInfo whiteInfo, PlayerInfo blackInfo, Result result, 
+        string whiteReason, string blackReason)
+    {
+        switch (result)
         {
-            await Clients.User(sender.Id).CriticalError(sendingResult.Message);
-            return;
+            case Result.WhiteWon:
+                await gameFinisher.SendWinResultAndSave(whiteInfo, blackInfo, whiteReason, blackReason);
+                break;
+            case Result.BlackWon:
+                await gameFinisher.SendWinResultAndSave(blackInfo, whiteInfo, blackReason, whiteReason);
+                break;
+            case Result.Draw:
+                await gameFinisher.SendDrawResultAndSave(whiteInfo, blackInfo, whiteReason);
+                break;
         }
+    }
+
+    public async Task NotifyDrawOfferSent(string senderName, string senderId, string receiverId)
+    {
         var offerPayload = new GameActionPayloadModel
         {
             GameActionType = GameActionType.ReceiveDrawOffer,
-            Message = $"{sender.Name} offers a draw."
+            Message = $"{senderName} offers a draw."
         };
-        await Clients.User(receiver.Id).PerformGameAction(offerPayload);
+        await Clients.User(receiverId).PerformGameAction(offerPayload);
         var sendingPayload = new GameActionPayloadModel { GameActionType = GameActionType.SendDrawOffer };
-        await Clients.User(sender.Id).PerformGameAction(sendingPayload);
+        await Clients.User(senderId).PerformGameAction(sendingPayload);
     }
 
-    private async Task SendDrawOfferDeclination(Game game, PlayerInfo sender, PlayerInfo receiver)
+    public async Task NotifyDrawOfferDeclined(string rejectingId, string senderId)
     {
-        var declinationResult = GetDrawOfferResultOrThrow(game, sender, 
-            (gameModel, color) => gameModel.DeclineDrawOffer(color));
-        if (!declinationResult.Success)
-        {
-            await Clients.User(sender.Id).CriticalError(declinationResult.Message);
-            return;
-        }
-        var declinationPayload = new GameActionPayloadModel { GameActionType = GameActionType.GetDrawOfferDeclination };
-        await Clients.User(receiver.Id).PerformGameAction(declinationPayload);
-        var declinePayload = new GameActionPayloadModel { GameActionType = GameActionType.DeclineDrawOffer };
-        await Clients.User(sender.Id).PerformGameAction(declinePayload);
+        var senderPayload = new GameActionPayloadModel { GameActionType = GameActionType.GetDrawOfferDeclination };
+        await Clients.User(senderId).PerformGameAction(senderPayload);
+        var rejectingPayload = new GameActionPayloadModel { GameActionType = GameActionType.DeclineDrawOffer };
+        await Clients.User(rejectingId).PerformGameAction(rejectingPayload);
     }
-
-    private DrawOfferResult GetDrawOfferResultOrThrow(Game game, PlayerInfo sender, 
-        Func<Game, PlayerColor, DrawOfferResult> getDrawResult)
-    {
-        var senderColor = game.GetColorById(sender.Id);
-        if (!senderColor.HasValue)
-            throw new InvalidOperationException(
-                $"[{nameof(GameHub)}.{nameof(GetDrawOfferResultOrThrow)}]: no such player in game {game.GameId}");
-        return getDrawResult(game, senderColor.Value);
-    }
-
-    private async Task SendResignationResult(Game game, PlayerInfo caller)
-    {
-        game.Resign(game.WhitePlayerInfo == caller ? PlayerColor.White : PlayerColor.Black);
-        var (winner, loser) = game.GetWinnerAndLoser();
-        if (winner is null || loser is null)
-            throw new InvalidOperationException(
-                $"[{nameof(GameHub)}.{nameof(SendResignationResult)}]: " +
-                $"game.{nameof(game.GetWinnerAndLoser)}() does not think the game is ended.");
-        await gameFinisher.SendWinResultAndSave(winner, loser,
-            $"{caller.Name} resigns.",
-            "due to resignation.");
-    }
-
-    private string GetMessageByMoveResult(MoveResult moveResult)
-        => moveResult switch
-        {
-            MoveResult.NotYourTurn => "not your turn.",
-            MoveResult.TimeRanOut => "time is ran out.",
-            MoveResult.Invalid => "invalid move.",
-            MoveResult.Success => "success.",
-            MoveResult.Checkmate => "checkmate.",
-            MoveResult.ThreeFold => "by threefold repetition.",
-            MoveResult.FiftyMovesRule => "by 50-move rule.",
-            MoveResult.Stalemate => "stalemate.",
-            _ => throw new ArgumentException(
-                $"[{nameof(GameHub)}.{nameof(GetMessageByMoveResult)}]: unexpected MoveResult.")
-        };
 }

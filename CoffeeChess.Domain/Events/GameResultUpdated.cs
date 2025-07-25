@@ -1,10 +1,7 @@
-﻿using CoffeeChess.Domain.Enums;
+﻿using CoffeeChess.Domain.Aggregates;
+using CoffeeChess.Domain.Enums;
 
 namespace CoffeeChess.Domain.Events;
 
-public class GameResultUpdated(Result result, string whiteReason, string blackReason) : IDomainEvent
-{
-    public Result Result { get; } = result;
-    public string WhiteReason { get; } = whiteReason;
-    public string BlackReason { get; } = blackReason;
-}
+public record GameResultUpdated(
+    PlayerInfo WhiteInfo, PlayerInfo BlackInfo, Result Result, string WhiteReason, string BlackReason) : IDomainEvent;

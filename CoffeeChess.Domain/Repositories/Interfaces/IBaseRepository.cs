@@ -8,4 +8,5 @@ public interface IBaseRepository<T>
     public bool TryAdd(string id, T challenge);
     public bool TryRemove(string id, [NotNullWhen(true)] out T? removedValue);
     public IEnumerable<(string, T)> GetAll();
+    public void SaveChanges(T obj);
 }

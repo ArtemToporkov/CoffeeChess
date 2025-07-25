@@ -25,5 +25,8 @@ public class BaseChallengeRepository : IChallengeRepository
 
     public IEnumerable<(string, GameChallenge)> GetAll()
         => _challenges.Select(kvp => (kvp.Key, kvp.Value));
-    
+
+    public void SaveChanges(GameChallenge challenge)
+    {
+    }
 }

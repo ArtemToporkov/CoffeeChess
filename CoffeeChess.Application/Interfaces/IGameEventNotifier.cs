@@ -1,0 +1,19 @@
+﻿using CoffeeChess.Domain.Aggregates;
+using CoffeeChess.Domain.Enums;
+using CoffeeChess.Domain.Events;
+
+namespace CoffeeChess.Application.Interfaces;
+
+public interface IGameEventNotifier
+{
+    public Task NotifyMoveMade(string whiteId, string blackId, string pgn, double whiteTimeLeft, double blackTimeLeft);
+
+    public Task NotifyMoveFailed(string moverId, string reason);
+
+    public Task NotifyGameResultUpdated(PlayerInfo whitePlayerInfo, PlayerInfo blackPlayerInfo, 
+        Result result, string whiteReason, string blackReason);
+
+    public Task NotifyDrawOfferSent(string senderName, string senderId, string receiverId);
+
+    public Task NotifyDrawOfferDeclined(string rejectingId, string senderId);
+}

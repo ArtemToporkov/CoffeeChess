@@ -1,6 +1,4 @@
 ﻿namespace CoffeeChess.Domain.Events;
 
-public class MoveMade(string newPgn) : IDomainEvent
-{
-    public string NewPgn { get; } = newPgn;
-}
+public record MoveMade(
+    string WhiteId, string BlackId, string NewPgn, TimeSpan WhiteTimeLeft, TimeSpan BlackTimeLeft) : IDomainEvent;

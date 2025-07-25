@@ -1,6 +1,3 @@
 ﻿namespace CoffeeChess.Domain.Events;
 
-public class MoveFailed(string reason) : IDomainEvent
-{
-    public string Reason { get; } = reason;
-}
+public record MoveFailed(string MoverId, string Reason) : IDomainEvent;

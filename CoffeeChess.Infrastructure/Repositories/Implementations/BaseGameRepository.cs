@@ -2,10 +2,11 @@
 using System.Diagnostics.CodeAnalysis;
 using CoffeeChess.Domain.Aggregates;
 using CoffeeChess.Domain.Repositories.Interfaces;
+using MediatR;
 
 namespace CoffeeChess.Infrastructure.Repositories.Implementations;
 
-public class BaseGameRepository : IGameRepository
+public class BaseGameRepository(IMediator mediator) : IGameRepository
 {
     private readonly ConcurrentDictionary<string, Game> _games = new();
 
@@ -25,6 +26,13 @@ public class BaseGameRepository : IGameRepository
 
     public IEnumerable<(string, Game)> GetAll() 
         => _games.Select(kvp => (kvp.Key, kvp.Value));
+
+    public void SaveChanges(Game game)
+    {
+        foreach (var @event in game.DomainEvents)
+            mediator.Publish(@event);
+        game.ClearDomainEvents();
+    }
 
     public IEnumerable<Game> GetActiveGames() => _games.Values
         .Where(g => !g.IsOver);
