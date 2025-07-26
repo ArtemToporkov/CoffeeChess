@@ -14,7 +14,7 @@ public class GameHub(
     IGameRepository gameRepository,
     IGameManagerService gameManager,
     IGameFinisherService gameFinisher,
-    UserManager<UserModel> userManager) : Hub<IGameClient>, IGameEventNotifier
+    UserManager<UserModel> userManager) : Hub<IGameClient>
 {
     private async Task<UserModel> GetUserAsync()
         => await userManager.GetUserAsync(Context.User!)
@@ -99,53 +99,5 @@ public class GameHub(
                 gameRepository.SaveChanges(game);
                 break;
         }
-    }
-
-    public async Task NotifyMoveMade(string whiteId, 
-        string blackId, string pgn, double whiteTimeLeft, double blackTimeLeft)
-    {
-        await Clients.Users(whiteId, blackId).MakeMove(pgn, whiteTimeLeft, blackTimeLeft);
-    }
-
-    public async Task NotifyMoveFailed(string moverId, string reason)
-    {
-        await Clients.User(moverId).MoveFailed(reason);
-    }
-
-    public async Task NotifyGameResultUpdated(PlayerInfo whiteInfo, PlayerInfo blackInfo, Result result, 
-        string whiteReason, string blackReason)
-    {
-        switch (result)
-        {
-            case Result.WhiteWon:
-                await gameFinisher.SendWinResultAndSave(whiteInfo, blackInfo, whiteReason, blackReason);
-                break;
-            case Result.BlackWon:
-                await gameFinisher.SendWinResultAndSave(blackInfo, whiteInfo, blackReason, whiteReason);
-                break;
-            case Result.Draw:
-                await gameFinisher.SendDrawResultAndSave(whiteInfo, blackInfo, whiteReason);
-                break;
-        }
-    }
-
-    public async Task NotifyDrawOfferSent(string senderName, string senderId, string receiverId)
-    {
-        var offerPayload = new GameActionPayloadModel
-        {
-            GameActionType = GameActionType.ReceiveDrawOffer,
-            Message = $"{senderName} offers a draw."
-        };
-        await Clients.User(receiverId).PerformGameAction(offerPayload);
-        var sendingPayload = new GameActionPayloadModel { GameActionType = GameActionType.SendDrawOffer };
-        await Clients.User(senderId).PerformGameAction(sendingPayload);
-    }
-
-    public async Task NotifyDrawOfferDeclined(string rejectingId, string senderId)
-    {
-        var senderPayload = new GameActionPayloadModel { GameActionType = GameActionType.GetDrawOfferDeclination };
-        await Clients.User(senderId).PerformGameAction(senderPayload);
-        var rejectingPayload = new GameActionPayloadModel { GameActionType = GameActionType.DeclineDrawOffer };
-        await Clients.User(rejectingId).PerformGameAction(rejectingPayload);
     }
 }

@@ -31,10 +31,10 @@ builder.Services.AddIdentity<UserModel, IdentityRole>(options =>
 builder.Services.AddControllersWithViews();
 builder.Services.AddSignalR();
 builder.Services.AddMediatR(cfg => 
-    cfg.RegisterServicesFromAssembly(typeof(MoveMadeHandler).Assembly));
+    cfg.RegisterServicesFromAssembly(typeof(GameEventsNotifierHandler).Assembly));
 
 builder.Services.AddSingleton<IGameRepository, BaseGameRepository>();
-builder.Services.AddSingleton<IGameEventNotifier, GameHub>();
+builder.Services.AddSingleton<IGameEventNotifier, SignalRGameEventNotifierService>();
 builder.Services.AddSingleton<IChallengeRepository, BaseChallengeRepository>();
 builder.Services.AddSingleton<IGameManagerService, BaseGameManagerService>();
 builder.Services.AddSingleton<IRatingService, EloRatingService>();
