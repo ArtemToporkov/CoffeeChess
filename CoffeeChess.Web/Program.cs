@@ -2,10 +2,10 @@ using CoffeeChess.Application.EventHandlers;
 using CoffeeChess.Application.Interfaces;
 using CoffeeChess.Application.Services;
 using CoffeeChess.Domain.Repositories.Interfaces;
+using CoffeeChess.Domain.Services.Implementations;
 using CoffeeChess.Domain.Services.Interfaces;
 using CoffeeChess.Infrastructure.Identity;
 using CoffeeChess.Infrastructure.Repositories.Implementations;
-using CoffeeChess.Infrastructure.Services;
 using CoffeeChess.Web.Data;
 using CoffeeChess.Web.Hubs;
 using CoffeeChess.Web.Services;
@@ -34,7 +34,7 @@ builder.Services.AddMediatR(cfg =>
     cfg.RegisterServicesFromAssembly(typeof(GameEventsNotifierHandler).Assembly));
 
 builder.Services.AddSingleton<IGameRepository, BaseGameRepository>();
-builder.Services.AddSingleton<IGameEventNotifier, SignalRGameEventNotifierService>();
+builder.Services.AddSingleton<IGameEventNotifierService, SignalRGameEventNotifierService>();
 builder.Services.AddSingleton<IChallengeRepository, BaseChallengeRepository>();
 builder.Services.AddSingleton<IGameManagerService, BaseGameManagerService>();
 builder.Services.AddSingleton<IRatingService, EloRatingService>();

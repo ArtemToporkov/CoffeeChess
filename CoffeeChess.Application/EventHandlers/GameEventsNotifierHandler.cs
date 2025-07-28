@@ -4,7 +4,7 @@ using MediatR;
 
 namespace CoffeeChess.Application.EventHandlers;
 
-public class GameEventsNotifierHandler(IGameEventNotifier notifier) : INotificationHandler<DrawOfferDeclined>,
+public class GameEventsNotifierHandler(IGameEventNotifierService notifier) : INotificationHandler<DrawOfferDeclined>,
     INotificationHandler<DrawOfferSent>,
     INotificationHandler<GameResultUpdated>,
     INotificationHandler<MoveFailed>,

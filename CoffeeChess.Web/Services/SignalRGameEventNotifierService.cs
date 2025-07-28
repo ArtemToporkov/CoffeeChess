@@ -9,7 +9,7 @@ namespace CoffeeChess.Web.Services;
 
 public class SignalRGameEventNotifierService(
     IHubContext<GameHub, IGameClient> hubContext,
-    IGameFinisherService gameFinisher) : IGameEventNotifier
+    IGameFinisherService gameFinisher) : IGameEventNotifierService
 {
     public async Task NotifyMoveMade(string whiteId, 
         string blackId, string pgn, double whiteTimeLeft, double blackTimeLeft)

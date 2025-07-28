@@ -1,6 +1,6 @@
 ﻿using CoffeeChess.Domain.Services.Interfaces;
 
-namespace CoffeeChess.Infrastructure.Services;
+namespace CoffeeChess.Domain.Services.Implementations;
 
 public class EloRatingService : IRatingService
 {

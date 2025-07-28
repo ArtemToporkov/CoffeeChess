@@ -4,7 +4,7 @@ using CoffeeChess.Domain.Events;
 
 namespace CoffeeChess.Application.Interfaces;
 
-public interface IGameEventNotifier
+public interface IGameEventNotifierService
 {
     public Task NotifyMoveMade(string whiteId, string blackId, string pgn, double whiteTimeLeft, double blackTimeLeft);
 
