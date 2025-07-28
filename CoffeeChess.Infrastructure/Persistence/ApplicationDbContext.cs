@@ -16,8 +16,13 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         builder.Entity<Player>(entity =>
         {
             entity.HasKey(p => p.Id);
+            
             entity.Property(p => p.Rating)
                 .HasDefaultValue(1500);
+            
+            entity.Property(p => p.Name)
+                .IsRequired();
+            
             entity.HasOne<UserModel>()
                 .WithOne()
                 .HasForeignKey<Player>(p => p.Id);

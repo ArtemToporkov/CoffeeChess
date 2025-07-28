@@ -11,7 +11,7 @@ public class Player
         Rating = rating;
     }
         
-    public string Id { get; }
-    public string Name { get; }
-    public int Rating { get; }
+    public string Id { get; init; }
+    public string Name { get; private set; }
+    public int Rating { get; private set; }
 }
