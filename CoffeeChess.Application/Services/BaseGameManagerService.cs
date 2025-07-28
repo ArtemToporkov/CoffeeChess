@@ -16,13 +16,13 @@ public class BaseGameManagerService(
     private static readonly Random Random = new();
     private static readonly Lock Lock = new();
 
-    public Game? CreateGameOrQueueChallenge(PlayerInfo playerInfo, GameSettings settings)
+    public Game? CreateGameOrQueueChallenge(Player player, GameSettings settings)
     {
         lock (Lock)
         {
-            if (TryFindChallenge(playerInfo, out var foundChallenge))
-                return CreateGameBasedOnFoundChallenge(playerInfo, settings, foundChallenge);
-            CreateGameChallenge(playerInfo, settings);
+            if (TryFindChallenge(player, out var foundChallenge))
+                return CreateGameBasedOnFoundChallenge(player, settings, foundChallenge);
+            CreateGameChallenge(player, settings);
             return null;
         }
     }
@@ -35,13 +35,13 @@ public class BaseGameManagerService(
         return true;
     }
     
-    private Game CreateGameBasedOnFoundChallenge(PlayerInfo connectingPlayerInfo, 
+    private Game CreateGameBasedOnFoundChallenge(Player connectingPlayer, 
         GameSettings settings, GameChallenge gameChallenge)
     {
         var connectingPlayerColor = GetColor(settings);
         var (whitePlayerInfo, blackPlayerInfo) = connectingPlayerColor == ColorPreference.White
-            ? (connectingPlayerInfo, gameChallenge.PlayerInfo)
-            : (gameChallenge.PlayerInfo, connectingPlayerInfo);
+            ? (connectingPlayerInfo: connectingPlayer, PlayerInfo: gameChallenge.Player)
+            : (PlayerInfo: gameChallenge.Player, connectingPlayerInfo: connectingPlayer);
         var createdGame = new Game(
             Guid.NewGuid().ToString("N")[..8],
             whitePlayerInfo,
@@ -53,18 +53,18 @@ public class BaseGameManagerService(
         return createdGame;
     }
     
-    private void CreateGameChallenge(PlayerInfo creatorInfo, GameSettings settings)
+    private void CreateGameChallenge(Player creator, GameSettings settings)
     {
-        var gameChallenge = new GameChallenge(creatorInfo, settings);
-        challengeRepository.TryAdd(creatorInfo.Id, gameChallenge);
+        var gameChallenge = new GameChallenge(creator, settings);
+        challengeRepository.TryAdd(creator.Id, gameChallenge);
     }
 
-    private bool TryFindChallenge(PlayerInfo playerInfo, 
+    private bool TryFindChallenge(Player player, 
         [NotNullWhen(true)] out GameChallenge? foundChallenge)
     {
         foreach (var (gameChallengeId, gameChallenge) in challengeRepository.GetAll())
         {
-            if (gameChallenge.PlayerInfo.Id != playerInfo.Id)
+            if (gameChallenge.Player.Id != player.Id)
             {
                 challengeRepository.TryRemove(gameChallengeId, out foundChallenge);
                 return foundChallenge is not null;

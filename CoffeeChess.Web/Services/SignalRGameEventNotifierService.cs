@@ -23,19 +23,19 @@ public class SignalRGameEventNotifierService(
         await hubContext.Clients.User(moverId).MoveFailed(reason);
     }
 
-    public async Task NotifyGameResultUpdated(PlayerInfo whiteInfo, PlayerInfo blackInfo, Result result, 
+    public async Task NotifyGameResultUpdated(Player white, Player black, Result result, 
         string whiteReason, string blackReason)
     {
         switch (result)
         {
             case Result.WhiteWon:
-                await gameFinisher.SendWinResultAndSave(whiteInfo, blackInfo, whiteReason, blackReason);
+                await gameFinisher.SendWinResultAndSave(white, black, whiteReason, blackReason);
                 break;
             case Result.BlackWon:
-                await gameFinisher.SendWinResultAndSave(blackInfo, whiteInfo, blackReason, whiteReason);
+                await gameFinisher.SendWinResultAndSave(black, white, blackReason, whiteReason);
                 break;
             case Result.Draw:
-                await gameFinisher.SendDrawResultAndSave(whiteInfo, blackInfo, whiteReason);
+                await gameFinisher.SendDrawResultAndSave(white, black, whiteReason);
                 break;
         }
     }

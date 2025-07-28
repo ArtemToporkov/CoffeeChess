@@ -7,7 +7,7 @@ namespace CoffeeChess.Web.Hubs;
 public interface IGameClient
 {
     public Task GameStarted(string gameId, bool isWhite, 
-        PlayerInfo whitePlayerInfo, PlayerInfo blackPlayerInfo, double totalMillisecondsForOnePlayerLeft);
+        Player whitePlayer, Player blackPlayer, double totalMillisecondsForOnePlayerLeft);
 
     public Task ReceiveChatMessage(string username, string message);
 

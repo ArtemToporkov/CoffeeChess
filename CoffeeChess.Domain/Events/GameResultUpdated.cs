@@ -4,5 +4,5 @@ using CoffeeChess.Domain.Enums;
 
 namespace CoffeeChess.Domain.Events;
 
-public record GameResultUpdated(PlayerInfo WhiteInfo, PlayerInfo BlackInfo, Result Result, 
+public record GameResultUpdated(Player White, Player Black, Result Result, 
     string WhiteReason, string BlackReason) : IDomainEvent;

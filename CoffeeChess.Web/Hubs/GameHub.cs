@@ -24,7 +24,7 @@ public class GameHub(
     public async Task CreateOrJoinGame(GameSettings settings)
     {
         var user = await GetUserAsync();
-        var playerInfo = new PlayerInfo(user.Id, user.UserName!, user.Rating);
+        var playerInfo = new Player(user.Id, user.UserName!, user.Rating);
         var game = gameManager.CreateGameOrQueueChallenge(playerInfo, settings);
         
         if (game is null)
@@ -32,11 +32,11 @@ public class GameHub(
         
         var totalMillisecondsForOnePlayerLeft = game.WhiteTimeLeft.TotalMilliseconds;
 
-        await Clients.User(game.WhitePlayerInfo.Id).GameStarted(
-            game.GameId, true, game.WhitePlayerInfo, game.BlackPlayerInfo,
+        await Clients.User(game.WhitePlayer.Id).GameStarted(
+            game.GameId, true, game.WhitePlayer, game.BlackPlayer,
             totalMillisecondsForOnePlayerLeft);
-        await Clients.User(game.BlackPlayerInfo.Id).GameStarted(
-            game.GameId, false, game.WhitePlayerInfo, game.BlackPlayerInfo,
+        await Clients.User(game.BlackPlayer.Id).GameStarted(
+            game.GameId, false, game.WhitePlayer, game.BlackPlayer,
             totalMillisecondsForOnePlayerLeft);
     }
 
@@ -46,7 +46,7 @@ public class GameHub(
         if (gameRepository.TryGetValue(gameId, out var game) &&
             gameManager.TryAddChatMessage(gameId, user.UserName!, message))
         {
-            await Clients.Users(game.WhitePlayerInfo.Id, game.BlackPlayerInfo.Id)
+            await Clients.Users(game.WhitePlayer.Id, game.BlackPlayer.Id)
                 .ReceiveChatMessage(user.UserName!, message);
         }
     }

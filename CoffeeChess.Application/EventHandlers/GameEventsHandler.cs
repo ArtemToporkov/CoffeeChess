@@ -19,7 +19,7 @@ public class GameEventsHandler(IGameEventNotifierService notifier) : INotificati
     public async Task Handle(GameResultUpdated notification, CancellationToken cancellationToken)
     {
         
-        await notifier.NotifyGameResultUpdated(notification.WhiteInfo, notification.BlackInfo,
+        await notifier.NotifyGameResultUpdated(notification.White, notification.Black,
         notification.Result, notification.WhiteReason, notification.BlackReason);
     }
     public async Task Handle(MoveFailed notification, CancellationToken cancellationToken)

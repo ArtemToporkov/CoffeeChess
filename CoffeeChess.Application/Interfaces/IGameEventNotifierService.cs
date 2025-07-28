@@ -11,7 +11,7 @@ public interface IGameEventNotifierService
 
     public Task NotifyMoveFailed(string moverId, string reason);
 
-    public Task NotifyGameResultUpdated(PlayerInfo whitePlayerInfo, PlayerInfo blackPlayerInfo, 
+    public Task NotifyGameResultUpdated(Player whitePlayer, Player blackPlayer, 
         Result result, string whiteReason, string blackReason);
 
     public Task NotifyDrawOfferSent(string senderName, string senderId, string receiverId);

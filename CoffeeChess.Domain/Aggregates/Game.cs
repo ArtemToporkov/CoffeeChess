@@ -1,23 +1,22 @@
-﻿using System.Collections.Concurrent;
-using System.Text;
+﻿using System.Text;
 using ChessDotNetCore;
 using CoffeeChess.Domain.Entities;
 using CoffeeChess.Domain.Enums;
 using CoffeeChess.Domain.Events;
-using CoffeeChess.Domain.ValueObjects;
-
+using Player = CoffeeChess.Domain.Entities.Player;
+using PlayerSide = ChessDotNetCore.Player;
 namespace CoffeeChess.Domain.Aggregates;
 
 public class Game(
     string gameId, 
-    PlayerInfo whitePlayerInfo,
-    PlayerInfo blackPlayerInfo, 
+    Player whitePlayer,
+    Player blackPlayer, 
     TimeSpan minutesLeftForPlayer,
     TimeSpan increment)
 {
     public string GameId { get; } = gameId;
-    public PlayerInfo WhitePlayerInfo { get; } = whitePlayerInfo;
-    public PlayerInfo BlackPlayerInfo { get; } = blackPlayerInfo;
+    public Player WhitePlayer { get; } = whitePlayer;
+    public Player BlackPlayer { get; } = blackPlayer;
     public Chat Chat { get; } = new();
     public bool IsOver => _chessGame.GameResult != GameResult.OnGoing &&
                           _chessGame.GameResult != GameResult.Check;
@@ -25,7 +24,7 @@ public class Game(
     public TimeSpan BlackTimeLeft { get; private set; } = minutesLeftForPlayer;
     public TimeSpan Increment { get; } = increment;
     public DateTime LastTimeUpdate { get; private set; } = DateTime.UtcNow;
-    public PlayerColor CurrentPlayerColor => _chessGame.CurrentPlayer == Player.White 
+    public PlayerColor CurrentPlayerColor => _chessGame.CurrentPlayer == PlayerSide.White 
         ? PlayerColor.White 
         : PlayerColor.Black;
     public PlayerColor? PlayerWithDrawOffer { get; private set; }
@@ -41,8 +40,8 @@ public class Game(
     {
         var playerColor = GetColorById(playerId);
         var currentPlayerId = CurrentPlayerColor == PlayerColor.White 
-            ? WhitePlayerInfo.Id 
-            : BlackPlayerInfo.Id;
+            ? WhitePlayer.Id 
+            : BlackPlayer.Id;
         var currentPlayerColor = CurrentPlayerColor;
         
         if (playerId != currentPlayerId)
@@ -54,7 +53,7 @@ public class Game(
         var promotionChar = promotion?[0];
 
         var move = new Move(from, to, CurrentPlayerColor == PlayerColor.White 
-            ? Player.White : Player.Black, promotionChar);
+            ? PlayerSide.White : PlayerSide.Black, promotionChar);
         if (_chessGame.MakeMove(move, false) is MoveType.Invalid)
         {
             _domainEvents.Add(new MoveFailed(playerId, "Invalid move."));
@@ -69,41 +68,41 @@ public class Game(
             _domainEvents.Add(new MoveFailed(playerId, "Time is ran up."));
             Resign(playerId);
             var (result, whiteReason, blackReason) = playerColor == PlayerColor.White
-                ? (Result.BlackWon, "your time is run up.", $"{WhitePlayerInfo.Name}'s time is ran up.")
-                : (Result.WhiteWon, $"{BlackPlayerInfo.Name}'s time is ran up.", "your time is ran up.");
-            _domainEvents.Add(new GameResultUpdated(WhitePlayerInfo, BlackPlayerInfo, result, whiteReason, blackReason));
+                ? (Result.BlackWon, "your time is run up.", $"{WhitePlayer.Name}'s time is ran up.")
+                : (Result.WhiteWon, $"{BlackPlayer.Name}'s time is ran up.", "your time is ran up.");
+            _domainEvents.Add(new GameResultUpdated(WhitePlayer, BlackPlayer, result, whiteReason, blackReason));
             return;
         }
 
         DoIncrement(currentPlayerColor);
-        _domainEvents.Add(new MoveMade(WhitePlayerInfo.Id, BlackPlayerInfo.Id, 
+        _domainEvents.Add(new MoveMade(WhitePlayer.Id, BlackPlayer.Id, 
             GetPgn(), WhiteTimeLeft, BlackTimeLeft));
         
         if (_chessGame.ThreeFoldRepeatAndThisCanResultInDraw)
         {
-            _domainEvents.Add(new GameResultUpdated(WhitePlayerInfo, BlackPlayerInfo, 
+            _domainEvents.Add(new GameResultUpdated(WhitePlayer, BlackPlayer, 
                 Result.Draw, "by threefold.", "by threefold."));
             return;
         }
 
         if (_chessGame.FiftyMovesAndThisCanResultInDraw)
         {
-            _domainEvents.Add(new GameResultUpdated(WhitePlayerInfo, BlackPlayerInfo, 
+            _domainEvents.Add(new GameResultUpdated(WhitePlayer, BlackPlayer, 
                 Result.Draw, "by 50-moves rule.", "by 50-moves rule."));
             return;
         }
         
-        if (_chessGame.IsCheckmated(Player.White) || _chessGame.IsCheckmated(Player.Black))
+        if (_chessGame.IsCheckmated(PlayerSide.White) || _chessGame.IsCheckmated(PlayerSide.Black))
         {
-            var result = _chessGame.IsCheckmated(Player.White) ? Result.BlackWon : Result.WhiteWon;
-            _domainEvents.Add(new GameResultUpdated(WhitePlayerInfo, BlackPlayerInfo, 
+            var result = _chessGame.IsCheckmated(PlayerSide.White) ? Result.BlackWon : Result.WhiteWon;
+            _domainEvents.Add(new GameResultUpdated(WhitePlayer, BlackPlayer, 
                 result, "by checkmate.", "by checkmate."));
             return;
         }
         
-        if (_chessGame.IsStalemated(Player.White) || _chessGame.IsStalemated(Player.Black))
+        if (_chessGame.IsStalemated(PlayerSide.White) || _chessGame.IsStalemated(PlayerSide.Black))
         { 
-            _domainEvents.Add(new GameResultUpdated(WhitePlayerInfo,  BlackPlayerInfo, 
+            _domainEvents.Add(new GameResultUpdated(WhitePlayer,  BlackPlayer, 
                 Result.Draw, "by stalemate.", "by stalemate."));
         }
     }
@@ -124,9 +123,9 @@ public class Game(
     
     public PlayerColor GetColorById(string playerId)
     {
-        if (playerId == WhitePlayerInfo.Id)
+        if (playerId == WhitePlayer.Id)
             return PlayerColor.White;
-        if (playerId == BlackPlayerInfo.Id)
+        if (playerId == BlackPlayer.Id)
             return PlayerColor.Black;
         throw new InvalidOperationException("There's no such player in the game.");
     }
@@ -135,11 +134,11 @@ public class Game(
     {
         if (PlayerWithDrawOffer.HasValue)
             throw new InvalidOperationException("There's already pending draw offer.");
-        PlayerWithDrawOffer = playerId == WhitePlayerInfo.Id ? PlayerColor.White : PlayerColor.Black;
+        PlayerWithDrawOffer = playerId == WhitePlayer.Id ? PlayerColor.White : PlayerColor.Black;
         var senderColor = GetColorById(playerId);
         var (sender, receiver) = senderColor == PlayerColor.White
-            ? (WhitePlayerInfo, BlackPlayerInfo) 
-            : (BlackPlayerInfo, WhitePlayerInfo);
+            ? (WhitePlayerInfo: WhitePlayer, BlackPlayerInfo: BlackPlayer) 
+            : (BlackPlayerInfo: BlackPlayer, WhitePlayerInfo: WhitePlayer);
         _domainEvents.Add(new DrawOfferSent(sender.Name, sender.Id, receiver.Id));
     }
 
@@ -151,7 +150,7 @@ public class Game(
         if (PlayerWithDrawOffer == playerColor)
             throw new InvalidOperationException("The same side tries to offer and accept a draw.");
         PlayerWithDrawOffer = null;
-        _domainEvents.Add(new GameResultUpdated(WhitePlayerInfo, BlackPlayerInfo, Result.Draw, 
+        _domainEvents.Add(new GameResultUpdated(WhitePlayer, BlackPlayer, Result.Draw, 
             "by agreement.", "by agreement."));
     }
 
@@ -164,20 +163,20 @@ public class Game(
             throw new InvalidOperationException("The same side tries to offer and decline a draw.");
         PlayerWithDrawOffer = null;
         var (rejecting, sender) = PlayerWithDrawOffer == PlayerColor.White
-            ? (BlackPlayerInfo, WhitePlayerInfo)
-            : (WhitePlayerInfo, BlackPlayerInfo);
+            ? (BlackPlayer, WhitePlayer)
+            : (WhitePlayer, BlackPlayer);
         _domainEvents.Add(new DrawOfferDeclined(rejecting.Id, sender.Id));
     }
 
     public void Resign(string playerId) 
     {
         var isWhite = GetColorById(playerId) == PlayerColor.White;
-        _chessGame.Resign(isWhite ? Player.White : Player.Black);
+        _chessGame.Resign(isWhite ? PlayerSide.White : PlayerSide.Black);
         var result = isWhite ? Result.BlackWon : Result.WhiteWon;
         var (whiteReason, blackReason) = isWhite
-            ? ("by resignation.", $"{WhitePlayerInfo.Name} resigns.")
-            : ($"{BlackPlayerInfo.Name} resigns.", "by resignation.");
-        _domainEvents.Add(new GameResultUpdated(WhitePlayerInfo, BlackPlayerInfo, result, whiteReason, blackReason));
+            ? ("by resignation.", $"{WhitePlayer.Name} resigns.")
+            : ($"{BlackPlayer.Name} resigns.", "by resignation.");
+        _domainEvents.Add(new GameResultUpdated(WhitePlayer, BlackPlayer, result, whiteReason, blackReason));
     }
 
     private bool UpdateTimeAndCheckTimeout(PlayerColor playerColor)

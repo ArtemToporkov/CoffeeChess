@@ -5,8 +5,8 @@ namespace CoffeeChess.Application.Interfaces;
 
 public interface IGameFinisherService
 {
-    public Task SendWinResultAndSave(PlayerInfo winner, PlayerInfo loser, 
+    public Task SendWinResultAndSave(Player winner, Player loser, 
         string winReason, string loseReason);
 
-    public Task SendDrawResultAndSave(PlayerInfo first, PlayerInfo second, string reason);
+    public Task SendDrawResultAndSave(Player first, Player second, string reason);
 }

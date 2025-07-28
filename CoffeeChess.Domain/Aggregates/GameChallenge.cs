@@ -4,9 +4,9 @@ using CoffeeChess.Domain.ValueObjects;
 namespace CoffeeChess.Domain.Aggregates;
 
 public class GameChallenge(
-    PlayerInfo playerInfo,
+    Player player,
     GameSettings gameSettings) 
 {
-    public PlayerInfo PlayerInfo { get; init; } = playerInfo;
+    public Player Player { get; init; } = player;
     public GameSettings GameSettings { get; init; } = gameSettings;
 }

@@ -7,7 +7,7 @@ namespace CoffeeChess.Application.Interfaces;
 
 public interface IGameManagerService
 {
-    public Game? CreateGameOrQueueChallenge(PlayerInfo player, GameSettings settings);
+    public Game? CreateGameOrQueueChallenge(Player player, GameSettings settings);
     
     bool TryAddChatMessage(string gameId, string username, string message);
 }

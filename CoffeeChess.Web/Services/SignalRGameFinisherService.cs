@@ -14,7 +14,7 @@ namespace CoffeeChess.Web.Services;
 public class SignalRGameFinisherService(IHubContext<GameHub, IGameClient> hubContext, 
     UserManager<UserModel> userManager, IRatingService ratingService) : IGameFinisherService
 {
-    public async Task SendDrawResultAndSave(PlayerInfo first, PlayerInfo second, string reason)
+    public async Task SendDrawResultAndSave(Player first, Player second, string reason)
     {
         var (firstNewRating, secondNewRating) = ratingService
             .CalculateNewRatingsAfterDraw(first.Rating, second.Rating);
@@ -24,7 +24,7 @@ public class SignalRGameFinisherService(IHubContext<GameHub, IGameClient> hubCon
             firstNewRating, secondNewRating);
     }
 
-    public async Task SendWinResultAndSave(PlayerInfo winner, PlayerInfo loser,
+    public async Task SendWinResultAndSave(Player winner, Player loser,
         string winReason, string loseReason)
     {
         var (winnerNewRating, loserNewRating) = ratingService.CalculateNewRatingsAfterWin(winner.Rating, loser.Rating);
@@ -34,7 +34,7 @@ public class SignalRGameFinisherService(IHubContext<GameHub, IGameClient> hubCon
             winnerNewRating, loserNewRating);
     }
 
-    private async Task SendResultAndSave(PlayerInfo first, PlayerInfo second, 
+    private async Task SendResultAndSave(Player first, Player second, 
         GameResultForPlayer firstResult, GameResultForPlayer secondResult,
         string firstReason, string secondReason,
         int firstNewRating, int secondNewRating)

@@ -1,6 +1,6 @@
 ﻿namespace CoffeeChess.Domain.Entities;
 
-public class PlayerInfo(string id, string name, int rating)
+public class Player(string id, string name, int rating)
 {
     public string Id { get; } = id;
     public string Name { get; } = name;
