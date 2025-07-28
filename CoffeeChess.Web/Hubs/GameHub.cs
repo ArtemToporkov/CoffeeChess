@@ -13,8 +13,8 @@ namespace CoffeeChess.Web.Hubs;
 
 public class GameHub(
     IGameRepository gameRepository,
+    IPlayerRepository playerRepository,
     IGameManagerService gameManager,
-    IGameFinisherService gameFinisher,
     UserManager<UserModel> userManager) : Hub<IGameClient>
 {
     private async Task<UserModel> GetUserAsync()
@@ -24,9 +24,10 @@ public class GameHub(
     public async Task CreateOrJoinGame(GameSettings settings)
     {
         var user = await GetUserAsync();
-        // TODO: use player from repo, don't create a new one
-        var playerInfo = new Player(user.Id, user.UserName!, 1);
-        var game = gameManager.CreateGameOrQueueChallenge(playerInfo, settings);
+        var player = await playerRepository.GetAsync(user.Id) ?? throw new InvalidOperationException(
+            $"[{nameof(GameHub)}.{nameof(CreateOrJoinGame)}]: Player not found.]");
+        
+        var game = gameManager.CreateGameOrQueueChallenge(player, settings);
         
         if (game is null)
             return;
