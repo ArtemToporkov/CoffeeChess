@@ -1,10 +1,17 @@
 ﻿using CoffeeChess.Application.Interfaces;
+using CoffeeChess.Domain.Enums;
 using CoffeeChess.Domain.Events;
+using CoffeeChess.Domain.Events.Game;
+using CoffeeChess.Domain.Repositories.Interfaces;
+using CoffeeChess.Domain.Services.Interfaces;
 using MediatR;
 
 namespace CoffeeChess.Application.EventHandlers;
 
-public class GameEventsHandler(IGameEventNotifierService notifier) : INotificationHandler<DrawOfferDeclined>,
+public class GameEventsHandler(
+    IRatingService ratingService,
+    IPlayerRepository playerRepository, 
+    IGameEventNotifierService notifier) : INotificationHandler<DrawOfferDeclined>,
     INotificationHandler<DrawOfferSent>,
     INotificationHandler<GameResultUpdated>,
     INotificationHandler<MoveFailed>,
@@ -18,10 +25,17 @@ public class GameEventsHandler(IGameEventNotifierService notifier) : INotificati
     
     public async Task Handle(GameResultUpdated notification, CancellationToken cancellationToken)
     {
+        var (newWhiteRating, newBlackRating) = ratingService.CalculateNewRatings(
+            notification.White.Rating, notification.Black.Rating, 
+            notification.Result);
+
+        await UpdateRating(notification.White.Id, newWhiteRating);
+        await UpdateRating(notification.Black.Id, newBlackRating);
         
         await notifier.NotifyGameResultUpdated(notification.White, notification.Black,
         notification.Result, notification.WhiteReason, notification.BlackReason);
     }
+    
     public async Task Handle(MoveFailed notification, CancellationToken cancellationToken)
         => await notifier.NotifyMoveFailed(notification.MoverId, notification.Reason);
     
@@ -29,4 +43,11 @@ public class GameEventsHandler(IGameEventNotifierService notifier) : INotificati
         => await notifier.NotifyMoveMade(notification.WhiteId, notification.BlackId, 
             notification.NewPgn, notification.WhiteTimeLeft.TotalMilliseconds, 
             notification.BlackTimeLeft.TotalMilliseconds);
+
+    private async Task UpdateRating(string playerId, int newRating)
+    {
+        var player = await playerRepository.GetAsync(playerId) ?? throw new InvalidOperationException(
+            $"[{nameof(GameEventsHandler)}.{nameof(UpdateRating)}]: player not found.");
+        player.UpdateRating(newRating);
+    }
 }

@@ -1,7 +1,7 @@
-﻿using CoffeeChess.Domain.Entities;
+﻿using CoffeeChess.Domain.Aggregates;
 using CoffeeChess.Domain.ValueObjects;
 
-namespace CoffeeChess.Domain.Aggregates;
+namespace CoffeeChess.Domain.Entities;
 
 public class GameChallenge(
     Player player,

@@ -3,7 +3,8 @@ using ChessDotNetCore;
 using CoffeeChess.Domain.Entities;
 using CoffeeChess.Domain.Enums;
 using CoffeeChess.Domain.Events;
-using Player = CoffeeChess.Domain.Entities.Player;
+using CoffeeChess.Domain.Events.Game;
+using Player = CoffeeChess.Domain.Aggregates.Player;
 using PlayerSide = ChessDotNetCore.Player;
 namespace CoffeeChess.Domain.Aggregates;
 

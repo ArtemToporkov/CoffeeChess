@@ -1,6 +1,3 @@
-﻿using CoffeeChess.Domain.Aggregates;
-using MediatR;
-
-namespace CoffeeChess.Domain.Events;
+﻿namespace CoffeeChess.Domain.Events.Game;
 
 public record DrawOfferSent(string SenderName, string SenderId, string ReceiverId) : IDomainEvent;
