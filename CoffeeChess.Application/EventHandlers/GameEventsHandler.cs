@@ -29,8 +29,8 @@ public class GameEventsHandler(
             notification.White.Rating, notification.Black.Rating, 
             notification.Result);
 
-        await UpdateRating(notification.White.Id, newWhiteRating);
-        await UpdateRating(notification.Black.Id, newBlackRating);
+        await UpdateRatingAndSave(notification.White.Id, newWhiteRating);
+        await UpdateRatingAndSave(notification.Black.Id, newBlackRating);
         
         await notifier.NotifyGameResultUpdated(notification.White, notification.Black,
         notification.Result, notification.WhiteReason, notification.BlackReason);
@@ -44,10 +44,11 @@ public class GameEventsHandler(
             notification.NewPgn, notification.WhiteTimeLeft.TotalMilliseconds, 
             notification.BlackTimeLeft.TotalMilliseconds);
 
-    private async Task UpdateRating(string playerId, int newRating)
+    private async Task UpdateRatingAndSave(string playerId, int newRating)
     {
         var player = await playerRepository.GetAsync(playerId) ?? throw new InvalidOperationException(
-            $"[{nameof(GameEventsHandler)}.{nameof(UpdateRating)}]: player not found.");
+            $"[{nameof(GameEventsHandler)}.{nameof(UpdateRatingAndSave)}]: player not found.");
         player.UpdateRating(newRating);
+        await playerRepository.SaveChangesAsync(player);
     }
 }

@@ -6,12 +6,14 @@ namespace CoffeeChess.Domain.Aggregates;
 
 public class Player
 {
-    public string Id { get; init; }
-    public string Name { get; private set; }
+    public string Id { get; init; } = null!;
+    public string Name { get; private set; } = null!;
     public int Rating { get; private set; }
     public IReadOnlyCollection<IDomainEvent> DomainEvents => _domainEvents.AsReadOnly();
 
-    private List<IDomainEvent> _domainEvents;
+    private readonly List<IDomainEvent> _domainEvents = [];
+
+    public void ClearDomainEvents() => _domainEvents.Clear();
     
     public Player(string id, string name, int rating)
     {
