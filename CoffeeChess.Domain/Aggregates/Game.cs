@@ -1,6 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using System.Text;
 using ChessDotNetCore;
+using CoffeeChess.Domain.Entities;
 using CoffeeChess.Domain.Enums;
 using CoffeeChess.Domain.Events;
 using CoffeeChess.Domain.ValueObjects;
@@ -17,13 +18,13 @@ public class Game(
     public string GameId { get; } = gameId;
     public PlayerInfo WhitePlayerInfo { get; } = whitePlayerInfo;
     public PlayerInfo BlackPlayerInfo { get; } = blackPlayerInfo;
+    public Chat Chat { get; } = new();
     public bool IsOver => _chessGame.GameResult != GameResult.OnGoing &&
                           _chessGame.GameResult != GameResult.Check;
     public TimeSpan WhiteTimeLeft { get; private set; } = minutesLeftForPlayer;
     public TimeSpan BlackTimeLeft { get; private set; } = minutesLeftForPlayer;
     public TimeSpan Increment { get; } = increment;
     public DateTime LastTimeUpdate { get; private set; } = DateTime.UtcNow;
-    public ConcurrentQueue<ChatMessage> ChatMessages { get; } = new();
     public PlayerColor CurrentPlayerColor => _chessGame.CurrentPlayer == Player.White 
         ? PlayerColor.White 
         : PlayerColor.Black;
