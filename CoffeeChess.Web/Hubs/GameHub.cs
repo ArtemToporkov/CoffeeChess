@@ -24,7 +24,8 @@ public class GameHub(
     public async Task CreateOrJoinGame(GameSettings settings)
     {
         var user = await GetUserAsync();
-        var playerInfo = new Player(user.Id, user.UserName!, user.Rating);
+        // TODO: use player from repo, don't create a new one
+        var playerInfo = new Player(user.Id, user.UserName!, 1);
         var game = gameManager.CreateGameOrQueueChallenge(playerInfo, settings);
         
         if (game is null)

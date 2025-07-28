@@ -52,10 +52,7 @@ public class SignalRGameFinisherService(IHubContext<GameHub, IGameClient> hubCon
 
     private async Task UpdateRating(string userId, int newRating)
     {
-        var user = await userManager.FindByIdAsync(userId);
-        if (user is null)
-            return;
-        user.Rating = newRating;
-        await userManager.UpdateAsync(user);
+        // TODO
+        await Task.CompletedTask;
     }
 }

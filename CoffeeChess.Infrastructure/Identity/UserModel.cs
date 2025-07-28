@@ -2,7 +2,4 @@
 
 namespace CoffeeChess.Infrastructure.Identity;
 
-public class UserModel : IdentityUser
-{
-    public int Rating { get; set; } = 1500;
-}
+public class UserModel : IdentityUser;

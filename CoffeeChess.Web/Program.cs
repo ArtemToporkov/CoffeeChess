@@ -34,10 +34,10 @@ builder.Services.AddMediatR(cfg =>
     cfg.RegisterServicesFromAssembly(typeof(GameEventsHandler).Assembly));
 
 builder.Services.AddSingleton<IGameRepository, BaseGameRepository>();
-builder.Services.AddSingleton<IGameEventNotifierService, SignalRGameEventNotifierService>();
 builder.Services.AddSingleton<IChallengeRepository, BaseChallengeRepository>();
 builder.Services.AddSingleton<IGameManagerService, BaseGameManagerService>();
 builder.Services.AddSingleton<IRatingService, EloRatingService>();
+builder.Services.AddScoped<IGameEventNotifierService, SignalRGameEventNotifierService>();
 builder.Services.AddScoped<IGameFinisherService, SignalRGameFinisherService>();
 
 var app = builder.Build();
