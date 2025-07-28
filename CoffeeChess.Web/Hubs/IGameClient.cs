@@ -1,5 +1,6 @@
 ﻿using CoffeeChess.Application.Payloads;
 using CoffeeChess.Domain.Aggregates;
+using CoffeeChess.Domain.Entities;
 
 namespace CoffeeChess.Web.Hubs;
 

@@ -4,7 +4,7 @@ using MediatR;
 
 namespace CoffeeChess.Application.EventHandlers;
 
-public class GameEventsNotifierHandler(IGameEventNotifierService notifier) : INotificationHandler<DrawOfferDeclined>,
+public class GameEventsHandler(IGameEventNotifierService notifier) : INotificationHandler<DrawOfferDeclined>,
     INotificationHandler<DrawOfferSent>,
     INotificationHandler<GameResultUpdated>,
     INotificationHandler<MoveFailed>,
@@ -17,9 +17,11 @@ public class GameEventsNotifierHandler(IGameEventNotifierService notifier) : INo
         => await notifier.NotifyDrawOfferSent(notification.SenderName, notification.SenderId, notification.ReceiverId);
     
     public async Task Handle(GameResultUpdated notification, CancellationToken cancellationToken)
-        => await notifier.NotifyGameResultUpdated(notification.WhiteInfo, notification.BlackInfo, 
-            notification.Result, notification.WhiteReason, notification.BlackReason);
-    
+    {
+        
+        await notifier.NotifyGameResultUpdated(notification.WhiteInfo, notification.BlackInfo,
+        notification.Result, notification.WhiteReason, notification.BlackReason);
+    }
     public async Task Handle(MoveFailed notification, CancellationToken cancellationToken)
         => await notifier.NotifyMoveFailed(notification.MoverId, notification.Reason);
     

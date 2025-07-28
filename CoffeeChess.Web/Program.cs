@@ -31,7 +31,7 @@ builder.Services.AddIdentity<UserModel, IdentityRole>(options =>
 builder.Services.AddControllersWithViews();
 builder.Services.AddSignalR();
 builder.Services.AddMediatR(cfg => 
-    cfg.RegisterServicesFromAssembly(typeof(GameEventsNotifierHandler).Assembly));
+    cfg.RegisterServicesFromAssembly(typeof(GameEventsHandler).Assembly));
 
 builder.Services.AddSingleton<IGameRepository, BaseGameRepository>();
 builder.Services.AddSingleton<IGameEventNotifierService, SignalRGameEventNotifierService>();

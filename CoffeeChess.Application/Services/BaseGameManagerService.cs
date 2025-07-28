@@ -2,6 +2,7 @@
 using System.Diagnostics.CodeAnalysis;
 using CoffeeChess.Application.Interfaces;
 using CoffeeChess.Domain.Aggregates;
+using CoffeeChess.Domain.Entities;
 using CoffeeChess.Domain.Enums;
 using CoffeeChess.Domain.Repositories.Interfaces;
 using CoffeeChess.Domain.ValueObjects;

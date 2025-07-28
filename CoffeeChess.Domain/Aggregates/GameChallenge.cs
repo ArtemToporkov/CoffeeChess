@@ -1,4 +1,5 @@
-﻿using CoffeeChess.Domain.ValueObjects;
+﻿using CoffeeChess.Domain.Entities;
+using CoffeeChess.Domain.ValueObjects;
 
 namespace CoffeeChess.Domain.Aggregates;
 
