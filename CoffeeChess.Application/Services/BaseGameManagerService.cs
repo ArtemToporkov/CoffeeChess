@@ -30,7 +30,7 @@ public class BaseGameManagerService(
     {
         if (!gameRepository.TryGetValue(gameId, out var game)) 
             return false;
-        game.ChatMessages.Enqueue(new ChatMessage { Username = username, Message = message });
+        game.ChatMessages.Enqueue(new ChatMessage(username, message));
         return true;
     }
     
