@@ -12,7 +12,7 @@ namespace CoffeeChess.Web.Hubs;
 public class GameHub(
     IGameRepository gameRepository,
     IPlayerRepository playerRepository,
-    IGameManagerService gameManager,
+    IMatchmakingService matchmakingService,
     UserManager<UserModel> userManager) : Hub<IGameClient>
 {
     private async Task<UserModel> GetUserAsync()
@@ -22,28 +22,14 @@ public class GameHub(
     public async Task CreateOrJoinGame(GameSettings settings)
     {
         var user = await GetUserAsync();
-        var game = gameManager.CreateGameOrQueueChallenge(user.Id, settings);
-        
-        if (game is null)
-            return;
-        
-        var totalMillisecondsForOnePlayerLeft = game.WhiteTimeLeft.TotalMilliseconds;
-
-        var whitePlayerInfo = await GetInfoAsync(game.WhitePlayerId);
-        var blackPlayerInfo = await GetInfoAsync(game.BlackPlayerId);
-        await Clients.User(game.WhitePlayerId).GameStarted(
-            game.GameId, true, whitePlayerInfo, blackPlayerInfo,
-            totalMillisecondsForOnePlayerLeft);
-        await Clients.User(game.BlackPlayerId).GameStarted(
-            game.GameId, false, whitePlayerInfo, blackPlayerInfo,
-            totalMillisecondsForOnePlayerLeft);
+        matchmakingService.QueueChallenge(user.Id, settings);
     }
 
     public async Task SendChatMessage(string gameId, string message)
     {
         var user = await GetUserAsync();
         if (gameRepository.TryGetValue(gameId, out var game) &&
-            gameManager.TryAddChatMessage(gameId, user.UserName!, message))
+            matchmakingService.TryAddChatMessage(gameId, user.UserName!, message))
         {
             await Clients.Users(game.WhitePlayerId, game.BlackPlayerId)
                 .ReceiveChatMessage(user.UserName!, message);

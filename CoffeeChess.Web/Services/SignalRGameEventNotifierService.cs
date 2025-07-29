@@ -2,12 +2,14 @@
 using CoffeeChess.Application.Payloads;
 using CoffeeChess.Domain.Aggregates;
 using CoffeeChess.Domain.Enums;
+using CoffeeChess.Domain.Repositories.Interfaces;
 using CoffeeChess.Web.Hubs;
+using CoffeeChess.Web.Models.ViewModels;
 using Microsoft.AspNetCore.SignalR;
 
 namespace CoffeeChess.Web.Services;
 
-public class SignalRGameEventNotifierService(
+public class SignalRGameEventNotifierService(IPlayerRepository playerRepository,
     IHubContext<GameHub, IGameClient> hubContext) : IGameEventNotifierService
 {
     public async Task NotifyMoveMade(string whiteId,
@@ -46,5 +48,20 @@ public class SignalRGameEventNotifierService(
         await hubContext.Clients.User(senderId).PerformGameAction(senderPayload);
         var rejectingPayload = new GameActionPayloadModel { GameActionType = GameActionType.DeclineDrawOffer };
         await hubContext.Clients.User(rejectingId).PerformGameAction(rejectingPayload);
+    }
+
+    public async Task NotifyGameStarted(string gameId, string whitePlayerId, string blackPlayerId,
+        int totalMillisecondsForOnePlayerLeft)
+    {
+        var whitePlayer = await playerRepository.GetAsync(whitePlayerId);
+        var whiteInfo = new PlayerInfoViewModel(whitePlayer!.Name, whitePlayer.Rating);
+        var blackPlayer = await playerRepository.GetAsync(whitePlayerId);
+        var blackInfo = new PlayerInfoViewModel(blackPlayer!.Name, whitePlayer.Rating);
+        await hubContext.Clients.User(whitePlayerId).GameStarted(
+            gameId, true, whiteInfo, blackInfo,
+            totalMillisecondsForOnePlayerLeft);
+        await hubContext.Clients.User(blackPlayerId).GameStarted(
+            gameId, false, whiteInfo, blackInfo,
+            totalMillisecondsForOnePlayerLeft);
     }
 }

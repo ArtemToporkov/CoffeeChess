@@ -3,9 +3,9 @@ using CoffeeChess.Domain.ValueObjects;
 
 namespace CoffeeChess.Application.Interfaces;
 
-public interface IGameManagerService
+public interface IMatchmakingService
 {
-    public Game? CreateGameOrQueueChallenge(string playerId, GameSettings settings);
+    public void QueueChallenge(string playerId, GameSettings settings);
     
     bool TryAddChatMessage(string gameId, string username, string message);
 }

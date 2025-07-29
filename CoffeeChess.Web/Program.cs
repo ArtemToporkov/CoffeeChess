@@ -36,7 +36,7 @@ builder.Services.AddMediatR(cfg =>
 builder.Services.AddSingleton<IGameRepository, BaseGameRepository>();
 builder.Services.AddSingleton<IPlayerRepository, SqlPlayerRepository>();
 builder.Services.AddSingleton<IChallengeRepository, BaseChallengeRepository>();
-builder.Services.AddSingleton<IGameManagerService, BaseGameManagerService>();
+builder.Services.AddSingleton<IMatchmakingService, InMemoryMatchmakingService>();
 builder.Services.AddSingleton<IRatingService, EloRatingService>();
 
 builder.Services.AddScoped<IGameEventNotifierService, SignalRGameEventNotifierService>();

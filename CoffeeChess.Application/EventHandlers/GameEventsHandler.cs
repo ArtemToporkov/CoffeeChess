@@ -10,12 +10,20 @@ namespace CoffeeChess.Application.EventHandlers;
 public class GameEventsHandler(
     IRatingService ratingService,
     IPlayerRepository playerRepository,
-    IGameEventNotifierService notifier) : INotificationHandler<DrawOfferDeclined>,
+    IGameEventNotifierService notifier) : INotificationHandler<GameStarted>,
+    INotificationHandler<DrawOfferDeclined>,
     INotificationHandler<DrawOfferSent>,
     INotificationHandler<GameResultUpdated>,
     INotificationHandler<MoveFailed>,
     INotificationHandler<MoveMade>
 {
+    public async Task Handle(GameStarted notification, CancellationToken cancellationToken)
+        => await notifier.NotifyGameStarted(
+            notification.GameId, 
+            notification.WhitePlayerId, 
+            notification.BlackPlayerId, 
+            notification.TotalMillisecondsForOnePlayerLeft);
+    
     public async Task Handle(DrawOfferDeclined notification, CancellationToken cancellationToken)
         => await notifier.NotifyDrawOfferDeclined(notification.RejectingId, notification.SenderId);
 

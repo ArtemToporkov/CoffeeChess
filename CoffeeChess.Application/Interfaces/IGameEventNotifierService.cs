@@ -17,4 +17,7 @@ public interface IGameEventNotifierService
     public Task NotifyDrawOfferSent(string message, string senderId, string receiverId);
 
     public Task NotifyDrawOfferDeclined(string rejectingId, string senderId);
+
+    public Task NotifyGameStarted(string gameId, string whitePlayerId, string blackPlayerId,
+        int totalMillisecondsForOnePlayerLeft);
 }

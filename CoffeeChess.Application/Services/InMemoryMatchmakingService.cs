@@ -8,21 +8,23 @@ using CoffeeChess.Domain.ValueObjects;
 
 namespace CoffeeChess.Application.Services;
 
-public class BaseGameManagerService(
+public class InMemoryMatchmakingService(
     IChallengeRepository challengeRepository, 
-    IGameRepository gameRepository) : IGameManagerService
+    IGameRepository gameRepository) : IMatchmakingService
 {
     private static readonly Random Random = new();
     private static readonly Lock Lock = new();
 
-    public Game? CreateGameOrQueueChallenge(string playerId, GameSettings settings)
+    public void QueueChallenge(string playerId, GameSettings settings)
     {
         lock (Lock)
         {
             if (TryFindChallenge(playerId, out var foundChallenge))
-                return CreateGameBasedOnFoundChallenge(playerId, settings, foundChallenge);
+            {
+                CreateGameBasedOnFoundChallenge(playerId, settings, foundChallenge);
+                return;
+            }
             CreateGameChallenge(playerId, settings);
-            return null;
         }
     }
     
@@ -34,7 +36,7 @@ public class BaseGameManagerService(
         return true;
     }
     
-    private Game CreateGameBasedOnFoundChallenge(string connectingPlayerId, 
+    private void CreateGameBasedOnFoundChallenge(string connectingPlayerId,
         GameSettings settings, GameChallenge gameChallenge)
     {
         var connectingPlayerColor = ChooseColor(settings);
@@ -49,7 +51,7 @@ public class BaseGameManagerService(
             TimeSpan.FromSeconds(settings.Increment)
         );
         gameRepository.TryAdd(createdGame.GameId, createdGame);
-        return createdGame;
+        gameRepository.SaveChanges(createdGame);
     }
     
     private void CreateGameChallenge(string creatorId, GameSettings settings)
@@ -80,7 +82,7 @@ public class BaseGameManagerService(
             ColorPreference.White => ColorPreference.White,
             ColorPreference.Black => ColorPreference.Black,
             ColorPreference.Any => GetRandomColor(),
-            _ => throw new ArgumentException($"[{nameof(BaseGameManagerService)}.{nameof(ChooseColor)}]: " +
+            _ => throw new ArgumentException($"[{nameof(InMemoryMatchmakingService)}.{nameof(ChooseColor)}]: " +
                                              $"Unsupported color preference.")
         };
 

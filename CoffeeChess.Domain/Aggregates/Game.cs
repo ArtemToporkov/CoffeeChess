@@ -8,23 +8,18 @@ using GameResult = CoffeeChess.Domain.Enums.GameResult;
 using PlayerSide = ChessDotNetCore.Player;
 namespace CoffeeChess.Domain.Aggregates;
 
-public class Game(
-    string gameId, 
-    string whitePlayerId,
-    string blackPlayerId, 
-    TimeSpan minutesLeftForPlayer,
-    TimeSpan increment)
+public class Game
 {
-    public string GameId { get; } = gameId;
-    public string WhitePlayerId { get; } = whitePlayerId;
-    public string BlackPlayerId { get; } = blackPlayerId;
+    public string GameId { get; }
+    public string WhitePlayerId { get; }
+    public string BlackPlayerId { get; }
     public Chat Chat { get; } = new();
     public bool IsOver => _chessGame.GameResult != ChessDotNetCore.GameResult.OnGoing &&
                           _chessGame.GameResult != ChessDotNetCore.GameResult.Check;
-    public TimeSpan WhiteTimeLeft { get; private set; } = minutesLeftForPlayer;
-    public TimeSpan BlackTimeLeft { get; private set; } = minutesLeftForPlayer;
-    public TimeSpan Increment { get; } = increment;
-    public DateTime LastTimeUpdate { get; private set; } = DateTime.UtcNow;
+    public TimeSpan WhiteTimeLeft { get; private set; }
+    public TimeSpan BlackTimeLeft { get; private set; }
+    public TimeSpan Increment { get; }
+    public DateTime LastTimeUpdate { get; private set; }
     public PlayerColor CurrentPlayerColor => _chessGame.CurrentPlayer == PlayerSide.White 
         ? PlayerColor.White 
         : PlayerColor.Black;
@@ -34,6 +29,23 @@ public class Game(
     private readonly ChessGame _chessGame = new();
     private readonly Lock _lockObject = new();
     private readonly List<IDomainEvent> _domainEvents = [];
+
+    public Game(
+        string gameId,
+        string whitePlayerId,
+        string blackPlayerId,
+        TimeSpan minutesLeftForPlayer,
+        TimeSpan increment)
+    {
+        GameId = gameId;
+        WhitePlayerId = whitePlayerId;
+        BlackPlayerId = blackPlayerId;
+        WhiteTimeLeft = minutesLeftForPlayer;
+        BlackTimeLeft = minutesLeftForPlayer;
+        Increment = increment;
+        LastTimeUpdate = DateTime.UtcNow;
+        _domainEvents.Add(new GameStarted(GameId, WhitePlayerId, BlackPlayerId, (int)WhiteTimeLeft.TotalMilliseconds));
+    }
     
     public void ClearDomainEvents() => _domainEvents.Clear();
     
