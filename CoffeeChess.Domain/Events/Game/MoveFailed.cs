@@ -1,3 +1,5 @@
-﻿namespace CoffeeChess.Domain.Events.Game;
+﻿using CoffeeChess.Domain.Enums;
 
-public record MoveFailed(string MoverId, string Reason) : IDomainEvent;
+namespace CoffeeChess.Domain.Events.Game;
+
+public record MoveFailed(string MoverId, MoveFailedReason Reason) : IDomainEvent;

@@ -38,14 +38,14 @@ public class BaseGameManagerService(
     private Game CreateGameBasedOnFoundChallenge(Player connectingPlayer, 
         GameSettings settings, GameChallenge gameChallenge)
     {
-        var connectingPlayerColor = GetColor(settings);
+        var connectingPlayerColor = ChooseColor(settings);
         var (whitePlayerInfo, blackPlayerInfo) = connectingPlayerColor == ColorPreference.White
-            ? (connectingPlayerInfo: connectingPlayer, PlayerInfo: gameChallenge.Player)
-            : (PlayerInfo: gameChallenge.Player, connectingPlayerInfo: connectingPlayer);
+            ? (connectingPlayer, gameChallenge.Player)
+            : (gameChallenge.Player, connectingPlayer);
         var createdGame = new Game(
             Guid.NewGuid().ToString("N")[..8],
-            whitePlayerInfo,
-            blackPlayerInfo,
+            whitePlayerInfo.Id,
+            blackPlayerInfo.Id,
             TimeSpan.FromMinutes(settings.Minutes),
             TimeSpan.FromSeconds(settings.Increment)
         );
@@ -75,13 +75,13 @@ public class BaseGameManagerService(
         return false;
     }
 
-    private static ColorPreference GetColor(GameSettings settings)
+    private static ColorPreference ChooseColor(GameSettings settings)
         => settings.ColorPreference switch
         {
             ColorPreference.White => ColorPreference.White,
             ColorPreference.Black => ColorPreference.Black,
             ColorPreference.Any => GetRandomColor(),
-            _ => throw new ArgumentException($"[{nameof(BaseGameManagerService)}.{nameof(GetColor)}]: " +
+            _ => throw new ArgumentException($"[{nameof(BaseGameManagerService)}.{nameof(ChooseColor)}]: " +
                                              $"Unsupported color preference.")
         };
 

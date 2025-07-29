@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using CoffeeChess.Web.Models;
+using CoffeeChess.Web.Models.ViewModels;
 
 namespace CoffeeChess.Web.Controllers;
 

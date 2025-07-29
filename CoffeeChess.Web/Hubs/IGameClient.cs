@@ -2,13 +2,14 @@
 using CoffeeChess.Domain.Aggregates;
 using CoffeeChess.Domain.Entities;
 using CoffeeChess.Domain.Enums;
+using CoffeeChess.Web.Models.ViewModels;
 
 namespace CoffeeChess.Web.Hubs;
 
 public interface IGameClient
 {
     public Task GameStarted(string gameId, bool isWhite, 
-        Player whitePlayer, Player blackPlayer, double totalMillisecondsForOnePlayerLeft);
+        PlayerInfoViewModel whitePlayer, PlayerInfoViewModel blackPlayer, double totalMillisecondsForOnePlayerLeft);
 
     public Task ReceiveChatMessage(string username, string message);
 

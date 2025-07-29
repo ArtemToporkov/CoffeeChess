@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace CoffeeChess.Web.Models;
+namespace CoffeeChess.Web.Models.ViewModels;
 
 public class RegisterViewModel
 {

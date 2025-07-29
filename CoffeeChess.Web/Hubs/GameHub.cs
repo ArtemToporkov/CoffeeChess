@@ -6,6 +6,7 @@ using CoffeeChess.Domain.Enums;
 using CoffeeChess.Domain.Repositories.Interfaces;
 using CoffeeChess.Domain.ValueObjects;
 using CoffeeChess.Infrastructure.Identity;
+using CoffeeChess.Web.Models.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.SignalR;
 
@@ -34,11 +35,13 @@ public class GameHub(
         
         var totalMillisecondsForOnePlayerLeft = game.WhiteTimeLeft.TotalMilliseconds;
 
-        await Clients.User(game.WhitePlayer.Id).GameStarted(
-            game.GameId, true, game.WhitePlayer, game.BlackPlayer,
+        var whitePlayerInfo = await GetInfoAsync(game.WhitePlayerId);
+        var blackPlayerInfo = await GetInfoAsync(game.BlackPlayerId);
+        await Clients.User(game.WhitePlayerId).GameStarted(
+            game.GameId, true, whitePlayerInfo, blackPlayerInfo,
             totalMillisecondsForOnePlayerLeft);
-        await Clients.User(game.BlackPlayer.Id).GameStarted(
-            game.GameId, false, game.WhitePlayer, game.BlackPlayer,
+        await Clients.User(game.BlackPlayerId).GameStarted(
+            game.GameId, false, whitePlayerInfo, blackPlayerInfo,
             totalMillisecondsForOnePlayerLeft);
     }
 
@@ -48,7 +51,7 @@ public class GameHub(
         if (gameRepository.TryGetValue(gameId, out var game) &&
             gameManager.TryAddChatMessage(gameId, user.UserName!, message))
         {
-            await Clients.Users(game.WhitePlayer.Id, game.BlackPlayer.Id)
+            await Clients.Users(game.WhitePlayerId, game.BlackPlayerId)
                 .ReceiveChatMessage(user.UserName!, message);
         }
     }
@@ -102,5 +105,13 @@ public class GameHub(
                 gameRepository.SaveChanges(game);
                 break;
         }
+    }
+
+    private async Task<PlayerInfoViewModel> GetInfoAsync(string playerId)
+    {
+        var player = await playerRepository.GetAsync(playerId) 
+                     ?? throw new InvalidOperationException(
+                         $"[{nameof(GameHub)}.{nameof(GetInfoAsync)}]: player not found.");
+        return new PlayerInfoViewModel(player.Name, player.Rating);
     }
 }

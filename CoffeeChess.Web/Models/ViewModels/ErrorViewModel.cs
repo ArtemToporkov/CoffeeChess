@@ -1,4 +1,4 @@
-namespace CoffeeChess.Web.Models;
+namespace CoffeeChess.Web.Models.ViewModels;
 
 public class ErrorViewModel
 {
