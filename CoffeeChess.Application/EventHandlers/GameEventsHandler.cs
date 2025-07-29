@@ -1,6 +1,5 @@
 ﻿using CoffeeChess.Application.Interfaces;
 using CoffeeChess.Domain.Enums;
-using CoffeeChess.Domain.Events;
 using CoffeeChess.Domain.Events.Game;
 using CoffeeChess.Domain.Repositories.Interfaces;
 using CoffeeChess.Domain.Services.Interfaces;
@@ -24,7 +23,8 @@ public class GameEventsHandler(
     {
         var sender = await playerRepository.GetAsync(notification.SenderId);
         var receiver = await playerRepository.GetAsync(notification.ReceiverId);
-        await notifier.NotifyDrawOfferSent(sender!.Name, sender.Id, receiver!.Id);
+        var message = $"{sender!.Name} offers a draw";
+        await notifier.NotifyDrawOfferSent(message, sender.Id, receiver!.Id);
     }
 
     public async Task Handle(GameResultUpdated notification, CancellationToken cancellationToken)

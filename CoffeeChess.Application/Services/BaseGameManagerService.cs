@@ -1,5 +1,4 @@
-﻿using System.Collections.Concurrent;
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 using CoffeeChess.Application.Interfaces;
 using CoffeeChess.Domain.Aggregates;
 using CoffeeChess.Domain.Entities;
@@ -16,13 +15,13 @@ public class BaseGameManagerService(
     private static readonly Random Random = new();
     private static readonly Lock Lock = new();
 
-    public Game? CreateGameOrQueueChallenge(Player player, GameSettings settings)
+    public Game? CreateGameOrQueueChallenge(string playerId, GameSettings settings)
     {
         lock (Lock)
         {
-            if (TryFindChallenge(player, out var foundChallenge))
-                return CreateGameBasedOnFoundChallenge(player, settings, foundChallenge);
-            CreateGameChallenge(player, settings);
+            if (TryFindChallenge(playerId, out var foundChallenge))
+                return CreateGameBasedOnFoundChallenge(playerId, settings, foundChallenge);
+            CreateGameChallenge(playerId, settings);
             return null;
         }
     }
@@ -35,17 +34,17 @@ public class BaseGameManagerService(
         return true;
     }
     
-    private Game CreateGameBasedOnFoundChallenge(Player connectingPlayer, 
+    private Game CreateGameBasedOnFoundChallenge(string connectingPlayerId, 
         GameSettings settings, GameChallenge gameChallenge)
     {
         var connectingPlayerColor = ChooseColor(settings);
-        var (whitePlayerInfo, blackPlayerInfo) = connectingPlayerColor == ColorPreference.White
-            ? (connectingPlayer, gameChallenge.Player)
-            : (gameChallenge.Player, connectingPlayer);
+        var (whitePlayerId, blackPlayerId) = connectingPlayerColor == ColorPreference.White
+            ? (connectingPlayerId, gameChallenge.PlayerId)
+            : (gameChallenge.PlayerId, connectingPlayerId);
         var createdGame = new Game(
             Guid.NewGuid().ToString("N")[..8],
-            whitePlayerInfo.Id,
-            blackPlayerInfo.Id,
+            whitePlayerId,
+            blackPlayerId,
             TimeSpan.FromMinutes(settings.Minutes),
             TimeSpan.FromSeconds(settings.Increment)
         );
@@ -53,18 +52,18 @@ public class BaseGameManagerService(
         return createdGame;
     }
     
-    private void CreateGameChallenge(Player creator, GameSettings settings)
+    private void CreateGameChallenge(string creatorId, GameSettings settings)
     {
-        var gameChallenge = new GameChallenge(creator, settings);
-        challengeRepository.TryAdd(creator.Id, gameChallenge);
+        var gameChallenge = new GameChallenge(creatorId, settings);
+        challengeRepository.TryAdd(creatorId, gameChallenge);
     }
 
-    private bool TryFindChallenge(Player player, 
+    private bool TryFindChallenge(string playerId, 
         [NotNullWhen(true)] out GameChallenge? foundChallenge)
     {
         foreach (var (gameChallengeId, gameChallenge) in challengeRepository.GetAll())
         {
-            if (gameChallenge.Player.Id != player.Id)
+            if (gameChallenge.PlayerId != playerId)
             {
                 challengeRepository.TryRemove(gameChallengeId, out foundChallenge);
                 return foundChallenge is not null;

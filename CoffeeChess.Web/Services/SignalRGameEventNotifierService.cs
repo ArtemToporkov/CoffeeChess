@@ -28,12 +28,12 @@ public class SignalRGameEventNotifierService(
         await hubContext.Clients.User(black.Id).UpdateGameResult(gameResult, blackReason);
     }
 
-    public async Task NotifyDrawOfferSent(string senderName, string senderId, string receiverId)
+    public async Task NotifyDrawOfferSent(string message, string senderId, string receiverId)
     {
         var offerPayload = new GameActionPayloadModel
         {
             GameActionType = GameActionType.ReceiveDrawOffer,
-            Message = $"{senderName} offers a draw."
+            Message = $"{message} offers a draw."
         };
         await hubContext.Clients.User(receiverId).PerformGameAction(offerPayload);
         var sendingPayload = new GameActionPayloadModel { GameActionType = GameActionType.SendDrawOffer };

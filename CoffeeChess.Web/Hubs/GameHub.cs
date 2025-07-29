@@ -1,7 +1,4 @@
 ﻿using CoffeeChess.Application.Interfaces;
-using CoffeeChess.Application.Payloads;
-using CoffeeChess.Domain.Aggregates;
-using CoffeeChess.Domain.Entities;
 using CoffeeChess.Domain.Enums;
 using CoffeeChess.Domain.Repositories.Interfaces;
 using CoffeeChess.Domain.ValueObjects;
@@ -25,10 +22,7 @@ public class GameHub(
     public async Task CreateOrJoinGame(GameSettings settings)
     {
         var user = await GetUserAsync();
-        var player = await playerRepository.GetAsync(user.Id) ?? throw new InvalidOperationException(
-            $"[{nameof(GameHub)}.{nameof(CreateOrJoinGame)}]: Player not found.]");
-        
-        var game = gameManager.CreateGameOrQueueChallenge(player, settings);
+        var game = gameManager.CreateGameOrQueueChallenge(user.Id, settings);
         
         if (game is null)
             return;

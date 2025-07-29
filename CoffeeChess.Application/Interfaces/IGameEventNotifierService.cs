@@ -14,7 +14,7 @@ public interface IGameEventNotifierService
     public Task NotifyGameResultUpdated(Player whitePlayer, Player blackPlayer, 
         GameResult gameResult, string whiteReason, string blackReason);
 
-    public Task NotifyDrawOfferSent(string senderName, string senderId, string receiverId);
+    public Task NotifyDrawOfferSent(string message, string senderId, string receiverId);
 
     public Task NotifyDrawOfferDeclined(string rejectingId, string senderId);
 }
