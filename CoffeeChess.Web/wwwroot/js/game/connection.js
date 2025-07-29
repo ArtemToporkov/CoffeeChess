@@ -1,7 +1,13 @@
 import { GameManager } from "./managers/GameManager.js";
 import { ChatManager } from "./managers/ChatManager.js";
-import { loadUi, receiveDrawOffer, turnButtonsBack, 
-    updateGameResult, turnOffDrawResignInfo, setDrawOfferInactive, setDrawOfferActive } from "./ui.js";
+import { loadUi, 
+    receiveDrawOffer, 
+    turnButtonsBack, 
+    updateGameResult, 
+    turnOffDrawResignInfo, 
+    setDrawOfferInactive, 
+    setDrawOfferActive, 
+    playRatingsChangeAnimation } from "./ui.js";
 import { GameActionType } from "./enums/GameActionType.js";
 import { GameHubMethods } from "./enums/GameHubMethods.js";
 
@@ -61,10 +67,14 @@ $(document).ready(() => {
        // TODO: tell client that performing game action is impossible 
     });
     
-    connection.on(GameHubMethods.UpdateGameResult, payload => {
+    connection.on(GameHubMethods.UpdateGameResult, (result, reason) => {
         gameManager.endGame();
         turnOffDrawResignInfo();
-        updateGameResult(payload.result, payload.message, payload.oldRating, payload.newRating);
+        updateGameResult(gameManager.isWhite, result, reason);
+    });
+    
+    connection.on(GameHubMethods.UpdatePlayerRating, (oldRating, newRating) => {
+        playRatingsChangeAnimation(oldRating, newRating);
     });
     
     connection.start();

@@ -1,7 +1,6 @@
 ﻿using CoffeeChess.Application.Interfaces;
 using CoffeeChess.Application.Payloads;
 using CoffeeChess.Domain.Aggregates;
-using CoffeeChess.Domain.Entities;
 using CoffeeChess.Domain.Enums;
 using CoffeeChess.Web.Hubs;
 using Microsoft.AspNetCore.SignalR;
@@ -9,10 +8,9 @@ using Microsoft.AspNetCore.SignalR;
 namespace CoffeeChess.Web.Services;
 
 public class SignalRGameEventNotifierService(
-    IHubContext<GameHub, IGameClient> hubContext,
-    IGameFinisherService gameFinisher) : IGameEventNotifierService
+    IHubContext<GameHub, IGameClient> hubContext) : IGameEventNotifierService
 {
-    public async Task NotifyMoveMade(string whiteId, 
+    public async Task NotifyMoveMade(string whiteId,
         string blackId, string pgn, double whiteTimeLeft, double blackTimeLeft)
     {
         await hubContext.Clients.Users(whiteId, blackId).MakeMove(pgn, whiteTimeLeft, blackTimeLeft);
@@ -23,21 +21,11 @@ public class SignalRGameEventNotifierService(
         await hubContext.Clients.User(moverId).MoveFailed(reason);
     }
 
-    public async Task NotifyGameResultUpdated(Player white, Player black, Result result, 
+    public async Task NotifyGameResultUpdated(Player white, Player black, GameResult gameResult,
         string whiteReason, string blackReason)
     {
-        switch (result)
-        {
-            case Result.WhiteWon:
-                await gameFinisher.SendWinResultAndSave(white, black, whiteReason, blackReason);
-                break;
-            case Result.BlackWon:
-                await gameFinisher.SendWinResultAndSave(black, white, blackReason, whiteReason);
-                break;
-            case Result.Draw:
-                await gameFinisher.SendDrawResultAndSave(white, black, whiteReason);
-                break;
-        }
+        await hubContext.Clients.User(white.Id).UpdateGameResult(gameResult, whiteReason);
+        await hubContext.Clients.User(black.Id).UpdateGameResult(gameResult, blackReason);
     }
 
     public async Task NotifyDrawOfferSent(string senderName, string senderId, string receiverId)

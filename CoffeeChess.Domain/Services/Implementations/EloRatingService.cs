@@ -14,15 +14,15 @@ public class EloRatingService : IRatingService
         => CalculateNewRatings(winnerRating, loserRating, 1.0);
 
     public (int NewWhiteRating, int NewBlackRating) CalculateNewRatings(int whiteRating, int blackRating,
-        Result result)
+        GameResult gameResult)
     {
         var expectedWhitePoints = 1.0 / (1 + Math.Pow(10, ((double)blackRating - whiteRating) / 400));
-        var actualWhitePoints = result switch
+        var actualWhitePoints = gameResult switch
         {
-            Result.WhiteWon => 1.0,
-            Result.Draw => 0.5,
-            Result.BlackWon => 0.0,
-            _ => throw new ArgumentOutOfRangeException(nameof(result), result, null)
+            GameResult.WhiteWon => 1.0,
+            GameResult.Draw => 0.5,
+            GameResult.BlackWon => 0.0,
+            _ => throw new ArgumentOutOfRangeException(nameof(gameResult), gameResult, null)
         };
         
         var rawDelta = KFactor * (actualWhitePoints - expectedWhitePoints);

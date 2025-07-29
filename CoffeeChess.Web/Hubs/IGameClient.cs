@@ -1,6 +1,7 @@
 ﻿using CoffeeChess.Application.Payloads;
 using CoffeeChess.Domain.Aggregates;
 using CoffeeChess.Domain.Entities;
+using CoffeeChess.Domain.Enums;
 
 namespace CoffeeChess.Web.Hubs;
 
@@ -20,6 +21,8 @@ public interface IGameClient
     public Task PerformingGameActionFailed(string message);
 
     public Task PerformGameAction(GameActionPayloadModel payload);
+    
+    public Task UpdateGameResult(GameResult gameResult, string? message);
 
-    public Task UpdateGameResult(GameResultPayloadModel payload);
+    public Task UpdatePlayerRating(int oldRating, int newRating);
 }

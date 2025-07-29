@@ -38,8 +38,9 @@ builder.Services.AddSingleton<IPlayerRepository, SqlPlayerRepository>();
 builder.Services.AddSingleton<IChallengeRepository, BaseChallengeRepository>();
 builder.Services.AddSingleton<IGameManagerService, BaseGameManagerService>();
 builder.Services.AddSingleton<IRatingService, EloRatingService>();
+
 builder.Services.AddScoped<IGameEventNotifierService, SignalRGameEventNotifierService>();
-builder.Services.AddScoped<IGameFinisherService, SignalRGameFinisherService>();
+builder.Services.AddScoped<IPlayerEventNotifierService, SignalRPlayerEventNotifierService>();
 
 var app = builder.Build();
 

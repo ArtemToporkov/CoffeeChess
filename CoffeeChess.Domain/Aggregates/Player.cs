@@ -23,7 +23,7 @@ public class Player
     }
 
     public void UpdateRating(int newRating)
-        => _domainEvents.Add(new RatingChanged(Id, Rating, newRating));
+        => _domainEvents.Add(new PlayerRatingChanged(Id, Rating, newRating));
     
     private Player() { }
 }

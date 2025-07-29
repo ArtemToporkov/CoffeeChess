@@ -27,13 +27,13 @@ public class GameEventsHandler(
     {
         var (newWhiteRating, newBlackRating) = ratingService.CalculateNewRatings(
             notification.White.Rating, notification.Black.Rating, 
-            notification.Result);
+            notification.GameResult);
 
         await UpdateRatingAndSave(notification.White.Id, newWhiteRating);
         await UpdateRatingAndSave(notification.Black.Id, newBlackRating);
         
         await notifier.NotifyGameResultUpdated(notification.White, notification.Black,
-        notification.Result, notification.WhiteReason, notification.BlackReason);
+        notification.GameResult, notification.WhiteReason, notification.BlackReason);
     }
     
     public async Task Handle(MoveFailed notification, CancellationToken cancellationToken)

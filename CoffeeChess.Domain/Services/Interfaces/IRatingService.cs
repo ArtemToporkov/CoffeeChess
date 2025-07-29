@@ -11,5 +11,5 @@ public interface IRatingService
         int winnerRating, int loserRating);
 
     public (int NewWhiteRating, int NewBlackRating) CalculateNewRatings(
-        int whiteRating, int blackRating, Result result);
+        int whiteRating, int blackRating, GameResult gameResult);
 }

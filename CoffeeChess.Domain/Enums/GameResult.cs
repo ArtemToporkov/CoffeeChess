@@ -1,8 +1,8 @@
 ﻿namespace CoffeeChess.Domain.Enums;
 
-public enum Result
+public enum GameResult
 {
-    Draw,
     WhiteWon,
+    Draw,
     BlackWon
 }

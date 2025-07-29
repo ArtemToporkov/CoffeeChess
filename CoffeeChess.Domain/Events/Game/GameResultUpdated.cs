@@ -2,5 +2,5 @@
 
 namespace CoffeeChess.Domain.Events.Game;
 
-public record GameResultUpdated(Aggregates.Player White, Aggregates.Player Black, Result Result, 
+public record GameResultUpdated(Aggregates.Player White, Aggregates.Player Black, GameResult GameResult, 
     string WhiteReason, string BlackReason) : IDomainEvent;

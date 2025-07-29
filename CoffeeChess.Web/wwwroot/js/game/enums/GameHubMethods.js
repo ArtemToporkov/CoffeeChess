@@ -8,5 +8,6 @@
     MoveFailed: "MoveFailed",
     PerformingGameActionFailed: "PerformingGameActionFailed",
     PerformGameAction: "PerformGameAction",
-    UpdateGameResult: "UpdateGameResult"
+    UpdateGameResult: "UpdateGameResult",
+    UpdatePlayerRating: "UpdatePlayerRating"
 });

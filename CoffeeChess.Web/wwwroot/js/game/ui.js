@@ -1,6 +1,6 @@
 ﻿import { GameActionType } from "./enums/GameActionType.js";
-import { GameResultForPlayer } from "./enums/GameResultForPlayer.js";
-import {ButtonStyle} from "./enums/ButtonStyle.js";
+import { ButtonStyle } from "./enums/ButtonStyle.js";
+import { GameResult } from "./enums/GameResult.js";
 
 export function loadUi(connection, gameManager, gameId) {
     const whitePlayerInfo = JSON.parse(localStorage.getItem('whitePlayerInfo'));
@@ -49,8 +49,9 @@ export function turnOffDrawResignInfo() {
     $('.resign-draw-info').css('display', 'none');
 }
 
-export function updateGameResult(result, message, oldRating, newRating) {
-    const [panelColorClass, fontButtonsColorClass] = result === GameResultForPlayer.Lost 
+export function updateGameResult(isWhite, result, reason) {
+    const [panelColorClass, fontButtonsColorClass] 
+        = (isWhite && result === GameResult.BlackWon) || (!isWhite && result === GameResult.WhiteWon)
         ? ['dark', 'milk'] 
         : ['milk', 'dark'];
 
@@ -62,12 +63,11 @@ export function updateGameResult(result, message, oldRating, newRating) {
         ['You win', 'You lose', 'Draw'][result]
     ).addClass(fontButtonsColorClass);
     $('#resultInfo')
-        .text(message)
+        .text(reason)
         .addClass(fontButtonsColorClass);
     $('.result-ratings-title').addClass(fontButtonsColorClass);
     $('.result-rating').addClass(fontButtonsColorClass);
     $('.result-button').addClass(fontButtonsColorClass);
-    playRatingsChangeAnimation(oldRating, newRating);
 }
 
 export function highlightSquares(from, to) {
@@ -126,12 +126,7 @@ export function animateSearching() {
     }, 600);
 }
 
-function hidePromotionModal() {
-    $('#modalOverlay').removeClass('show');
-    $('#promotionPanel').removeClass('show');
-}
-
-function playRatingsChangeAnimation(oldRating, newRating) {
+export function playRatingsChangeAnimation(oldRating, newRating) {
     const $oldRating = $('#oldRating');
     const $newRating = $('#newRating');
     const $ratingDelta = $('#ratingDelta');
@@ -168,6 +163,11 @@ function playRatingsChangeAnimation(oldRating, newRating) {
             $newRating.text(Math.round(current));
         }, 16);
     }, delay * 4);
+}
+
+function hidePromotionModal() {
+    $('#modalOverlay').removeClass('show');
+    $('#promotionPanel').removeClass('show');
 }
 
 function bindEventsToResignButton(connection, gameId) {
