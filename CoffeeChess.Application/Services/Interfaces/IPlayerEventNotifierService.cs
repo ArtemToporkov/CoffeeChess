@@ -1,4 +1,4 @@
-﻿namespace CoffeeChess.Application.Interfaces;
+﻿namespace CoffeeChess.Application.Services.Interfaces;
 
 public interface IPlayerEventNotifierService
 {

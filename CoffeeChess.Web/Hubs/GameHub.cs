@@ -1,4 +1,4 @@
-﻿using CoffeeChess.Application.Interfaces;
+﻿using CoffeeChess.Application.Services.Interfaces;
 using CoffeeChess.Domain.Enums;
 using CoffeeChess.Domain.Repositories.Interfaces;
 using CoffeeChess.Domain.ValueObjects;

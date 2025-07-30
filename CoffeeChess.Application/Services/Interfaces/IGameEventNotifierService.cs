@@ -1,9 +1,7 @@
 ﻿using CoffeeChess.Domain.Aggregates;
-using CoffeeChess.Domain.Entities;
 using CoffeeChess.Domain.Enums;
-using CoffeeChess.Domain.Events;
 
-namespace CoffeeChess.Application.Interfaces;
+namespace CoffeeChess.Application.Services.Interfaces;
 
 public interface IGameEventNotifierService
 {

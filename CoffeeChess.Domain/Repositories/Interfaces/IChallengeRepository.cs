@@ -1,5 +1,4 @@
-﻿using CoffeeChess.Domain.Aggregates;
-using CoffeeChess.Domain.Entities;
+﻿using CoffeeChess.Domain.Entities;
 
 namespace CoffeeChess.Domain.Repositories.Interfaces;
 

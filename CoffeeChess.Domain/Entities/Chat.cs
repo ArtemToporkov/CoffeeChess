@@ -6,11 +6,11 @@ namespace CoffeeChess.Domain.Entities;
 public class Chat
 {
     public IEnumerable<ChatMessage> Messages => _messages.AsEnumerable();
-    private ConcurrentQueue<ChatMessage> _messages { get; } = new();
+    private readonly ConcurrentQueue<ChatMessage> _messages = new();
 
     public Task AddMessage(string username, string message)
     {
-        _messages.Enqueue(new(username, message));
+        _messages.Enqueue(new(username, message, DateTime.UtcNow));
         return Task.CompletedTask;
     }
 }

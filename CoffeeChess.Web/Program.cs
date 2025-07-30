@@ -1,6 +1,7 @@
 using CoffeeChess.Application.EventHandlers;
-using CoffeeChess.Application.Interfaces;
 using CoffeeChess.Application.Services;
+using CoffeeChess.Application.Services.Implementations;
+using CoffeeChess.Application.Services.Interfaces;
 using CoffeeChess.Domain.Repositories.Interfaces;
 using CoffeeChess.Domain.Services.Implementations;
 using CoffeeChess.Domain.Services.Interfaces;
