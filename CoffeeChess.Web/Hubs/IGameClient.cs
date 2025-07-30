@@ -9,19 +9,19 @@ public interface IGameClient
     public Task GameStarted(string gameId, bool isWhite, 
         PlayerInfoViewModel whitePlayer, PlayerInfoViewModel blackPlayer, double totalMillisecondsForOnePlayerLeft);
 
-    public Task ReceiveChatMessage(string username, string message);
+    public Task ChatMessageReceived(string username, string message);
 
-    public Task CriticalError(string message);
+    public Task CriticalErrorOccured(string message);
 
-    public Task MakeMove(string pgn, double whiteMillisecondsLeft, double blackMillisecondsLeft);
+    public Task MoveMade(string pgn, double whiteMillisecondsLeft, double blackMillisecondsLeft);
 
     public Task MoveFailed(string message);
 
     public Task PerformingGameActionFailed(string message);
 
-    public Task PerformGameAction(GameActionPayloadModel payload);
+    public Task GameActionPerformed(GameActionPayloadModel payload);
     
-    public Task UpdateGameResult(GameResult gameResult, string? message);
+    public Task GameResultUpdated(GameResult gameResult, string? message);
 
-    public Task UpdatePlayerRating(int oldRating, int newRating);
+    public Task PlayerRatingUpdated(int oldRating, int newRating);
 }

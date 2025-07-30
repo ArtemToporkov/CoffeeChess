@@ -9,7 +9,7 @@ import { loadUi,
     setDrawOfferActive, 
     playRatingsChangeAnimation } from "./ui.js";
 import { GameActionType } from "./enums/GameActionType.js";
-import { GameHubMethods } from "./enums/GameHubMethods.js";
+import { GameHubEvents } from "./enums/GameHubEvents.js";
 
 $(document).ready(() => {
     const connection = new signalR.HubConnectionBuilder()
@@ -29,24 +29,24 @@ $(document).ready(() => {
     const chatManager = new ChatManager(connection, gameId);
     loadUi(connection, gameManager, gameId);
     
-    connection.on(GameHubMethods.MakeMove, (pgn, newWhiteMillisecondsLeft, newBlackMillisecondsLeft) => {
+    connection.on(GameHubEvents.MoveMade, (pgn, newWhiteMillisecondsLeft, newBlackMillisecondsLeft) => {
         gameManager.updateGameState(pgn, newWhiteMillisecondsLeft, newBlackMillisecondsLeft);
     });
     
-    connection.on(GameHubMethods.MoveFailed, (errorMessage) => {
+    connection.on(GameHubEvents.MoveFailed, (errorMessage) => {
         gameManager.undoLastMove();
         chatManager.addMessageToChat("CoffeeChess", errorMessage);
     });
     
-    connection.on(GameHubMethods.CriticalError, (errorMessage) => {
+    connection.on(GameHubEvents.CriticalErrorOccured, (errorMessage) => {
         console.error(errorMessage);
     });
 
-    connection.on(GameHubMethods.ReceiveChatMessage, (user, message) => {
+    connection.on(GameHubEvents.ChatMessageReceived, (user, message) => {
         chatManager.addMessageToChat(user, message);
     });
     
-    connection.on(GameHubMethods.PerformGameAction, payload => {
+    connection.on(GameHubEvents.GameActionPerformed, payload => {
         switch (payload.gameActionType) {
             case GameActionType.SendDrawOffer:
                 setDrawOfferInactive();
@@ -63,17 +63,17 @@ $(document).ready(() => {
         }
     });
     
-    connection.on(GameHubMethods.PerformingGameActionFailed, (errorMessage) => {
+    connection.on(GameHubEvents.PerformingGameActionFailed, (errorMessage) => {
        // TODO: tell client that performing game action is impossible 
     });
     
-    connection.on(GameHubMethods.UpdateGameResult, (result, reason) => {
+    connection.on(GameHubEvents.GameResultUpdated, (result, reason) => {
         gameManager.endGame();
         turnOffDrawResignInfo();
         updateGameResult(gameManager.isWhite, result, reason);
     });
     
-    connection.on(GameHubMethods.UpdatePlayerRating, (oldRating, newRating) => {
+    connection.on(GameHubEvents.PlayerRatingUpdated, (oldRating, newRating) => {
         playRatingsChangeAnimation(oldRating, newRating);
     });
     

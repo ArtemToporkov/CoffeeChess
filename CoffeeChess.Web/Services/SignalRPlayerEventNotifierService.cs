@@ -9,6 +9,6 @@ public class SignalRPlayerEventNotifierService(
 {
     public async Task NotifyPlayerRatingChanged(string playerId, int oldRating, int newRating)
     {
-        await hubContext.Clients.User(playerId).UpdatePlayerRating(oldRating, newRating);
+        await hubContext.Clients.User(playerId).PlayerRatingUpdated(oldRating, newRating);
     }
 }

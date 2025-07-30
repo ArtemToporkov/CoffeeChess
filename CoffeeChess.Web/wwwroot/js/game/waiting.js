@@ -1,4 +1,5 @@
-﻿import { GameHubMethods } from "./enums/GameHubMethods.js";
+﻿import { GameHubEvents } from "./enums/GameHubEvents.js";
+import { GameHubMethods } from "./enums/GameHubMethods.js";
 import { animateSearching } from "./ui.js";
 
 $(async () => {
@@ -10,8 +11,8 @@ $(async () => {
         .configureLogging(signalR.LogLevel.Information)
         .build();
     
-    connection.on(GameHubMethods.GameStarted, (gameId, isWhite, whitePlayerInfo,
-                                               blackPlayerInfo, totalMillisecondsLeft) => {
+    connection.on(GameHubEvents.GameStarted, (gameId, isWhite, whitePlayerInfo,
+                                              blackPlayerInfo, totalMillisecondsLeft) => {
         localStorage.setItem("totalMillisecondsLeft", totalMillisecondsLeft);
         localStorage.setItem("isWhite", isWhite);
         localStorage.setItem("whitePlayerInfo", JSON.stringify(whitePlayerInfo));
@@ -21,15 +22,11 @@ $(async () => {
 
     const gameSettings = $("#gameSettings").data('gameSettings');
     console.log(gameSettings);
-    
-    async function startSignalR() {
-        try {
-            await connection.start();
-            await connection.invoke(GameHubMethods.CreateOrJoinGame, gameSettings);
-        } catch (err) {
-            console.error(err.toString());
-        }
+
+    try {
+        await connection.start();
+        await connection.invoke(GameHubMethods.QueueChallenge, gameSettings);
+    } catch (err) {
+        console.error(err.toString());
     }
-    
-    await startSignalR();
 });

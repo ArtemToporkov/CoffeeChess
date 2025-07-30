@@ -19,7 +19,7 @@ public class GameHub(
         => await userManager.GetUserAsync(Context.User!)
            ?? throw new HubException($"[{nameof(GameHub)}.{nameof(GetUserAsync)}]: User not found.");
 
-    public async Task CreateOrJoinGame(GameSettings settings)
+    public async Task QueueChallenge(GameSettings settings)
     {
         var user = await GetUserAsync();
         matchmakingService.QueueChallenge(user.Id, settings);
@@ -32,7 +32,7 @@ public class GameHub(
             matchmakingService.TryAddChatMessage(gameId, user.UserName!, message))
         {
             await Clients.Users(game.WhitePlayerId, game.BlackPlayerId)
-                .ReceiveChatMessage(user.UserName!, message);
+                .ChatMessageReceived(user.UserName!, message);
         }
     }
 
@@ -40,7 +40,7 @@ public class GameHub(
     {
         if (!gameRepository.TryGetValue(gameId, out var game))
         {
-            await Clients.Caller.CriticalError("Game not found");
+            await Clients.Caller.CriticalErrorOccured("Game not found");
             return;
         }
 
@@ -55,7 +55,7 @@ public class GameHub(
     {
         if (!gameRepository.TryGetValue(gameId, out var game))
         {
-            await Clients.Caller.CriticalError("Game not found");
+            await Clients.Caller.CriticalErrorOccured("Game not found");
             return;
         }
 

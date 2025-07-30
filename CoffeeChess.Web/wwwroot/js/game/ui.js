@@ -1,6 +1,7 @@
 ﻿import { GameActionType } from "./enums/GameActionType.js";
 import { ButtonStyle } from "./enums/ButtonStyle.js";
 import { GameResult } from "./enums/GameResult.js";
+import { GameHubMethods } from "./enums/GameHubMethods.js";
 
 export function loadUi(connection, gameManager, gameId) {
     const whitePlayerInfo = JSON.parse(localStorage.getItem('whitePlayerInfo'));
@@ -178,7 +179,7 @@ function bindEventsToResignButton(connection, gameId) {
     });
     
     $('#confirmButton').on('click', () => {
-        connection.invoke('PerformGameAction', gameId, GameActionType.Resign);
+        connection.invoke(GameHubMethods.PerformGameAction, gameId, GameActionType.Resign);
     });
 
     $('#denyButton').on('click', () => {
@@ -188,15 +189,15 @@ function bindEventsToResignButton(connection, gameId) {
 
 function bindEventsToDrawOfferButtons(connection, gameId) {
     $('#drawOfferButton').on('click', () => {
-        connection.invoke('PerformGameAction', gameId, GameActionType.SendDrawOffer);
+        connection.invoke(GameHubMethods.PerformGameAction, gameId, GameActionType.SendDrawOffer);
     });
     
     $('#acceptButton').on('click', () => {
-        connection.invoke("PerformGameAction", gameId, GameActionType.AcceptDrawOffer);
+        connection.invoke(GameHubMethods.PerformGameAction, gameId, GameActionType.AcceptDrawOffer);
     });
 
     $('#declineButton').on('click', () => {
-        connection.invoke('PerformGameAction', gameId, GameActionType.DeclineDrawOffer);
+        connection.invoke(GameHubMethods.PerformGameAction, gameId, GameActionType.DeclineDrawOffer);
     });
 }
 

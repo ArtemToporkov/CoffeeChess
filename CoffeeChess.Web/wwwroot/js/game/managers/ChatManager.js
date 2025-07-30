@@ -1,4 +1,5 @@
-﻿import { GameHubMethods } from "../enums/GameHubMethods.js";
+﻿import { GameHubEvents } from "../enums/GameHubEvents.js";
+import { GameHubMethods } from "../enums/GameHubMethods.js";
 
 export class ChatManager {
     #connection;
