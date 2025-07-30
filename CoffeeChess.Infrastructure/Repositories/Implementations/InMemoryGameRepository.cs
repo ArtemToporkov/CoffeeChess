@@ -6,7 +6,7 @@ using MediatR;
 
 namespace CoffeeChess.Infrastructure.Repositories.Implementations;
 
-public class BaseGameRepository(IMediator mediator) : IGameRepository
+public class InMemoryGameRepository(IMediator mediator) : IGameRepository
 {
     private readonly ConcurrentDictionary<string, Game> _games = new();
 
