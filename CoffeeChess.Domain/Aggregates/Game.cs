@@ -13,9 +13,8 @@ public class Game
     public string GameId { get; }
     public string WhitePlayerId { get; }
     public string BlackPlayerId { get; }
-    public Chat Chat { get; } = new();
-    public bool IsOver => _chessGame.GameResult != ChessDotNetCore.GameResult.OnGoing &&
-                          _chessGame.GameResult != ChessDotNetCore.GameResult.Check;
+    public Chat Chat { get; }
+    public bool IsOver { get; private set; }
     public TimeSpan WhiteTimeLeft { get; private set; }
     public TimeSpan BlackTimeLeft { get; private set; }
     public TimeSpan Increment { get; }
@@ -43,7 +42,10 @@ public class Game
         Increment = increment;
         LastTimeUpdate = DateTime.UtcNow;
         CurrentPlayerColor = PlayerColor.White;
-        _domainEvents.Add(new GameStarted(GameId, WhitePlayerId, BlackPlayerId, (int)WhiteTimeLeft.TotalMilliseconds));
+        Chat = new();
+        IsOver = false;
+        _domainEvents.Add(new GameStarted(
+            GameId, WhitePlayerId, BlackPlayerId, (int)WhiteTimeLeft.TotalMilliseconds));
     }
     
     public void ClearDomainEvents() => _domainEvents.Clear();
@@ -82,6 +84,7 @@ public class Game
                 ? (GameResult.BlackWon, GameResultReason.WhiteTimeRanOut) 
                 : (GameResult.WhiteWon, GameResultReason.BlackTimeRanOut) ;
             _domainEvents.Add(new GameResultUpdated(WhitePlayerId, BlackPlayerId, result, reason));
+            IsOver = true;
             return;
         }
 
@@ -95,6 +98,7 @@ public class Game
         {
             _domainEvents.Add(new GameResultUpdated(
                 WhitePlayerId, BlackPlayerId, GameResult.Draw, GameResultReason.Threefold));
+            IsOver = true;
             return;
         }
 
@@ -102,6 +106,7 @@ public class Game
         {
             _domainEvents.Add(new GameResultUpdated(WhitePlayerId, BlackPlayerId, 
                 GameResult.Draw, GameResultReason.FiftyMovesRule));
+            IsOver = true;
             return;
         }
         
@@ -111,6 +116,7 @@ public class Game
                 ? (GameResult.BlackWon, GameResultReason.WhiteCheckmates) 
                 : (GameResult.WhiteWon, GameResultReason.BlackCheckmates);
             _domainEvents.Add(new GameResultUpdated(WhitePlayerId, BlackPlayerId, result, reason));
+            IsOver = true;
             return;
         }
         
@@ -118,6 +124,7 @@ public class Game
         { 
             _domainEvents.Add(new GameResultUpdated(WhitePlayerId,  BlackPlayerId, 
                 GameResult.Draw, GameResultReason.Stalemate));
+            IsOver = true;
         }
     }
 
@@ -166,6 +173,7 @@ public class Game
         PlayerWithDrawOffer = null;
         _domainEvents.Add(new GameResultUpdated(
             WhitePlayerId, BlackPlayerId, GameResult.Draw, GameResultReason.Agreement));
+        IsOver = true;
     }
 
     public void DeclineDrawOffer(string playerId)
@@ -190,6 +198,7 @@ public class Game
             ? (GameResult.BlackWon, GameResultReason.WhiteResigns) 
             : (GameResult.WhiteWon, GameResultReason.BlackResigns);
         _domainEvents.Add(new GameResultUpdated(WhitePlayerId, BlackPlayerId, result, reason));
+        IsOver = true;
     }
 
     private bool UpdateTimeAndCheckTimeout()
