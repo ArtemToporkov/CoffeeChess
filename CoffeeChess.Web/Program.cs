@@ -8,6 +8,7 @@ using CoffeeChess.Domain.Services.Interfaces;
 using CoffeeChess.Infrastructure.Identity;
 using CoffeeChess.Infrastructure.Persistence;
 using CoffeeChess.Infrastructure.Repositories.Implementations;
+using CoffeeChess.Web.HostedServices;
 using CoffeeChess.Web.Hubs;
 using CoffeeChess.Web.Services;
 using Microsoft.AspNetCore.Identity;
@@ -42,6 +43,8 @@ builder.Services.AddScoped<IPlayerEventNotifierService, SignalRPlayerEventNotifi
 builder.Services.AddSingleton<IChallengeRepository, InMemoryChallengeRepository>();
 builder.Services.AddSingleton<IGameRepository, InMemoryGameRepository>();
 builder.Services.AddScoped<IPlayerRepository, SqlPlayerRepository>();
+
+builder.Services.AddHostedService<GameTimeoutCheckerService>();
 
 var app = builder.Build();
 

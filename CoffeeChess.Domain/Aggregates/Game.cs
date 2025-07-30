@@ -24,7 +24,7 @@ public class Game
     public IReadOnlyCollection<IDomainEvent> DomainEvents => _domainEvents.AsReadOnly();
     
     private readonly ChessGame _chessGame = new();
-    private readonly Lock _lockObject = new();
+    private readonly Lock _lock = new();
     private readonly List<IDomainEvent> _domainEvents = [];
 
     public Game(
@@ -201,23 +201,38 @@ public class Game
         IsOver = true;
     }
 
+    public void CheckTimeout()
+    {
+        if (UpdateTimeAndCheckTimeout())
+        {
+            _chessGame.Resign(CurrentPlayerColor == PlayerColor.White ? PlayerSide.White : PlayerSide.Black);
+            var (result, reason) = CurrentPlayerColor == PlayerColor.White
+                ? (GameResult.BlackWon, GameResultReason.WhiteTimeRanOut)
+                : (GameResult.WhiteWon, GameResultReason.BlackTimeRanOut);
+            _domainEvents.Add(new GameResultUpdated(WhitePlayerId, BlackPlayerId, result, reason));
+            IsOver = true;
+        }
+    }
+
     private bool UpdateTimeAndCheckTimeout()
     {
-        lock (_lockObject)
+        lock (_lock)
         {
             var deltaTime = DateTime.UtcNow - LastTimeUpdate;
             LastTimeUpdate = DateTime.UtcNow;
             if (CurrentPlayerColor is PlayerColor.White)
             {
                 WhiteTimeLeft -= deltaTime;
-                if (WhiteTimeLeft >= TimeSpan.Zero) return false;
+                if (WhiteTimeLeft >= TimeSpan.Zero) 
+                    return false;
             
                 WhiteTimeLeft = TimeSpan.Zero;
             }
             else
             {
                 BlackTimeLeft -= deltaTime;
-                if (BlackTimeLeft >= TimeSpan.Zero) return false;
+                if (BlackTimeLeft >= TimeSpan.Zero) 
+                    return false;
             
                 BlackTimeLeft = TimeSpan.Zero;
             }
