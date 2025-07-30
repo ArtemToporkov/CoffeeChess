@@ -20,9 +20,7 @@ public class Game
     public TimeSpan BlackTimeLeft { get; private set; }
     public TimeSpan Increment { get; }
     public DateTime LastTimeUpdate { get; private set; }
-    public PlayerColor CurrentPlayerColor => _chessGame.CurrentPlayer == PlayerSide.White 
-        ? PlayerColor.White 
-        : PlayerColor.Black;
+    public PlayerColor CurrentPlayerColor { get; private set; }
     public PlayerColor? PlayerWithDrawOffer { get; private set; }
     public IReadOnlyCollection<IDomainEvent> DomainEvents => _domainEvents.AsReadOnly();
     
@@ -44,6 +42,7 @@ public class Game
         BlackTimeLeft = minutesLeftForPlayer;
         Increment = increment;
         LastTimeUpdate = DateTime.UtcNow;
+        CurrentPlayerColor = PlayerColor.White;
         _domainEvents.Add(new GameStarted(GameId, WhitePlayerId, BlackPlayerId, (int)WhiteTimeLeft.TotalMilliseconds));
     }
     
@@ -55,7 +54,6 @@ public class Game
         var currentPlayerId = CurrentPlayerColor == PlayerColor.White 
             ? WhitePlayerId 
             : BlackPlayerId;
-        var currentPlayerColor = CurrentPlayerColor;
         
         if (playerId != currentPlayerId)
         {
@@ -76,20 +74,22 @@ public class Game
         if (PlayerWithDrawOffer.HasValue && playerColor != PlayerWithDrawOffer)
             DeclineDrawOffer(playerId);
 
-        if (UpdateTimeAndCheckTimeout(currentPlayerColor))
+        if (UpdateTimeAndCheckTimeout())
         {
             _domainEvents.Add(new MoveFailed(playerId, MoveFailedReason.TimeRanOut));
-            _chessGame.Resign(currentPlayerColor == PlayerColor.White ? PlayerSide.White : PlayerSide.Black);
-            var (result, reason) = currentPlayerColor == PlayerColor.White 
+            _chessGame.Resign(CurrentPlayerColor == PlayerColor.White ? PlayerSide.White : PlayerSide.Black);
+            var (result, reason) = CurrentPlayerColor == PlayerColor.White 
                 ? (GameResult.BlackWon, GameResultReason.WhiteTimeRanOut) 
                 : (GameResult.WhiteWon, GameResultReason.BlackTimeRanOut) ;
             _domainEvents.Add(new GameResultUpdated(WhitePlayerId, BlackPlayerId, result, reason));
             return;
         }
 
-        DoIncrement(currentPlayerColor);
+        DoIncrement();
         _domainEvents.Add(new MoveMade(WhitePlayerId, BlackPlayerId, 
             GetPgn(), WhiteTimeLeft, BlackTimeLeft));
+        CurrentPlayerColor = CurrentPlayerColor == PlayerColor.White
+            ? PlayerColor.Black : PlayerColor.White;
         
         if (_chessGame.ThreeFoldRepeatAndThisCanResultInDraw)
         {
@@ -192,13 +192,13 @@ public class Game
         _domainEvents.Add(new GameResultUpdated(WhitePlayerId, BlackPlayerId, result, reason));
     }
 
-    private bool UpdateTimeAndCheckTimeout(PlayerColor playerColor)
+    private bool UpdateTimeAndCheckTimeout()
     {
         lock (_lockObject)
         {
             var deltaTime = DateTime.UtcNow - LastTimeUpdate;
             LastTimeUpdate = DateTime.UtcNow;
-            if (playerColor is PlayerColor.White)
+            if (CurrentPlayerColor is PlayerColor.White)
             {
                 WhiteTimeLeft -= deltaTime;
                 if (WhiteTimeLeft >= TimeSpan.Zero) return false;
@@ -217,9 +217,9 @@ public class Game
         }
     }
 
-    private void DoIncrement(PlayerColor playerColor)
+    private void DoIncrement()
     {
-        if (playerColor is PlayerColor.White)
+        if (CurrentPlayerColor is PlayerColor.White)
             WhiteTimeLeft += Increment;
         else
             BlackTimeLeft += Increment;
