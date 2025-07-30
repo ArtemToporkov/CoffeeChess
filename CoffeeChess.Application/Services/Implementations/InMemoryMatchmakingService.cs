@@ -14,29 +14,36 @@ public class InMemoryMatchmakingService(
 {
     private static readonly Random Random = new();
     private static readonly Lock Lock = new();
+    private static readonly SemaphoreSlim Mutex = new(1, 1);
 
-    public void QueueChallenge(string playerId, GameSettings settings)
+    public async Task QueueChallenge(string playerId, GameSettings settings)
     {
-        lock (Lock)
+        await Mutex.WaitAsync();
+        try
         {
             if (TryFindChallenge(playerId, out var foundChallenge))
             {
-                CreateGameBasedOnFoundChallenge(playerId, settings, foundChallenge);
+                await CreateGameBasedOnFoundChallenge(playerId, settings, foundChallenge);
                 return;
             }
+
             CreateGameChallenge(playerId, settings);
+        }
+        finally
+        {
+            Mutex.Release();
         }
     }
     
-    public bool TryAddChatMessage(string gameId, string username, string message)
+    public async Task<bool> TryAddChatMessage(string gameId, string username, string message)
     {
         if (!gameRepository.TryGetValue(gameId, out var game)) 
             return false;
-        game.Chat.AddMessage(username, message);
+        await game.Chat.AddMessage(username, message);
         return true;
     }
     
-    private void CreateGameBasedOnFoundChallenge(string connectingPlayerId,
+    private async Task CreateGameBasedOnFoundChallenge(string connectingPlayerId,
         GameSettings settings, GameChallenge gameChallenge)
     {
         var connectingPlayerColor = ChooseColor(settings);
@@ -51,7 +58,7 @@ public class InMemoryMatchmakingService(
             TimeSpan.FromSeconds(settings.Increment)
         );
         gameRepository.TryAdd(createdGame.GameId, createdGame);
-        gameRepository.SaveChanges(createdGame);
+        await gameRepository.SaveChangesAsync(createdGame);
     }
     
     private void CreateGameChallenge(string creatorId, GameSettings settings)

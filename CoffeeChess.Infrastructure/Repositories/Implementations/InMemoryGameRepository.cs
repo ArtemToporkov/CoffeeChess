@@ -3,10 +3,11 @@ using System.Diagnostics.CodeAnalysis;
 using CoffeeChess.Domain.Aggregates;
 using CoffeeChess.Domain.Repositories.Interfaces;
 using MediatR;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace CoffeeChess.Infrastructure.Repositories.Implementations;
 
-public class InMemoryGameRepository(IMediator mediator) : IGameRepository
+public class InMemoryGameRepository(IServiceProvider serviceProvider) : IGameRepository
 {
     private readonly ConcurrentDictionary<string, Game> _games = new();
 
@@ -29,8 +30,15 @@ public class InMemoryGameRepository(IMediator mediator) : IGameRepository
 
     public void SaveChanges(Game game)
     {
+    }
+
+    public async Task SaveChangesAsync(Game game)
+    {
+        // TODO: use redis instead of in-memory implementation
+        using var scope = serviceProvider.CreateScope();
+        var mediator = scope.ServiceProvider.GetService<IMediator>();
         foreach (var @event in game.DomainEvents)
-            mediator.Publish(@event);
+            await mediator!.Publish(@event);
         game.ClearDomainEvents();
     }
 

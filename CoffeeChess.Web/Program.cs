@@ -39,8 +39,8 @@ builder.Services.AddScoped<IRatingService, EloRatingService>();
 builder.Services.AddScoped<IGameEventNotifierService, SignalRGameEventNotifierService>();
 builder.Services.AddScoped<IPlayerEventNotifierService, SignalRPlayerEventNotifierService>();
 
-builder.Services.AddScoped<IChallengeRepository, InMemoryChallengeRepository>();
-builder.Services.AddScoped<IGameRepository, InMemoryGameRepository>();
+builder.Services.AddSingleton<IChallengeRepository, InMemoryChallengeRepository>();
+builder.Services.AddSingleton<IGameRepository, InMemoryGameRepository>();
 builder.Services.AddScoped<IPlayerRepository, SqlPlayerRepository>();
 
 var app = builder.Build();

@@ -11,7 +11,6 @@ namespace CoffeeChess.Web.Hubs;
 
 public class GameHub(
     IGameRepository gameRepository,
-    IPlayerRepository playerRepository,
     IMatchmakingService matchmakingService,
     UserManager<UserModel> userManager) : Hub<IGameClient>
 {
@@ -22,14 +21,14 @@ public class GameHub(
     public async Task QueueChallenge(GameSettings settings)
     {
         var user = await GetUserAsync();
-        matchmakingService.QueueChallenge(user.Id, settings);
+        await matchmakingService.QueueChallenge(user.Id, settings);
     }
 
     public async Task SendChatMessage(string gameId, string message)
     {
         var user = await GetUserAsync();
         if (gameRepository.TryGetValue(gameId, out var game) &&
-            matchmakingService.TryAddChatMessage(gameId, user.UserName!, message))
+            await matchmakingService.TryAddChatMessage(gameId, user.UserName!, message))
         {
             await Clients.Users(game.WhitePlayerId, game.BlackPlayerId)
                 .ChatMessageReceived(user.UserName!, message);
@@ -48,7 +47,7 @@ public class GameHub(
             await Clients.Caller.MoveFailed( "Game is over.");
 
         game.ApplyMove(Context.UserIdentifier!, from, to, promotion);
-        gameRepository.SaveChanges(game);
+        await gameRepository.SaveChangesAsync(game);
     }
 
     public async Task PerformGameAction(string gameId, GameActionType gameActionType)
@@ -70,28 +69,20 @@ public class GameHub(
         {
             case GameActionType.SendDrawOffer:
                 game.OfferADraw(user.Id);
-                gameRepository.SaveChanges(game);
+                await gameRepository.SaveChangesAsync(game);
                 break;
             case GameActionType.AcceptDrawOffer:
                 game.AcceptDrawOffer(user.Id);
-                gameRepository.SaveChanges(game);
+                await gameRepository.SaveChangesAsync(game);
                 break;
             case GameActionType.DeclineDrawOffer:
                 game.DeclineDrawOffer(user.Id);
-                gameRepository.SaveChanges(game);
+                await gameRepository.SaveChangesAsync(game);
                 break;
             case GameActionType.Resign:
                 game.Resign(user.Id);
-                gameRepository.SaveChanges(game);
+                await gameRepository.SaveChangesAsync(game);
                 break;
         }
-    }
-
-    private async Task<PlayerInfoViewModel> GetInfoAsync(string playerId)
-    {
-        var player = await playerRepository.GetAsync(playerId) 
-                     ?? throw new InvalidOperationException(
-                         $"[{nameof(GameHub)}.{nameof(GetInfoAsync)}]: player not found.");
-        return new PlayerInfoViewModel(player.Name, player.Rating);
     }
 }
