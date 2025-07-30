@@ -60,8 +60,9 @@ export function updateGameResult(isWhite, result, reason) {
     $('#resultPanel')
         .css('display', 'flex')
         .addClass(panelColorClass);
+    
     $('#resultTitle').text(
-        ['You win', 'You lose', 'Draw'][result]
+        getResultTitle(isWhite, result)
     ).addClass(fontButtonsColorClass);
     $('#resultInfo')
         .text(reason)
@@ -164,6 +165,15 @@ export function playRatingsChangeAnimation(oldRating, newRating) {
             $newRating.text(Math.round(current));
         }, 16);
     }, delay * 4);
+}
+
+function getResultTitle(isWhite, result) {
+    if (result === GameResult.Draw)
+        return 'Draw';
+    if (isWhite && result === GameResult.WhiteWon 
+        || !isWhite && result === GameResult.BlackWon)
+        return "You win";
+    return "You lose";
 }
 
 function hidePromotionModal() {
