@@ -36,9 +36,9 @@ public class InMemoryGameRepository(IServiceProvider serviceProvider) : IGameRep
     {
         // TODO: use redis instead of in-memory implementation
         using var scope = serviceProvider.CreateScope();
-        var mediator = scope.ServiceProvider.GetService<IMediator>();
+        var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
         foreach (var @event in game.DomainEvents)
-            await mediator!.Publish(@event);
+            await mediator.Publish(@event);
         game.ClearDomainEvents();
     }
 

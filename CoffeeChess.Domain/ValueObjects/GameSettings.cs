@@ -1,7 +1,9 @@
-﻿using CoffeeChess.Domain.Enums;
+﻿using System.Text.Json.Serialization;
+using CoffeeChess.Domain.Enums;
 
 namespace CoffeeChess.Domain.ValueObjects;
 
+[method: JsonConstructor]
 public readonly struct GameSettings(
     int minutes,
     int increment,
