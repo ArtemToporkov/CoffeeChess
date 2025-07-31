@@ -28,14 +28,9 @@ public class GameHub(
 
     public async Task SendChatMessage(string gameId, string message)
     {
-        // TODO: create and send command
-        /*var user = await GetUserAsync();
-        if (gameRepository.TryGetValue(gameId, out var game) &&
-            await matchmakingService.TryAddChatMessage(gameId, user.UserName!, message))
-        {
-            await Clients.Users(game.WhitePlayerId, game.BlackPlayerId)
-                .ChatMessageReceived(user.UserName!, message);
-        }*/
+        var user = await GetUserAsync();
+        var sendChatMessageCommand = new SendChatMessageCommand(gameId, user.UserName!, message);
+        await mediator.Send(sendChatMessageCommand);
     }
 
     public async Task MakeMove(string gameId, string from, string to, string? promotion)
