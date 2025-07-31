@@ -1,14 +1,18 @@
 ﻿using CoffeeChess.Application.Services.Interfaces;
 using CoffeeChess.Domain.Events.Game;
+using CoffeeChess.Domain.Services.Interfaces;
 using MediatR;
 
 namespace CoffeeChess.Application.EventHandlers.Game;
 
 public class MoveMadeEventHandler(
+    IPgnBuilderService pgnBuilder,
     IGameEventNotifierService notifier) : INotificationHandler<MoveMade> 
 {
     public async Task Handle(MoveMade notification, CancellationToken cancellationToken)
-        => await notifier.NotifyMoveMade(notification.WhiteId, notification.BlackId,
-            notification.NewPgn, notification.WhiteTimeLeft.TotalMilliseconds,
-            notification.BlackTimeLeft.TotalMilliseconds);
+    {
+        await notifier.NotifyMoveMade(notification.WhiteId, notification.BlackId,
+        pgnBuilder.GetPgn(notification.SanMovesHistory), notification.WhiteTimeLeft.TotalMilliseconds,
+        notification.BlackTimeLeft.TotalMilliseconds);
+    }
 }

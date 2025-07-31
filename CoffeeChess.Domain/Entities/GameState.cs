@@ -15,5 +15,6 @@ public class GameState
     public DateTime LastTimeUpdate { get; init; }
     public PlayerColor CurrentPlayerColor { get; init; }
     public PlayerColor? PlayerWithDrawOffer { get; init; }
-    public List<string> PositionHistory { get; init; }
+    public string CurrentFenPosition { get; init; }
+    public IReadOnlyCollection<string> SanMovesHistory { get; init; }
 }

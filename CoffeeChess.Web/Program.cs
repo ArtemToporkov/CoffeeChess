@@ -41,6 +41,7 @@ builder.Services.AddMediatR(cfg =>
 
 builder.Services.AddScoped<IMatchmakingService, InMemoryMatchmakingService>();
 builder.Services.AddScoped<IRatingService, EloRatingService>();
+builder.Services.AddScoped<IPgnBuilderService, StringBuilderPgnBuilderService>();
 builder.Services.AddScoped<IGameEventNotifierService, SignalRGameEventNotifierService>();
 builder.Services.AddScoped<IPlayerEventNotifierService, SignalRPlayerEventNotifierService>();
 builder.Services.AddScoped<IChatEventNotifierService, SignalRChatEventNotifierService>();

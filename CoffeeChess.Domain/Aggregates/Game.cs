@@ -21,8 +21,12 @@ public class Game
     public PlayerColor CurrentPlayerColor { get; private set; }
     public PlayerColor? PlayerWithDrawOffer { get; private set; }
     public IReadOnlyCollection<IDomainEvent> DomainEvents => _domainEvents.AsReadOnly();
-    
-    private readonly ChessGame _chessGame = new();
+    // TODO: use MoveInfo class instead of string
+    public IReadOnlyCollection<string> SanMovesHistory => _sanMovesHistory.AsReadOnly();
+
+    private string _currentFenPosition;
+    private readonly List<string> _sanMovesHistory;
+    private readonly ChessGame _chessGame;
     private readonly Lock _lock = new();
     private readonly List<IDomainEvent> _domainEvents = [];
 
@@ -42,12 +46,16 @@ public class Game
         LastTimeUpdate = DateTime.UtcNow;
         CurrentPlayerColor = PlayerColor.White;
         IsOver = false;
+        _chessGame = new();
+        _sanMovesHistory = new();
+        _currentFenPosition = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
         _domainEvents.Add(new GameStarted(
             GameId, WhitePlayerId, BlackPlayerId, (int)WhiteTimeLeft.TotalMilliseconds));
     }
 
     public Game(GameState gameState)
     {
+        _chessGame = new(gameState.CurrentFenPosition);
         GameId = gameState.GameId;
         WhitePlayerId = gameState.WhitePlayerId;
         BlackPlayerId = gameState.BlackPlayerId;
@@ -58,6 +66,8 @@ public class Game
         LastTimeUpdate = gameState.LastTimeUpdate;
         CurrentPlayerColor = gameState.CurrentPlayerColor;
         PlayerWithDrawOffer = gameState.PlayerWithDrawOffer;
+        _currentFenPosition = gameState.CurrentFenPosition;
+        _sanMovesHistory = gameState.SanMovesHistory.ToList();
     }
 
     public GameState GetGameState()
@@ -74,6 +84,8 @@ public class Game
             LastTimeUpdate = LastTimeUpdate,
             CurrentPlayerColor = CurrentPlayerColor,
             PlayerWithDrawOffer = PlayerWithDrawOffer,
+            CurrentFenPosition = _currentFenPosition,
+            SanMovesHistory = SanMovesHistory
         };
     }
     
@@ -118,8 +130,11 @@ public class Game
         }
 
         DoIncrement();
+        _sanMovesHistory.Add(_chessGame.LastMove!.SAN);
+        _currentFenPosition = _chessGame.GetFen();
         _domainEvents.Add(new MoveMade(WhitePlayerId, BlackPlayerId, 
-            GetPgn(), WhiteTimeLeft, BlackTimeLeft));
+            SanMovesHistory, WhiteTimeLeft, BlackTimeLeft));
+        
         CurrentPlayerColor = CurrentPlayerColor == PlayerColor.White
             ? PlayerColor.Black : PlayerColor.White;
         
@@ -155,20 +170,6 @@ public class Game
                 GameResult.Draw, GameResultReason.Stalemate));
             IsOver = true;
         }
-    }
-
-    public string GetPgn()
-    {
-        var pgnBuilder = new StringBuilder();
-        for (var i = 0; i < _chessGame.Moves.Count; i++)
-        {
-            if (i % 2 == 0)
-                pgnBuilder.Append($"{i / 2 + 1}. {_chessGame.Moves[i].SAN} ");
-            else
-                pgnBuilder.Append($"{_chessGame.Moves[i].SAN} ");
-        }
-
-        return pgnBuilder.ToString().Trim();
     }
     
     public PlayerColor GetColorById(string playerId)
