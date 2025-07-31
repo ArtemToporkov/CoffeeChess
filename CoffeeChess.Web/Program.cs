@@ -1,5 +1,4 @@
 using CoffeeChess.Application.EventHandlers;
-using CoffeeChess.Application.Services;
 using CoffeeChess.Application.Services.Implementations;
 using CoffeeChess.Application.Services.Interfaces;
 using CoffeeChess.Domain.Repositories.Interfaces;
@@ -42,6 +41,7 @@ builder.Services.AddScoped<IPlayerEventNotifierService, SignalRPlayerEventNotifi
 
 builder.Services.AddSingleton<IChallengeRepository, InMemoryChallengeRepository>();
 builder.Services.AddSingleton<IGameRepository, InMemoryGameRepository>();
+builder.Services.AddSingleton<IChatRepository, InMemoryChatRepository>();
 builder.Services.AddScoped<IPlayerRepository, SqlPlayerRepository>();
 
 builder.Services.AddHostedService<GameTimeoutCheckerService>();

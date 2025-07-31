@@ -13,7 +13,6 @@ public class Game
     public string GameId { get; }
     public string WhitePlayerId { get; }
     public string BlackPlayerId { get; }
-    public Chat Chat { get; }
     public bool IsOver { get; private set; }
     public TimeSpan WhiteTimeLeft { get; private set; }
     public TimeSpan BlackTimeLeft { get; private set; }
@@ -42,7 +41,6 @@ public class Game
         Increment = increment;
         LastTimeUpdate = DateTime.UtcNow;
         CurrentPlayerColor = PlayerColor.White;
-        Chat = new();
         IsOver = false;
         _domainEvents.Add(new GameStarted(
             GameId, WhitePlayerId, BlackPlayerId, (int)WhiteTimeLeft.TotalMilliseconds));

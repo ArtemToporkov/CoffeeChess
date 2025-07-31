@@ -10,7 +10,8 @@ namespace CoffeeChess.Application.Services.Implementations;
 
 public class InMemoryMatchmakingService(
     IChallengeRepository challengeRepository, 
-    IGameRepository gameRepository) : IMatchmakingService
+    IGameRepository gameRepository,
+    IChatRepository chatRepository) : IMatchmakingService
 {
     private static readonly Random Random = new();
     private static readonly Lock Lock = new();
@@ -35,14 +36,6 @@ public class InMemoryMatchmakingService(
         }
     }
     
-    public async Task<bool> TryAddChatMessage(string gameId, string username, string message)
-    {
-        if (!gameRepository.TryGetValue(gameId, out var game)) 
-            return false;
-        await game.Chat.AddMessage(username, message);
-        return true;
-    }
-    
     private async Task CreateGameBasedOnFoundChallenge(string connectingPlayerId,
         GameSettings settings, GameChallenge gameChallenge)
     {
@@ -58,6 +51,8 @@ public class InMemoryMatchmakingService(
             TimeSpan.FromSeconds(settings.Increment)
         );
         gameRepository.TryAdd(createdGame.GameId, createdGame);
+        var chat = new Chat(createdGame.GameId);
+        chatRepository.TryAdd(chat.GameId, chat);
         await gameRepository.SaveChangesAsync(createdGame);
     }
     
