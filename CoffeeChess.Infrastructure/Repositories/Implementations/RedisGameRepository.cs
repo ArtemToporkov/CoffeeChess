@@ -70,7 +70,7 @@ public class RedisGameRepository(
     {
         var state = game.GetGameState();
         var serializedState = JsonSerializer.Serialize(state);
-        await _database.StringSetAsync(GameKeyPrefix + game.GameId, serializedState);
+        await _database.StringSetAsync($"{GameKeyPrefix}:{game.GameId}", serializedState);
         
         using var scope = serviceProvider.CreateScope();
         var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
