@@ -45,6 +45,37 @@ public class Game
         _domainEvents.Add(new GameStarted(
             GameId, WhitePlayerId, BlackPlayerId, (int)WhiteTimeLeft.TotalMilliseconds));
     }
+
+    public Game(GameState gameState)
+    {
+        GameId = gameState.GameId;
+        WhitePlayerId = gameState.WhitePlayerId;
+        BlackPlayerId = gameState.BlackPlayerId;
+        IsOver = gameState.IsOver;
+        WhiteTimeLeft = gameState.WhiteTimeLeft;
+        BlackTimeLeft = gameState.BlackTimeLeft;
+        Increment = gameState.Increment;
+        LastTimeUpdate = gameState.LastTimeUpdate;
+        CurrentPlayerColor = gameState.CurrentPlayerColor;
+        PlayerWithDrawOffer = gameState.PlayerWithDrawOffer;
+    }
+
+    public GameState GetGameState()
+    {
+        return new GameState
+        {
+            GameId = GameId,
+            WhitePlayerId = WhitePlayerId,
+            BlackPlayerId = BlackPlayerId,
+            IsOver = IsOver,
+            WhiteTimeLeft = WhiteTimeLeft,
+            BlackTimeLeft = BlackTimeLeft,
+            Increment = Increment,
+            LastTimeUpdate = LastTimeUpdate,
+            CurrentPlayerColor = CurrentPlayerColor,
+            PlayerWithDrawOffer = PlayerWithDrawOffer,
+        };
+    }
     
     public void ClearDomainEvents() => _domainEvents.Clear();
     

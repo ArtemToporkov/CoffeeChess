@@ -1,7 +1,6 @@
 ﻿using CoffeeChess.Application.Commands;
 using CoffeeChess.Application.Services.Interfaces;
 using CoffeeChess.Domain.Enums;
-using CoffeeChess.Domain.Repositories.Interfaces;
 using CoffeeChess.Domain.ValueObjects;
 using CoffeeChess.Infrastructure.Identity;
 using MediatR;
@@ -12,7 +11,6 @@ namespace CoffeeChess.Web.Hubs;
 
 public class GameHub(
     IMediator mediator,
-    IGameRepository gameRepository,
     IMatchmakingService matchmakingService,
     UserManager<UserModel> userManager) : Hub<IGameClient>
 {

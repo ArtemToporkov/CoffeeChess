@@ -13,8 +13,12 @@ using CoffeeChess.Web.Hubs;
 using CoffeeChess.Web.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
+
+var redisConnectionString = builder.Configuration.GetConnectionString("RedisConnection");
+builder.Services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(redisConnectionString!));
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(connectionString));
@@ -42,8 +46,8 @@ builder.Services.AddScoped<IPlayerEventNotifierService, SignalRPlayerEventNotifi
 builder.Services.AddScoped<IChatEventNotifierService, SignalRChatEventNotifierService>();
 
 builder.Services.AddSingleton<IChallengeRepository, InMemoryChallengeRepository>();
-builder.Services.AddSingleton<IGameRepository, InMemoryGameRepository>();
 builder.Services.AddSingleton<IChatRepository, InMemoryChatRepository>();
+builder.Services.AddSingleton<IGameRepository, RedisGameRepository>();
 builder.Services.AddScoped<IPlayerRepository, SqlPlayerRepository>();
 
 builder.Services.AddHostedService<GameTimeoutCheckerService>();
