@@ -12,11 +12,11 @@ public class PerformGameActionCommandHandler(
     {
         if (!gameRepository.TryGetValue(request.GameId, out var game))
             throw new InvalidOperationException(
-                $"[{nameof(MakeMoveCommandHandler)}.{nameof(Handle)}]: game not found.");
+                $"[{nameof(PerformGameActionCommandHandler)}.{nameof(Handle)}]: game not found.");
 
         if (game.IsOver)
             throw new InvalidOperationException(
-                $"[{nameof(MakeMoveCommandHandler)}.{nameof(Handle)}]: game is over.");
+                $"[{nameof(PerformGameActionCommandHandler)}.{nameof(Handle)}]: game is over.");
 
         switch (request.GameActionType)
         {

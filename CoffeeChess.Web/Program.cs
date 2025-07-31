@@ -38,6 +38,7 @@ builder.Services.AddScoped<IMatchmakingService, InMemoryMatchmakingService>();
 builder.Services.AddScoped<IRatingService, EloRatingService>();
 builder.Services.AddScoped<IGameEventNotifierService, SignalRGameEventNotifierService>();
 builder.Services.AddScoped<IPlayerEventNotifierService, SignalRPlayerEventNotifierService>();
+builder.Services.AddScoped<IChatEventNotifierService, SignalRChatEventNotifierService>();
 
 builder.Services.AddSingleton<IChallengeRepository, InMemoryChallengeRepository>();
 builder.Services.AddSingleton<IGameRepository, InMemoryGameRepository>();

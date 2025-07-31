@@ -20,7 +20,7 @@ public class Chat(string gameId)
     public Task AddMessage(string username, string message)
     {
         _messages.Enqueue(new(username, message, DateTime.UtcNow));
-        _domainEvents.Add(new ChatMessageAdded(username, message));
+        _domainEvents.Add(new ChatMessageAdded(GameId, username, message));
         return Task.CompletedTask;
     }
 }
