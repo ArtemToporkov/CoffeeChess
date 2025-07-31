@@ -2,9 +2,10 @@
 using CoffeeChess.Domain.Events.Player;
 using MediatR;
 
-namespace CoffeeChess.Application.EventHandlers;
+namespace CoffeeChess.Application.EventHandlers.Player;
 
-public class PlayerEventsHandler(IPlayerEventNotifierService notifier) : INotificationHandler<PlayerRatingChanged>
+public class PlayerRatingChangedEventHandler(
+    IPlayerEventNotifierService notifier) : INotificationHandler<PlayerRatingChanged>
 {
     public async Task Handle(PlayerRatingChanged notification, CancellationToken cancellationToken)
     {

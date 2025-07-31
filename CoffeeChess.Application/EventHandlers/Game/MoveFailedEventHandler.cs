@@ -1,0 +1,21 @@
+﻿using CoffeeChess.Application.Services.Interfaces;
+using CoffeeChess.Domain.Enums;
+using CoffeeChess.Domain.Events.Game;
+using MediatR;
+
+namespace CoffeeChess.Application.EventHandlers.Game;
+
+public class MoveFailedEventHandler(
+    IGameEventNotifierService notifier) : INotificationHandler<MoveFailed>
+{
+    public async Task Handle(MoveFailed notification, CancellationToken cancellationToken)
+        => await notifier.NotifyMoveFailed(notification.MoverId, GetMessageByMoveFailedReason(notification.Reason));
+    
+    private static string GetMessageByMoveFailedReason(MoveFailedReason reason) => reason switch
+    {
+        MoveFailedReason.InvalidMove => "Invalid move.",
+        MoveFailedReason.TimeRanOut => "Your time is run up.",
+        MoveFailedReason.NotYourTurn => "It's not your turn.",
+        _ => throw new ArgumentOutOfRangeException(nameof(reason), reason, null)
+    };
+}

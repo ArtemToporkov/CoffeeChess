@@ -5,36 +5,13 @@ using CoffeeChess.Domain.Repositories.Interfaces;
 using CoffeeChess.Domain.Services.Interfaces;
 using MediatR;
 
-namespace CoffeeChess.Application.EventHandlers;
+namespace CoffeeChess.Application.EventHandlers.Game;
 
-public class GameEventsHandler(
+public class GameResultUpdatedEventHandler(
     IRatingService ratingService,
     IPlayerRepository playerRepository,
-    IGameEventNotifierService notifier) : INotificationHandler<GameStarted>,
-    INotificationHandler<DrawOfferDeclined>,
-    INotificationHandler<DrawOfferSent>,
-    INotificationHandler<GameResultUpdated>,
-    INotificationHandler<MoveFailed>,
-    INotificationHandler<MoveMade>
+    IGameEventNotifierService notifier) : INotificationHandler<GameResultUpdated>
 {
-    public async Task Handle(GameStarted notification, CancellationToken cancellationToken)
-        => await notifier.NotifyGameStarted(
-            notification.GameId, 
-            notification.WhitePlayerId, 
-            notification.BlackPlayerId, 
-            notification.TotalMillisecondsForOnePlayerLeft);
-    
-    public async Task Handle(DrawOfferDeclined notification, CancellationToken cancellationToken)
-        => await notifier.NotifyDrawOfferDeclined(notification.RejectingId, notification.SenderId);
-
-    public async Task Handle(DrawOfferSent notification, CancellationToken cancellationToken)
-    {
-        var sender = await playerRepository.GetAsync(notification.SenderId);
-        var receiver = await playerRepository.GetAsync(notification.ReceiverId);
-        var message = $"{sender!.Name} offers a draw";
-        await notifier.NotifyDrawOfferSent(message, sender.Id, receiver!.Id);
-    }
-
     public async Task Handle(GameResultUpdated notification, CancellationToken cancellationToken)
     {
         var white = await playerRepository.GetAsync(notification.WhiteId);
@@ -51,23 +28,15 @@ public class GameEventsHandler(
         await notifier.NotifyGameResultUpdated(white, black,
             notification.GameResult, whiteReason, blackReason);
     }
-
-    public async Task Handle(MoveFailed notification, CancellationToken cancellationToken)
-        => await notifier.NotifyMoveFailed(notification.MoverId, GetMessageByMoveFailedReason(notification.Reason));
-
-    public async Task Handle(MoveMade notification, CancellationToken cancellationToken)
-        => await notifier.NotifyMoveMade(notification.WhiteId, notification.BlackId,
-            notification.NewPgn, notification.WhiteTimeLeft.TotalMilliseconds,
-            notification.BlackTimeLeft.TotalMilliseconds);
-
+    
     private async Task UpdateRatingAndSave(string playerId, int newRating)
     {
         var player = await playerRepository.GetAsync(playerId) ?? throw new InvalidOperationException(
-            $"[{nameof(GameEventsHandler)}.{nameof(UpdateRatingAndSave)}]: player not found.");
+            $"[{nameof(GameResultUpdatedEventHandler)}.{nameof(UpdateRatingAndSave)}]: player not found.");
         player.UpdateRating(newRating);
         await playerRepository.SaveChangesAsync(player);
     }
-
+    
     private (string WhiteReason, string BlackReason) GetMessageByGameResultReason(
         GameResultReason reason, string whiteName, string blackName)
         => reason switch
@@ -84,12 +53,4 @@ public class GameEventsHandler(
             GameResultReason.FiftyMovesRule => ("by 50-moves rule.", "by 50-moves rule."),
             _ => throw new ArgumentOutOfRangeException(nameof(reason), reason, null)
         };
-
-    private string GetMessageByMoveFailedReason(MoveFailedReason reason) => reason switch
-    {
-        MoveFailedReason.InvalidMove => "Invalid move.",
-        MoveFailedReason.TimeRanOut => "Your time is run up.",
-        MoveFailedReason.NotYourTurn => "It's not your turn.",
-        _ => throw new ArgumentOutOfRangeException(nameof(reason), reason, null)
-    };
 }

@@ -1,4 +1,5 @@
 using CoffeeChess.Application.EventHandlers;
+using CoffeeChess.Application.EventHandlers.Game;
 using CoffeeChess.Application.Services.Implementations;
 using CoffeeChess.Application.Services.Interfaces;
 using CoffeeChess.Domain.Repositories.Interfaces;
@@ -32,7 +33,7 @@ builder.Services.AddIdentity<UserModel, IdentityRole>(options =>
 builder.Services.AddControllersWithViews();
 builder.Services.AddSignalR();
 builder.Services.AddMediatR(cfg => 
-    cfg.RegisterServicesFromAssembly(typeof(GameEventsHandler).Assembly));
+    cfg.RegisterServicesFromAssembly(typeof(DrawOfferDeclinedEventHandler).Assembly));
 
 builder.Services.AddScoped<IMatchmakingService, InMemoryMatchmakingService>();
 builder.Services.AddScoped<IRatingService, EloRatingService>();
