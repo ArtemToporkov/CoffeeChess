@@ -26,21 +26,23 @@ public class GameResultUpdatedEventHandler(
             white!.Rating, black!.Rating,
             notification.GameResult);
 
-        await UpdateRatingAndSave(white.Id, newWhiteRating);
-        await UpdateRatingAndSave(black.Id, newBlackRating);
+        await UpdateRatingAndSave(white.Id, newWhiteRating, cancellationToken);
+        await UpdateRatingAndSave(black.Id, newBlackRating, cancellationToken);
 
         var (whiteReason, blackReason) = GetMessageByGameResultReason(
             notification.GameResultReason, white.Name, black.Name);
-        await notifier.NotifyGameResultUpdated(white, black,
-            notification.GameResult, whiteReason, blackReason);
+        await notifier.NotifyGameResultUpdated(white, black, notification.GameResult,
+            whiteReason, blackReason, cancellationToken);
     }
 
-    private async Task UpdateRatingAndSave(string playerId, int newRating)
+    private async Task UpdateRatingAndSave(string playerId, int newRating,
+        CancellationToken cancellationToken = default)
     {
-        var player = await playerRepository.GetByIdAsync(playerId) ?? throw new InvalidOperationException(
-            $"[{nameof(GameResultUpdatedEventHandler)}.{nameof(UpdateRatingAndSave)}]: player not found.");
+        var player = await playerRepository.GetByIdAsync(playerId, cancellationToken) ??
+                     throw new InvalidOperationException(
+                         $"[{nameof(GameResultUpdatedEventHandler)}.{nameof(UpdateRatingAndSave)}]: player not found.");
         player.UpdateRating(newRating);
-        await playerRepository.SaveChangesAsync(player);
+        await playerRepository.SaveChangesAsync(player, cancellationToken);
     }
 
     private static (string WhiteReason, string BlackReason) GetMessageByGameResultReason(

@@ -10,6 +10,6 @@ public class PlayerRatingChangedEventHandler(
     public async Task Handle(PlayerRatingChanged notification, CancellationToken cancellationToken)
     {
         await notifier.NotifyPlayerRatingChanged(
-            notification.PlayerId, notification.OldRating, notification.NewRating);
+            notification.PlayerId, notification.OldRating, notification.NewRating, cancellationToken);
     }
 }

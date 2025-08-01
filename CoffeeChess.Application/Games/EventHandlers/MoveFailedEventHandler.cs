@@ -9,7 +9,8 @@ public class MoveFailedEventHandler(
     IGameEventNotifierService notifier) : INotificationHandler<MoveFailed>
 {
     public async Task Handle(MoveFailed notification, CancellationToken cancellationToken)
-        => await notifier.NotifyMoveFailed(notification.MoverId, GetMessageByMoveFailedReason(notification.Reason));
+        => await notifier.NotifyMoveFailed(
+            notification.MoverId, GetMessageByMoveFailedReason(notification.Reason), cancellationToken);
     
     private static string GetMessageByMoveFailedReason(MoveFailedReason reason) => reason switch
     {

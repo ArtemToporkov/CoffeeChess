@@ -12,5 +12,6 @@ public class GameStartedEventHandler(
             notification.GameId, 
             notification.WhitePlayerId, 
             notification.BlackPlayerId, 
-            notification.TotalMillisecondsForOnePlayerLeft);
+            notification.TotalMillisecondsForOnePlayerLeft, 
+            cancellationToken);
 }

@@ -2,5 +2,6 @@
 
 public interface IChatEventNotifierService
 {
-    public Task NotifyChatMessageAdded(string whiteId, string blackId, string senderName, string message);
+    public Task NotifyChatMessageAdded(string whiteId, string blackId, string senderName, string message, 
+        CancellationToken cancellationToken = default);
 }

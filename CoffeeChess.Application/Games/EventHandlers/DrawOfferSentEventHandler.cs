@@ -18,6 +18,6 @@ public class DrawOfferSentEventHandler(
                        ?? throw new InvalidOperationException(
                            $"[{nameof(DrawOfferDeclinedEventHandler)}.{nameof(Handle)}]: receiver not found.]");
         var message = $"{sender.Name} offers a draw";
-        await notifier.NotifyDrawOfferSent(message, sender.Id, receiver.Id);
+        await notifier.NotifyDrawOfferSent(message, sender.Id, receiver.Id, cancellationToken);
     }
 }

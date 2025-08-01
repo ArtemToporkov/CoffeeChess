@@ -8,5 +8,5 @@ public class DrawOfferDeclinedEventHandler(
     IGameEventNotifierService notifier) : INotificationHandler<DrawOfferDeclined>
 {
     public async Task Handle(DrawOfferDeclined notification, CancellationToken cancellationToken)
-        => await notifier.NotifyDrawOfferDeclined(notification.RejectingId, notification.SenderId);
+        => await notifier.NotifyDrawOfferDeclined(notification.RejectingId, notification.SenderId, cancellationToken);
 }

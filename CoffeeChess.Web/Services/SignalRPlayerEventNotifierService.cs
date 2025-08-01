@@ -7,8 +7,9 @@ namespace CoffeeChess.Web.Services;
 public class SignalRPlayerEventNotifierService(
     IHubContext<GameHub, IGameClient> hubContext) : IPlayerEventNotifierService
 {
-    public async Task NotifyPlayerRatingChanged(string playerId, int oldRating, int newRating)
+    public async Task NotifyPlayerRatingChanged(string playerId, int oldRating, int newRating, 
+        CancellationToken cancellationToken = default)
     {
-        await hubContext.Clients.User(playerId).PlayerRatingUpdated(oldRating, newRating);
+        await hubContext.Clients.User(playerId).PlayerRatingUpdated(oldRating, newRating, cancellationToken);
     }
 }

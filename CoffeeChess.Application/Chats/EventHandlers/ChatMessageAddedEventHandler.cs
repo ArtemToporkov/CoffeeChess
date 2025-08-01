@@ -15,6 +15,6 @@ public class ChatMessageAddedEventHandler(
                    ?? throw new InvalidOperationException(
                        $"[{nameof(ChatMessageAddedEventHandler)}.{nameof(Handle)}]: game not found.");
         await notifier.NotifyChatMessageAdded(game.WhitePlayerId, game.BlackPlayerId, notification.Username,
-            notification.Message);
+            notification.Message, cancellationToken);
     }
 }

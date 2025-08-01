@@ -2,5 +2,6 @@
 
 public interface IPlayerEventNotifierService
 {
-    public Task NotifyPlayerRatingChanged(string playerId, int oldRating, int newRating);
+    public Task NotifyPlayerRatingChanged(string playerId, int oldRating, int newRating, 
+        CancellationToken cancellationToken = default);
 }
