@@ -1,5 +1,4 @@
 using CoffeeChess.Application.Chats.Services.Interfaces;
-using CoffeeChess.Application.EventHandlers;
 using CoffeeChess.Application.Games.EventHandlers;
 using CoffeeChess.Application.Games.Services.Interfaces;
 using CoffeeChess.Application.Matchmaking.Services.Implementations;
