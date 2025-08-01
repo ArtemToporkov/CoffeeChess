@@ -2,12 +2,13 @@
 using CoffeeChess.Domain.Games.Entities;
 using CoffeeChess.Domain.Games.Enums;
 using CoffeeChess.Domain.Games.Events;
+using CoffeeChess.Domain.Shared.Abstractions;
 using CoffeeChess.Domain.Shared.Interfaces;
 using GameResult = CoffeeChess.Domain.Games.Enums.GameResult;
 using PlayerSide = ChessDotNetCore.Player;
 namespace CoffeeChess.Domain.Games.AggregatesRoots;
 
-public class Game
+public class Game : AggregateRoot<IDomainEvent>
 {
     public string GameId { get; }
     public string WhitePlayerId { get; }
@@ -19,7 +20,6 @@ public class Game
     public DateTime LastTimeUpdate { get; private set; }
     public PlayerColor CurrentPlayerColor { get; private set; }
     public PlayerColor? PlayerWithDrawOffer { get; private set; }
-    public IReadOnlyCollection<IDomainEvent> DomainEvents => _domainEvents.AsReadOnly();
     // TODO: use MoveInfo class instead of string
     public IReadOnlyCollection<string> SanMovesHistory => _sanMovesHistory.AsReadOnly();
 
@@ -27,7 +27,6 @@ public class Game
     private readonly List<string> _sanMovesHistory;
     private readonly ChessGame _chessGame;
     private readonly Lock _lock = new();
-    private readonly List<IDomainEvent> _domainEvents = [];
 
     public Game(
         string gameId,
@@ -48,7 +47,7 @@ public class Game
         _chessGame = new();
         _sanMovesHistory = new();
         _currentFenPosition = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-        _domainEvents.Add(new GameStarted(
+        AddDomainEvent(new GameStarted(
             GameId, WhitePlayerId, BlackPlayerId, (int)WhiteTimeLeft.TotalMilliseconds));
     }
 
@@ -88,8 +87,6 @@ public class Game
         };
     }
     
-    public void ClearDomainEvents() => _domainEvents.Clear();
-    
     public void ApplyMove(string playerId, string from, string to, string? promotion)
     {
         var playerColor = GetColorById(playerId);
@@ -99,7 +96,7 @@ public class Game
         
         if (playerId != currentPlayerId)
         {
-            _domainEvents.Add(new MoveFailed(playerId, MoveFailedReason.NotYourTurn));
+            AddDomainEvent(new MoveFailed(playerId, MoveFailedReason.NotYourTurn));
             return;
         }
 
@@ -109,7 +106,7 @@ public class Game
             ? PlayerSide.White : PlayerSide.Black, promotionChar);
         if (_chessGame.MakeMove(move, false) is MoveType.Invalid)
         {
-            _domainEvents.Add(new MoveFailed(playerId, MoveFailedReason.InvalidMove));
+            AddDomainEvent(new MoveFailed(playerId, MoveFailedReason.InvalidMove));
             return;
         }
         
@@ -118,12 +115,12 @@ public class Game
 
         if (UpdateTimeAndCheckTimeout())
         {
-            _domainEvents.Add(new MoveFailed(playerId, MoveFailedReason.TimeRanOut));
+            AddDomainEvent(new MoveFailed(playerId, MoveFailedReason.TimeRanOut));
             _chessGame.Resign(CurrentPlayerColor == PlayerColor.White ? PlayerSide.White : PlayerSide.Black);
             var (result, reason) = CurrentPlayerColor == PlayerColor.White 
                 ? (GameResult.BlackWon, GameResultReason.WhiteTimeRanOut) 
                 : (GameResult.WhiteWon, GameResultReason.BlackTimeRanOut) ;
-            _domainEvents.Add(new GameResultUpdated(WhitePlayerId, BlackPlayerId, result, reason));
+            AddDomainEvent(new GameResultUpdated(WhitePlayerId, BlackPlayerId, result, reason));
             IsOver = true;
             return;
         }
@@ -131,7 +128,7 @@ public class Game
         DoIncrement();
         _sanMovesHistory.Add(_chessGame.LastMove!.SAN);
         _currentFenPosition = _chessGame.GetFen();
-        _domainEvents.Add(new MoveMade(WhitePlayerId, BlackPlayerId, 
+        AddDomainEvent(new MoveMade(WhitePlayerId, BlackPlayerId, 
             SanMovesHistory, WhiteTimeLeft, BlackTimeLeft));
         
         CurrentPlayerColor = CurrentPlayerColor == PlayerColor.White
@@ -139,7 +136,7 @@ public class Game
         
         if (_chessGame.ThreeFoldRepeatAndThisCanResultInDraw)
         {
-            _domainEvents.Add(new GameResultUpdated(
+            AddDomainEvent(new GameResultUpdated(
                 WhitePlayerId, BlackPlayerId, GameResult.Draw, GameResultReason.Threefold));
             IsOver = true;
             return;
@@ -147,7 +144,7 @@ public class Game
 
         if (_chessGame.FiftyMovesAndThisCanResultInDraw)
         {
-            _domainEvents.Add(new GameResultUpdated(WhitePlayerId, BlackPlayerId, 
+            AddDomainEvent(new GameResultUpdated(WhitePlayerId, BlackPlayerId, 
                 GameResult.Draw, GameResultReason.FiftyMovesRule));
             IsOver = true;
             return;
@@ -158,14 +155,14 @@ public class Game
             var (result, reason) = _chessGame.IsCheckmated(PlayerSide.White) 
                 ? (GameResult.BlackWon, GameResultReason.WhiteCheckmates) 
                 : (GameResult.WhiteWon, GameResultReason.BlackCheckmates);
-            _domainEvents.Add(new GameResultUpdated(WhitePlayerId, BlackPlayerId, result, reason));
+            AddDomainEvent(new GameResultUpdated(WhitePlayerId, BlackPlayerId, result, reason));
             IsOver = true;
             return;
         }
         
         if (_chessGame.IsStalemated(PlayerSide.White) || _chessGame.IsStalemated(PlayerSide.Black))
         { 
-            _domainEvents.Add(new GameResultUpdated(WhitePlayerId,  BlackPlayerId, 
+            AddDomainEvent(new GameResultUpdated(WhitePlayerId,  BlackPlayerId, 
                 GameResult.Draw, GameResultReason.Stalemate));
             IsOver = true;
         }
@@ -189,7 +186,7 @@ public class Game
         var (senderId, receiverId) = senderColor == PlayerColor.White
             ? (WhitePlayerId, BlackPlayerId) 
             : (BlackPlayerId, WhitePlayerId);
-        _domainEvents.Add(new DrawOfferSent(senderId, receiverId));
+        AddDomainEvent(new DrawOfferSent(senderId, receiverId));
     }
 
     public void AcceptDrawOffer(string playerId)
@@ -200,7 +197,7 @@ public class Game
         if (PlayerWithDrawOffer == playerColor)
             throw new InvalidOperationException("The same side tries to offer and accept a draw.");
         PlayerWithDrawOffer = null;
-        _domainEvents.Add(new GameResultUpdated(
+        AddDomainEvent(new GameResultUpdated(
             WhitePlayerId, BlackPlayerId, GameResult.Draw, GameResultReason.Agreement));
         IsOver = true;
     }
@@ -216,7 +213,7 @@ public class Game
         var (rejectingId, senderId) = PlayerWithDrawOffer == PlayerColor.White
             ? (BlackPlayerId, WhitePlayerId)
             : (WhitePlayerId, BlackPlayerId);
-        _domainEvents.Add(new DrawOfferDeclined(rejectingId, senderId));
+        AddDomainEvent(new DrawOfferDeclined(rejectingId, senderId));
     }
 
     public void Resign(string playerId) 
@@ -226,7 +223,7 @@ public class Game
         var (result, reason) = isWhite 
             ? (GameResult.BlackWon, GameResultReason.WhiteResigns) 
             : (GameResult.WhiteWon, GameResultReason.BlackResigns);
-        _domainEvents.Add(new GameResultUpdated(WhitePlayerId, BlackPlayerId, result, reason));
+        AddDomainEvent(new GameResultUpdated(WhitePlayerId, BlackPlayerId, result, reason));
         IsOver = true;
     }
 
@@ -238,7 +235,7 @@ public class Game
             var (result, reason) = CurrentPlayerColor == PlayerColor.White
                 ? (GameResult.BlackWon, GameResultReason.WhiteTimeRanOut)
                 : (GameResult.WhiteWon, GameResultReason.BlackTimeRanOut);
-            _domainEvents.Add(new GameResultUpdated(WhitePlayerId, BlackPlayerId, result, reason));
+            AddDomainEvent(new GameResultUpdated(WhitePlayerId, BlackPlayerId, result, reason));
             IsOver = true;
         }
     }
