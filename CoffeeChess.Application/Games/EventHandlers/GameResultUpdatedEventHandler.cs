@@ -14,10 +14,14 @@ public class GameResultUpdatedEventHandler(
 {
     public async Task Handle(GameResultUpdated notification, CancellationToken cancellationToken)
     {
-        var white = await playerRepository.GetByIdAsync(notification.WhiteId) ?? throw new InvalidOperationException(
-            $"[{nameof(GameResultUpdatedEventHandler)}.{nameof(Handle)}]: white not found.]");;
-        var black = await playerRepository.GetByIdAsync(notification.BlackId) ?? throw new InvalidOperationException(
-            $"[{nameof(GameResultUpdatedEventHandler)}.{nameof(Handle)}]: black not found.]");;
+        var white = await playerRepository.GetByIdAsync(notification.WhiteId, cancellationToken) ??
+                    throw new InvalidOperationException(
+                        $"[{nameof(GameResultUpdatedEventHandler)}.{nameof(Handle)}]: white not found.]");
+        ;
+        var black = await playerRepository.GetByIdAsync(notification.BlackId, cancellationToken) ??
+                    throw new InvalidOperationException(
+                        $"[{nameof(GameResultUpdatedEventHandler)}.{nameof(Handle)}]: black not found.]");
+        ;
         var (newWhiteRating, newBlackRating) = ratingService.CalculateNewRatings(
             white!.Rating, black!.Rating,
             notification.GameResult);
@@ -30,7 +34,7 @@ public class GameResultUpdatedEventHandler(
         await notifier.NotifyGameResultUpdated(white, black,
             notification.GameResult, whiteReason, blackReason);
     }
-    
+
     private async Task UpdateRatingAndSave(string playerId, int newRating)
     {
         var player = await playerRepository.GetByIdAsync(playerId) ?? throw new InvalidOperationException(
@@ -38,8 +42,8 @@ public class GameResultUpdatedEventHandler(
         player.UpdateRating(newRating);
         await playerRepository.SaveChangesAsync(player);
     }
-    
-    private (string WhiteReason, string BlackReason) GetMessageByGameResultReason(
+
+    private static (string WhiteReason, string BlackReason) GetMessageByGameResultReason(
         GameResultReason reason, string whiteName, string blackName)
         => reason switch
         {
@@ -47,7 +51,7 @@ public class GameResultUpdatedEventHandler(
             GameResultReason.BlackResigns => ($"{blackName} resigned.", "you resigned."),
             GameResultReason.WhiteTimeRanOut => ("your time is run up.", $"{whiteName}'s time is run up."),
             GameResultReason.BlackTimeRanOut => ($"{blackName}'s time is run up.", "your time is run up."),
-            GameResultReason.WhiteCheckmates or 
+            GameResultReason.WhiteCheckmates or
                 GameResultReason.BlackCheckmates => ("checkmate.", "checkmate."),
             GameResultReason.Agreement => ("by agreement.", "by agreement."),
             GameResultReason.Stalemate => ("stalemate.", "stalemate."),

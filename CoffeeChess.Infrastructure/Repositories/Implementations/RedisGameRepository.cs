@@ -16,7 +16,7 @@ public class RedisGameRepository(
     private readonly IDatabase _database = redis.GetDatabase();
     private const string GameKeyPrefix = "game";
 
-    public async Task<Game?> GetByIdAsync(string id)
+    public async Task<Game?> GetByIdAsync(string id, CancellationToken cancellationToken = default)
     {
         var redisValue = await _database.StringGetAsync($"{GameKeyPrefix}:{id}");
         if (redisValue.IsNullOrEmpty)
@@ -29,17 +29,17 @@ public class RedisGameRepository(
         return new Game(gameState);
     }
 
-    public async Task AddAsync(Game game)
+    public async Task AddAsync(Game game, CancellationToken cancellationToken = default)
     {
         var gameState = game.GetGameState();
         var serializedGameState = JsonSerializer.Serialize(gameState);
         await _database.StringSetAsync($"{GameKeyPrefix}:{game.GameId}", serializedGameState, when: When.NotExists);
     }
 
-    public async Task DeleteAsync(Game game)
+    public async Task DeleteAsync(Game game, CancellationToken cancellationToken = default)
         => await _database.KeyDeleteAsync($"{GameKeyPrefix}:{game.GameId}");
 
-    public async Task SaveChangesAsync(Game game)
+    public async Task SaveChangesAsync(Game game, CancellationToken cancellationToken = default)
     {
         var state = game.GetGameState();
         var serializedState = JsonSerializer.Serialize(state);
@@ -48,7 +48,7 @@ public class RedisGameRepository(
         using var scope = serviceProvider.CreateScope();
         var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
         foreach (var @event in game.DomainEvents)
-            await mediator.Publish(@event);
+            await mediator.Publish(@event, cancellationToken);
         game.ClearDomainEvents();
     }
     

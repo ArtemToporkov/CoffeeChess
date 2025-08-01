@@ -11,8 +11,9 @@ public class ChatMessageAddedEventHandler(
 {
     public async Task Handle(ChatMessageAdded notification, CancellationToken cancellationToken)
     {
-        var game = await gameRepository.GetByIdAsync(notification.GameId) ?? throw new InvalidOperationException(
-            $"[{nameof(ChatMessageAddedEventHandler)}.{nameof(Handle)}]: game not found.");
+        var game = await gameRepository.GetByIdAsync(notification.GameId, cancellationToken) 
+                   ?? throw new InvalidOperationException(
+                       $"[{nameof(ChatMessageAddedEventHandler)}.{nameof(Handle)}]: game not found.");
         await notifier.NotifyChatMessageAdded(game.WhitePlayerId, game.BlackPlayerId, notification.Username,
             notification.Message);
     }

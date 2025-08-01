@@ -22,26 +22,26 @@ public class GameHub(
     public async Task QueueChallenge(GameSettings settings)
     {
         var user = await GetUserAsync();
-        await matchmakingService.QueueChallenge(user.Id, settings);
+        await matchmakingService.QueueChallenge(user.Id, settings, Context.ConnectionAborted);
     }
 
     public async Task SendChatMessage(string gameId, string message)
     {
         var user = await GetUserAsync();
         var sendChatMessageCommand = new SendChatMessageCommand(gameId, user.UserName!, message);
-        await mediator.Send(sendChatMessageCommand);
+        await mediator.Send(sendChatMessageCommand, Context.ConnectionAborted);
     }
 
     public async Task MakeMove(string gameId, string from, string to, string? promotion)
     {
         var makeMoveCommand = new MakeMoveCommand(gameId, Context.UserIdentifier!, from, to, promotion);
-        await mediator.Send(makeMoveCommand);
+        await mediator.Send(makeMoveCommand, Context.ConnectionAborted);
     }
 
     public async Task PerformGameAction(string gameId, GameActionType gameActionType)
     {
         var performGameActionCommand = new PerformGameActionCommand(
             gameId, Context.UserIdentifier!, gameActionType);
-        await mediator.Send(performGameActionCommand);
+        await mediator.Send(performGameActionCommand, Context.ConnectionAborted);
     }
 }

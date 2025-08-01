@@ -11,25 +11,25 @@ public class InMemoryChatRepository(IServiceProvider serviceProvider) : IChatRep
 {
     private readonly ConcurrentDictionary<string, Chat> _chats = new();
 
-    public Task<Chat?> GetByIdAsync(string id)
+    public Task<Chat?> GetByIdAsync(string id, CancellationToken cancellationToken = default)
     {
         _ = _chats.TryGetValue(id, out var chat);
         return Task.FromResult(chat);
     }
 
-    public Task AddAsync(Chat chat)
+    public Task AddAsync(Chat chat, CancellationToken cancellationToken = default)
     {
         _chats.TryAdd(chat.GameId, chat);
         return Task.CompletedTask;
     }
 
-    public Task DeleteAsync(Chat chat)
+    public Task DeleteAsync(Chat chat, CancellationToken cancellationToken = default)
     {
         _chats.TryRemove(chat.GameId, out _);
         return Task.CompletedTask;
     }
 
-    public async Task SaveChangesAsync(Chat chat)
+    public async Task SaveChangesAsync(Chat chat, CancellationToken cancellationToken = default)
     {
         // TODO: use redis instead of in-memory implementation
         using var scope = serviceProvider.CreateScope();

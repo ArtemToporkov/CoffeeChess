@@ -2,11 +2,11 @@
 
 public interface IBaseRepository<T>
 {
-    public Task<T?> GetByIdAsync(string id);
+    public Task<T?> GetByIdAsync(string id, CancellationToken cancellationToken = default);
     
-    public Task AddAsync(T entity);
+    public Task AddAsync(T entity, CancellationToken cancellationToken = default);
     
-    public Task DeleteAsync(T entity);
+    public Task DeleteAsync(T entity, CancellationToken cancellationToken = default);
     
-    public Task SaveChangesAsync(T entity);
+    public Task SaveChangesAsync(T entity, CancellationToken cancellationToken = default);
 }

@@ -4,5 +4,5 @@ namespace CoffeeChess.Application.Matchmaking.Services.Interfaces;
 
 public interface IMatchmakingService
 {
-    public Task QueueChallenge(string playerId, GameSettings settings);
+    public Task QueueChallenge(string playerId, GameSettings settings, CancellationToken cancellationToken = default);
 }

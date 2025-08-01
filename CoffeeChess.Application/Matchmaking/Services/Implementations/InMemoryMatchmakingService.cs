@@ -20,18 +20,19 @@ public class InMemoryMatchmakingService(
     private static readonly Lock Lock = new();
     private static readonly SemaphoreSlim Mutex = new(1, 1);
 
-    public async Task QueueChallenge(string playerId, GameSettings settings)
+    public async Task QueueChallenge(
+        string playerId, GameSettings settings, CancellationToken cancellationToken = default)
     {
-        await Mutex.WaitAsync();
+        await Mutex.WaitAsync(cancellationToken);
         try
         {
             if (TryFindChallenge(playerId, out var foundChallenge))
             {
-                await CreateGameBasedOnFoundChallenge(playerId, settings, foundChallenge);
+                await CreateGameBasedOnFoundChallenge(playerId, settings, foundChallenge, cancellationToken);
                 return;
             }
 
-            await CreateGameChallenge(playerId, settings);
+            await CreateGameChallenge(playerId, settings, cancellationToken);
         }
         finally
         {
@@ -40,7 +41,7 @@ public class InMemoryMatchmakingService(
     }
     
     private async Task CreateGameBasedOnFoundChallenge(string connectingPlayerId,
-        GameSettings settings, GameChallenge gameChallenge)
+        GameSettings settings, GameChallenge gameChallenge, CancellationToken cancellationToken = default)
     {
         var connectingPlayerColor = ChooseColor(settings);
         var (whitePlayerId, blackPlayerId) = connectingPlayerColor == ColorPreference.White
@@ -53,16 +54,17 @@ public class InMemoryMatchmakingService(
             TimeSpan.FromMinutes(settings.Minutes),
             TimeSpan.FromSeconds(settings.Increment)
         );
-        await gameRepository.AddAsync(createdGame);
+        await gameRepository.AddAsync(createdGame, cancellationToken);
         var chat = new Chat(createdGame.GameId);
-        await chatRepository.AddAsync(chat);
-        await gameRepository.SaveChangesAsync(createdGame);
+        await chatRepository.AddAsync(chat, cancellationToken);
+        await gameRepository.SaveChangesAsync(createdGame, cancellationToken);
     }
     
-    private async Task CreateGameChallenge(string creatorId, GameSettings settings)
+    private async Task CreateGameChallenge(string creatorId, GameSettings settings, 
+        CancellationToken cancellationToken = default)
     {
         var gameChallenge = new GameChallenge(creatorId, settings);
-        await challengeRepository.AddAsync(gameChallenge);
+        await challengeRepository.AddAsync(gameChallenge, cancellationToken);
     }
 
     private bool TryFindChallenge(string playerId, 
