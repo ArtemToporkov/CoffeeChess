@@ -1,6 +1,6 @@
 ﻿using CoffeeChess.Domain.Games.Repositories.Interfaces;
 
-namespace CoffeeChess.Web.HostedServices;
+namespace CoffeeChess.Web.BackgroundWorkers;
 
 public class GameTimeoutCheckerService(IServiceProvider serviceProvider) : BackgroundService
 {
@@ -13,7 +13,7 @@ public class GameTimeoutCheckerService(IServiceProvider serviceProvider) : Backg
             foreach (var game in gameRepository.GetActiveGames())
             {
                 game.CheckTimeout();
-                await gameRepository.SaveChangesAsync(game);
+                await gameRepository.SaveChangesAsync(game, stoppingToken);
             }
             await Task.Delay(1000, stoppingToken);
         }

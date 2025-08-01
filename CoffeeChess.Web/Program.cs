@@ -15,7 +15,7 @@ using CoffeeChess.Domain.Players.Services.Interfaces;
 using CoffeeChess.Infrastructure.Identity;
 using CoffeeChess.Infrastructure.Persistence;
 using CoffeeChess.Infrastructure.Repositories.Implementations;
-using CoffeeChess.Web.HostedServices;
+using CoffeeChess.Web.BackgroundWorkers;
 using CoffeeChess.Web.Hubs;
 using CoffeeChess.Web.Services;
 using Microsoft.AspNetCore.Identity;

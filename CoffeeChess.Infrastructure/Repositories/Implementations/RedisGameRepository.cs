@@ -1,7 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using System.Text.Json;
+﻿using System.Text.Json;
 using CoffeeChess.Domain.Games.AggregatesRoots;
-using CoffeeChess.Domain.Games.Entities;
 using CoffeeChess.Domain.Games.Repositories.Interfaces;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
@@ -22,18 +20,13 @@ public class RedisGameRepository(
         if (redisValue.IsNullOrEmpty)
             return null;
 
-        var gameState = JsonSerializer.Deserialize<GameState>(redisValue!);
-        if (gameState is null)
-            return null;
-        
-        return new Game(gameState);
+        return JsonSerializer.Deserialize<Game>(redisValue!);
     }
 
     public async Task AddAsync(Game game, CancellationToken cancellationToken = default)
     {
-        var gameState = game.GetGameState();
-        var serializedGameState = JsonSerializer.Serialize(gameState);
-        await _database.StringSetAsync($"{GameKeyPrefix}:{game.GameId}", serializedGameState, when: When.NotExists);
+        var serializedGame = JsonSerializer.Serialize(game);
+        await _database.StringSetAsync($"{GameKeyPrefix}:{game.GameId}", serializedGame, when: When.NotExists);
     }
 
     public async Task DeleteAsync(Game game, CancellationToken cancellationToken = default)
@@ -41,9 +34,8 @@ public class RedisGameRepository(
 
     public async Task SaveChangesAsync(Game game, CancellationToken cancellationToken = default)
     {
-        var state = game.GetGameState();
-        var serializedState = JsonSerializer.Serialize(state);
-        await _database.StringSetAsync($"{GameKeyPrefix}:{game.GameId}", serializedState);
+        var serializedGame = JsonSerializer.Serialize(game);
+        await _database.StringSetAsync($"{GameKeyPrefix}:{game.GameId}", serializedGame);
         
         using var scope = serviceProvider.CreateScope();
         var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();

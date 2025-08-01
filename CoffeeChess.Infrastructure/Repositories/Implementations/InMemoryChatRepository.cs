@@ -35,7 +35,7 @@ public class InMemoryChatRepository(IServiceProvider serviceProvider) : IChatRep
         using var scope = serviceProvider.CreateScope();
         var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
         foreach (var @event in chat.DomainEvents)
-            await mediator.Publish(@event);
+            await mediator.Publish(@event, cancellationToken);
         chat.ClearDomainEvents();
     }
 }
