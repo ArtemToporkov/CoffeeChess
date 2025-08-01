@@ -39,11 +39,6 @@ public class RedisGameRepository(
     public async Task DeleteAsync(Game game)
         => await _database.KeyDeleteAsync($"{GameKeyPrefix}:{game.GameId}");
 
-    public IAsyncEnumerable<Game> GetAllAsync()
-    {
-        throw new NotImplementedException();
-    }
-
     public async Task SaveChangesAsync(Game game)
     {
         var state = game.GetGameState();

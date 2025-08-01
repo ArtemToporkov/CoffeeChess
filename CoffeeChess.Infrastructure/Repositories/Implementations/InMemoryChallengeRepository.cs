@@ -26,11 +26,6 @@ public class InMemoryChallengeRepository : IChallengeRepository
         _challenges.TryRemove(challenge.PlayerId, out _);
         return Task.CompletedTask;
     }
-
-    public IAsyncEnumerable<GameChallenge> GetAllAsync()
-    {
-        throw new NotImplementedException();
-    }
     
     public IEnumerable<GameChallenge> GetAll() => _challenges.Values;
 

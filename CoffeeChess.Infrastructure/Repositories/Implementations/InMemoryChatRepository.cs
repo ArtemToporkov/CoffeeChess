@@ -29,11 +29,6 @@ public class InMemoryChatRepository(IServiceProvider serviceProvider) : IChatRep
         return Task.CompletedTask;
     }
 
-    public IAsyncEnumerable<Chat> GetAllAsync()
-    {
-        throw new NotImplementedException();
-    }
-
     public async Task SaveChangesAsync(Chat chat)
     {
         // TODO: use redis instead of in-memory implementation

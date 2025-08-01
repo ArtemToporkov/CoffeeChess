@@ -23,8 +23,6 @@ public class SqlPlayerRepository(ApplicationDbContext dbContext, IMediator media
         await dbContext.SaveChangesAsync();
     }
 
-    public IAsyncEnumerable<Player> GetAllAsync() => dbContext.Players.AsAsyncEnumerable();
-
     public async Task SaveChangesAsync(Player player)
     {
         await dbContext.SaveChangesAsync();
