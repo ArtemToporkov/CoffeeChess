@@ -1,4 +1,4 @@
-﻿using CoffeeChess.Domain.ValueObjects;
+﻿using CoffeeChess.Domain.Games.ValueObjects;
 
 namespace CoffeeChess.Application.Services.Interfaces;
 

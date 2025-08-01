@@ -1,5 +1,4 @@
-﻿using CoffeeChess.Domain.Aggregates;
-using MediatR;
+﻿using MediatR;
 
 namespace CoffeeChess.Application.Commands;
 

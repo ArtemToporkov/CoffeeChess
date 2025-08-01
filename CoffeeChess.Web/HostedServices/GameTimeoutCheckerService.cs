@@ -1,4 +1,4 @@
-﻿using CoffeeChess.Domain.Repositories.Interfaces;
+﻿using CoffeeChess.Domain.Games.Repositories.Interfaces;
 
 namespace CoffeeChess.Web.HostedServices;
 

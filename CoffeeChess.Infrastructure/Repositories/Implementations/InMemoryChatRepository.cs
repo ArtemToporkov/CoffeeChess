@@ -1,7 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
-using CoffeeChess.Domain.Aggregates;
-using CoffeeChess.Domain.Repositories.Interfaces;
+using CoffeeChess.Domain.Chats.AggregatesRoots;
+using CoffeeChess.Domain.Chats.Repositories.Interfaces;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 

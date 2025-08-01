@@ -1,5 +1,5 @@
-﻿using CoffeeChess.Domain.Aggregates;
-using CoffeeChess.Domain.Enums;
+﻿using CoffeeChess.Domain.Games.Enums;
+using CoffeeChess.Domain.Players.AggregatesRoots;
 
 namespace CoffeeChess.Application.Services.Interfaces;
 

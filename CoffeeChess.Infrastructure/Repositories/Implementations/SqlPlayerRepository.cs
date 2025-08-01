@@ -1,6 +1,5 @@
-﻿using CoffeeChess.Domain.Aggregates;
-using CoffeeChess.Domain.Entities;
-using CoffeeChess.Domain.Repositories.Interfaces;
+﻿using CoffeeChess.Domain.Players.AggregatesRoots;
+using CoffeeChess.Domain.Players.Repositories.Interfaces;
 using CoffeeChess.Infrastructure.Persistence;
 using MediatR;
 using Microsoft.EntityFrameworkCore;

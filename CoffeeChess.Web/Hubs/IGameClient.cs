@@ -1,5 +1,5 @@
 ﻿using CoffeeChess.Application.Payloads;
-using CoffeeChess.Domain.Enums;
+using CoffeeChess.Domain.Games.Enums;
 using CoffeeChess.Web.Models.ViewModels;
 
 namespace CoffeeChess.Web.Hubs;

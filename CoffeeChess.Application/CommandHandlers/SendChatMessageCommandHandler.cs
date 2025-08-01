@@ -1,5 +1,5 @@
 ﻿using CoffeeChess.Application.Commands;
-using CoffeeChess.Domain.Repositories.Interfaces;
+using CoffeeChess.Domain.Chats.Repositories.Interfaces;
 using MediatR;
 
 namespace CoffeeChess.Application.CommandHandlers;

@@ -1,6 +1,6 @@
 ﻿using CoffeeChess.Application.Services.Interfaces;
-using CoffeeChess.Domain.Events.Game;
-using CoffeeChess.Domain.Repositories.Interfaces;
+using CoffeeChess.Domain.Games.Events;
+using CoffeeChess.Domain.Players.Repositories.Interfaces;
 using MediatR;
 
 namespace CoffeeChess.Application.EventHandlers.Game;

@@ -1,4 +1,4 @@
-﻿using CoffeeChess.Domain.Enums;
+﻿using CoffeeChess.Domain.Games.Enums;
 
 namespace CoffeeChess.Application.Payloads;
 

@@ -1,8 +1,8 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
-using CoffeeChess.Domain.Aggregates;
-using CoffeeChess.Domain.Entities;
-using CoffeeChess.Domain.Repositories.Interfaces;
+using CoffeeChess.Domain.Games.AggregatesRoots;
+using CoffeeChess.Domain.Games.Entities;
+using CoffeeChess.Domain.Games.Repositories.Interfaces;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using StackExchange.Redis;

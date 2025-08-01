@@ -1,4 +1,4 @@
-﻿using CoffeeChess.Domain.Enums;
+﻿using CoffeeChess.Domain.Games.Enums;
 using CoffeeChess.Web.Models;
 using CoffeeChess.Web.Models.ViewModels;
 using Microsoft.AspNetCore.Mvc;

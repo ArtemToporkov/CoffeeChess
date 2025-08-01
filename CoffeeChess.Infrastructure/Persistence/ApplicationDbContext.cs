@@ -1,5 +1,4 @@
-﻿using CoffeeChess.Domain.Aggregates;
-using CoffeeChess.Domain.Entities;
+﻿using CoffeeChess.Domain.Players.AggregatesRoots;
 using CoffeeChess.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;

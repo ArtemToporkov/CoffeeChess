@@ -1,7 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
-using CoffeeChess.Domain.Entities;
-using CoffeeChess.Domain.Repositories.Interfaces;
+using CoffeeChess.Domain.Matchmaking.Repositories.Interfaces;
+using CoffeeChess.Domain.Players.Entities;
 
 namespace CoffeeChess.Infrastructure.Repositories.Implementations;
 

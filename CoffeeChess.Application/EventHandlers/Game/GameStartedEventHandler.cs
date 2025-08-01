@@ -1,5 +1,5 @@
 ﻿using CoffeeChess.Application.Services.Interfaces;
-using CoffeeChess.Domain.Events.Game;
+using CoffeeChess.Domain.Games.Events;
 using MediatR;
 
 namespace CoffeeChess.Application.EventHandlers.Game;

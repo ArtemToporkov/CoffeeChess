@@ -1,6 +1,6 @@
 ﻿using CoffeeChess.Application.Commands;
-using CoffeeChess.Domain.Enums;
-using CoffeeChess.Domain.Repositories.Interfaces;
+using CoffeeChess.Domain.Games.Enums;
+using CoffeeChess.Domain.Games.Repositories.Interfaces;
 using MediatR;
 
 namespace CoffeeChess.Application.CommandHandlers;

@@ -1,8 +1,8 @@
 ﻿using CoffeeChess.Application.Payloads;
 using CoffeeChess.Application.Services.Interfaces;
-using CoffeeChess.Domain.Aggregates;
-using CoffeeChess.Domain.Enums;
-using CoffeeChess.Domain.Repositories.Interfaces;
+using CoffeeChess.Domain.Games.Enums;
+using CoffeeChess.Domain.Players.AggregatesRoots;
+using CoffeeChess.Domain.Players.Repositories.Interfaces;
 using CoffeeChess.Web.Hubs;
 using CoffeeChess.Web.Models.ViewModels;
 using Microsoft.AspNetCore.SignalR;

@@ -1,10 +1,13 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using CoffeeChess.Application.Services.Interfaces;
-using CoffeeChess.Domain.Aggregates;
-using CoffeeChess.Domain.Entities;
-using CoffeeChess.Domain.Enums;
-using CoffeeChess.Domain.Repositories.Interfaces;
-using CoffeeChess.Domain.ValueObjects;
+using CoffeeChess.Domain.Chats.AggregatesRoots;
+using CoffeeChess.Domain.Chats.Repositories.Interfaces;
+using CoffeeChess.Domain.Games.AggregatesRoots;
+using CoffeeChess.Domain.Games.Enums;
+using CoffeeChess.Domain.Games.Repositories.Interfaces;
+using CoffeeChess.Domain.Games.ValueObjects;
+using CoffeeChess.Domain.Matchmaking.Repositories.Interfaces;
+using CoffeeChess.Domain.Players.Entities;
 
 namespace CoffeeChess.Application.Services.Implementations;
 

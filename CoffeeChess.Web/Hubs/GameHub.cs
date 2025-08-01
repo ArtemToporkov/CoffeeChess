@@ -1,7 +1,7 @@
 ﻿using CoffeeChess.Application.Commands;
 using CoffeeChess.Application.Services.Interfaces;
-using CoffeeChess.Domain.Enums;
-using CoffeeChess.Domain.ValueObjects;
+using CoffeeChess.Domain.Games.Enums;
+using CoffeeChess.Domain.Games.ValueObjects;
 using CoffeeChess.Infrastructure.Identity;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
