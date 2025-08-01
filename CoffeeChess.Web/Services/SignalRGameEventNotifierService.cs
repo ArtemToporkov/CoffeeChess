@@ -1,5 +1,5 @@
-﻿using CoffeeChess.Application.Payloads;
-using CoffeeChess.Application.Services.Interfaces;
+﻿using CoffeeChess.Application.Games.Payloads;
+using CoffeeChess.Application.Games.Services.Interfaces;
 using CoffeeChess.Domain.Games.Enums;
 using CoffeeChess.Domain.Players.AggregatesRoots;
 using CoffeeChess.Domain.Players.Repositories.Interfaces;

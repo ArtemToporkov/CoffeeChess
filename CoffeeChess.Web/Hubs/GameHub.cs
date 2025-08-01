@@ -1,5 +1,6 @@
-﻿using CoffeeChess.Application.Commands;
-using CoffeeChess.Application.Services.Interfaces;
+﻿using CoffeeChess.Application.Chats.Commands;
+using CoffeeChess.Application.Games.Commands;
+using CoffeeChess.Application.Matchmaking.Services.Interfaces;
 using CoffeeChess.Domain.Games.Enums;
 using CoffeeChess.Domain.Games.ValueObjects;
 using CoffeeChess.Infrastructure.Identity;

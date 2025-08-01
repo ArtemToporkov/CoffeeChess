@@ -1,4 +1,4 @@
-﻿using CoffeeChess.Application.Services.Interfaces;
+﻿using CoffeeChess.Application.Players.Services.Interfaces;
 using CoffeeChess.Web.Hubs;
 using Microsoft.AspNetCore.SignalR;
 

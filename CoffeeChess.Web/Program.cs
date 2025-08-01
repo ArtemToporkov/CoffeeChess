@@ -1,7 +1,10 @@
+using CoffeeChess.Application.Chats.Services.Interfaces;
 using CoffeeChess.Application.EventHandlers;
-using CoffeeChess.Application.EventHandlers.Game;
-using CoffeeChess.Application.Services.Implementations;
-using CoffeeChess.Application.Services.Interfaces;
+using CoffeeChess.Application.Games.EventHandlers;
+using CoffeeChess.Application.Games.Services.Interfaces;
+using CoffeeChess.Application.Matchmaking.Services.Implementations;
+using CoffeeChess.Application.Matchmaking.Services.Interfaces;
+using CoffeeChess.Application.Players.Services.Interfaces;
 using CoffeeChess.Domain.Chats.Repositories.Interfaces;
 using CoffeeChess.Domain.Games.Repositories.Interfaces;
 using CoffeeChess.Domain.Games.Services.Implementations;

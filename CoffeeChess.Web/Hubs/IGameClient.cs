@@ -1,4 +1,4 @@
-﻿using CoffeeChess.Application.Payloads;
+﻿using CoffeeChess.Application.Games.Payloads;
 using CoffeeChess.Domain.Games.Enums;
 using CoffeeChess.Web.Models.ViewModels;
 
