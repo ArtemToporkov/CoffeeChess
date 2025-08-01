@@ -8,25 +8,34 @@ namespace CoffeeChess.Infrastructure.Repositories.Implementations;
 public class InMemoryChallengeRepository : IChallengeRepository
 {
     private readonly ConcurrentDictionary<string, GameChallenge> _challenges = new();
-
-    public bool TryGetValue(string id, [NotNullWhen(true)] out GameChallenge? challenge)
+    
+    public Task<GameChallenge?> GetByIdAsync(string id)
     {
-        if (_challenges.TryGetValue(id, out challenge))
-            return true;
-
-        challenge = null;
-        return false;
+        _ = _challenges.TryGetValue(id, out var chat);
+        return Task.FromResult(chat);
     }
 
-    public bool TryAdd(string id, GameChallenge challenge) => _challenges.TryAdd(id, challenge);
-    
-    public bool TryRemove(string id, [NotNullWhen(true)] out GameChallenge? removedChallenge) 
-        => _challenges.TryRemove(id, out removedChallenge);
-
-    public IEnumerable<(string, GameChallenge)> GetAll()
-        => _challenges.Select(kvp => (kvp.Key, kvp.Value));
-
-    public void SaveChanges(GameChallenge challenge)
+    public Task AddAsync(GameChallenge challenge)
     {
+        _challenges.TryAdd(challenge.PlayerId, challenge);
+        return Task.CompletedTask;
+    }
+
+    public Task DeleteAsync(GameChallenge challenge)
+    {
+        _challenges.TryRemove(challenge.PlayerId, out _);
+        return Task.CompletedTask;
+    }
+
+    public IAsyncEnumerable<GameChallenge> GetAllAsync()
+    {
+        throw new NotImplementedException();
+    }
+    
+    public IEnumerable<GameChallenge> GetAll() => _challenges.Values;
+
+    public Task SaveChangesAsync(GameChallenge chat)
+    {
+        return Task.CompletedTask;
     }
 }

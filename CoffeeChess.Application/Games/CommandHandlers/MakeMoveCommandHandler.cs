@@ -8,8 +8,7 @@ public class MakeMoveCommandHandler(IGameRepository gameRepository) : IRequestHa
 {
     public async Task Handle(MakeMoveCommand request, CancellationToken cancellationToken)
     {
-        if (!gameRepository.TryGetValue(request.GameId, out var game))
-            throw new InvalidOperationException(
+        var game = await gameRepository.GetByIdAsync(request.GameId) ?? throw new InvalidOperationException(
                 $"[{nameof(MakeMoveCommandHandler)}.{nameof(Handle)}]: game not found.");
 
         if (game.IsOver)

@@ -15,55 +15,33 @@ public class RedisGameRepository(
 {
     private readonly IDatabase _database = redis.GetDatabase();
     private const string GameKeyPrefix = "game";
-    
-    
-    public bool TryGetValue(string id, [NotNullWhen(true)] out Game? game)
+
+    public async Task<Game?> GetByIdAsync(string id)
     {
-        var redisValue = _database.StringGet($"{GameKeyPrefix}:{id}");
+        var redisValue = await _database.StringGetAsync($"{GameKeyPrefix}:{id}");
         if (redisValue.IsNullOrEmpty)
-        {
-            game = null;
-            return false;
-        }
+            return null;
 
         var gameState = JsonSerializer.Deserialize<GameState>(redisValue!);
-
         if (gameState is null)
-        {
-            game = null;
-            return false;
-        }
+            return null;
         
-        game = new Game(gameState);
-        return true;
+        return new Game(gameState);
     }
 
-    public bool TryAdd(string id, Game game)
+    public async Task AddAsync(Game game)
     {
         var gameState = game.GetGameState();
         var serializedGameState = JsonSerializer.Serialize(gameState);
-        return _database.StringSet($"{GameKeyPrefix}:{id}", serializedGameState, when: When.NotExists);
+        await _database.StringSetAsync($"{GameKeyPrefix}:{game.GameId}", serializedGameState, when: When.NotExists);
     }
 
-    public bool TryRemove(string id, [NotNullWhen(true)] out Game? removedGame)
+    public async Task DeleteAsync(Game game)
+        => await _database.KeyDeleteAsync($"{GameKeyPrefix}:{game.GameId}");
+
+    public IAsyncEnumerable<Game> GetAllAsync()
     {
         throw new NotImplementedException();
-    }
-
-    public IEnumerable<(string, Game)> GetAll()
-    {
-        return [];
-    }
-
-    public void SaveChanges(Game game)
-    {
-        throw new NotImplementedException();
-    }
-
-    public IEnumerable<Game> GetActiveGames()
-    {
-        // TODO: implement
-        return [];
     }
 
     public async Task SaveChangesAsync(Game game)
@@ -77,5 +55,11 @@ public class RedisGameRepository(
         foreach (var @event in game.DomainEvents)
             await mediator.Publish(@event);
         game.ClearDomainEvents();
+    }
+    
+    public IEnumerable<Game> GetActiveGames()
+    {
+        // TODO: implement
+        return [];
     }
 }

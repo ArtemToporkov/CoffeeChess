@@ -31,7 +31,7 @@ public class InMemoryMatchmakingService(
                 return;
             }
 
-            CreateGameChallenge(playerId, settings);
+            await CreateGameChallenge(playerId, settings);
         }
         finally
         {
@@ -53,27 +53,30 @@ public class InMemoryMatchmakingService(
             TimeSpan.FromMinutes(settings.Minutes),
             TimeSpan.FromSeconds(settings.Increment)
         );
-        gameRepository.TryAdd(createdGame.GameId, createdGame);
+        await gameRepository.AddAsync(createdGame);
         var chat = new Chat(createdGame.GameId);
-        chatRepository.TryAdd(chat.GameId, chat);
+        await chatRepository.AddAsync(chat);
         await gameRepository.SaveChangesAsync(createdGame);
     }
     
-    private void CreateGameChallenge(string creatorId, GameSettings settings)
+    private async Task CreateGameChallenge(string creatorId, GameSettings settings)
     {
         var gameChallenge = new GameChallenge(creatorId, settings);
-        challengeRepository.TryAdd(creatorId, gameChallenge);
+        await challengeRepository.AddAsync(gameChallenge);
     }
 
     private bool TryFindChallenge(string playerId, 
         [NotNullWhen(true)] out GameChallenge? foundChallenge)
     {
-        foreach (var (gameChallengeId, gameChallenge) in challengeRepository.GetAll())
+        // TODO: find appropriate challenge
+        foreach (var gameChallenge in challengeRepository.GetAll())
         {
             if (gameChallenge.PlayerId != playerId)
             {
-                challengeRepository.TryRemove(gameChallengeId, out foundChallenge);
-                return foundChallenge is not null;
+                // TODO: fix async problems
+                challengeRepository.DeleteAsync(gameChallenge);
+                foundChallenge = gameChallenge;
+                return true;
             }
         }
 

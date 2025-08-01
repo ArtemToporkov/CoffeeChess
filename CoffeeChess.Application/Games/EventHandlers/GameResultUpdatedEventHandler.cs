@@ -14,8 +14,10 @@ public class GameResultUpdatedEventHandler(
 {
     public async Task Handle(GameResultUpdated notification, CancellationToken cancellationToken)
     {
-        var white = await playerRepository.GetAsync(notification.WhiteId);
-        var black = await playerRepository.GetAsync(notification.BlackId);
+        var white = await playerRepository.GetByIdAsync(notification.WhiteId) ?? throw new InvalidOperationException(
+            $"[{nameof(GameResultUpdatedEventHandler)}.{nameof(Handle)}]: white not found.]");;
+        var black = await playerRepository.GetByIdAsync(notification.BlackId) ?? throw new InvalidOperationException(
+            $"[{nameof(GameResultUpdatedEventHandler)}.{nameof(Handle)}]: black not found.]");;
         var (newWhiteRating, newBlackRating) = ratingService.CalculateNewRatings(
             white!.Rating, black!.Rating,
             notification.GameResult);
@@ -31,7 +33,7 @@ public class GameResultUpdatedEventHandler(
     
     private async Task UpdateRatingAndSave(string playerId, int newRating)
     {
-        var player = await playerRepository.GetAsync(playerId) ?? throw new InvalidOperationException(
+        var player = await playerRepository.GetByIdAsync(playerId) ?? throw new InvalidOperationException(
             $"[{nameof(GameResultUpdatedEventHandler)}.{nameof(UpdateRatingAndSave)}]: player not found.");
         player.UpdateRating(newRating);
         await playerRepository.SaveChangesAsync(player);

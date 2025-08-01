@@ -10,9 +10,8 @@ public class PerformGameActionCommandHandler(
 {
     public async Task Handle(PerformGameActionCommand request, CancellationToken cancellationToken)
     {
-        if (!gameRepository.TryGetValue(request.GameId, out var game))
-            throw new InvalidOperationException(
-                $"[{nameof(PerformGameActionCommandHandler)}.{nameof(Handle)}]: game not found.");
+        var game = await gameRepository.GetByIdAsync(request.GameId) ?? throw new InvalidOperationException(
+                $"[{nameof(MakeMoveCommandHandler)}.{nameof(Handle)}]: game not found.");
 
         if (game.IsOver)
             throw new InvalidOperationException(

@@ -1,12 +1,11 @@
-﻿using System.Diagnostics.CodeAnalysis;
-
-namespace CoffeeChess.Domain.Shared.Interfaces;
+﻿namespace CoffeeChess.Domain.Shared.Interfaces;
 
 public interface IBaseRepository<T>
 {
-    public bool TryGetValue(string id, [NotNullWhen(true)] out T? value);
-    public bool TryAdd(string id, T challenge);
-    public bool TryRemove(string id, [NotNullWhen(true)] out T? removedValue);
-    public IEnumerable<(string, T)> GetAll();
-    public void SaveChanges(T obj);
+    public Task<T?> GetByIdAsync(string id);
+    public Task AddAsync(T entity);
+    public Task DeleteAsync(T entity);
+    
+    public IAsyncEnumerable<T> GetAllAsync();
+    public Task SaveChangesAsync(T entity);
 }

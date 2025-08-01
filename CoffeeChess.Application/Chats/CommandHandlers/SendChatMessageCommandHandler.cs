@@ -9,9 +9,8 @@ public class SendChatMessageCommandHandler(IChatRepository chatRepository) : IRe
 {
     public async Task Handle(SendChatMessageCommand request, CancellationToken cancellationToken)
     {
-        if (!chatRepository.TryGetValue(request.GameId, out var chat))
-            throw new InvalidOperationException(
-                $"[{nameof(PerformGameActionCommandHandler)}.{nameof(Handle)}]: chat not found.");
+        var chat = await chatRepository.GetByIdAsync(request.GameId) ?? throw new InvalidOperationException(
+            $"[{nameof(SendChatMessageCommandHandler)}.{nameof(Handle)}]: chat not found.");
         await chat.AddMessage(request.Username, request.Message);
         await chatRepository.SaveChangesAsync(chat);
     }

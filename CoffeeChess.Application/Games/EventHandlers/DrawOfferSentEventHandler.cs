@@ -11,9 +11,11 @@ public class DrawOfferSentEventHandler(
 {
     public async Task Handle(DrawOfferSent notification, CancellationToken cancellationToken)
     {
-        var sender = await playerRepository.GetAsync(notification.SenderId);
-        var receiver = await playerRepository.GetAsync(notification.ReceiverId);
-        var message = $"{sender!.Name} offers a draw";
-        await notifier.NotifyDrawOfferSent(message, sender.Id, receiver!.Id);
+        var sender = await playerRepository.GetByIdAsync(notification.SenderId) ?? throw new InvalidOperationException(
+            $"[{nameof(DrawOfferDeclinedEventHandler)}.{nameof(Handle)}]: sender not found.]");
+        var receiver = await playerRepository.GetByIdAsync(notification.ReceiverId) ?? throw new InvalidOperationException(
+            $"[{nameof(DrawOfferDeclinedEventHandler)}.{nameof(Handle)}]: receiver not found.]");
+        var message = $"{sender.Name} offers a draw";
+        await notifier.NotifyDrawOfferSent(message, sender.Id, receiver.Id);
     }
 }

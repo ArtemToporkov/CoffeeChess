@@ -53,10 +53,14 @@ public class SignalRGameEventNotifierService(IPlayerRepository playerRepository,
     public async Task NotifyGameStarted(string gameId, string whitePlayerId, string blackPlayerId,
         int totalMillisecondsForOnePlayerLeft)
     {
-        var whitePlayer = await playerRepository.GetAsync(whitePlayerId);
-        var whiteInfo = new PlayerInfoViewModel(whitePlayer!.Name, whitePlayer.Rating);
-        var blackPlayer = await playerRepository.GetAsync(whitePlayerId);
-        var blackInfo = new PlayerInfoViewModel(blackPlayer!.Name, whitePlayer.Rating);
+        var whitePlayer = await playerRepository.GetByIdAsync(whitePlayerId) ?? throw new InvalidOperationException(
+            $"[{nameof(SignalRGameEventNotifierService)}.{nameof(NotifyGameStarted)}]: white player not found.");
+        var whiteInfo = new PlayerInfoViewModel(whitePlayer.Name, whitePlayer.Rating);
+        
+        var blackPlayer = await playerRepository.GetByIdAsync(blackPlayerId) ?? throw new InvalidOperationException(
+            $"[{nameof(SignalRGameEventNotifierService)}.{nameof(NotifyGameStarted)}]: black player not found.");
+        var blackInfo = new PlayerInfoViewModel(blackPlayer.Name, blackPlayer.Rating);
+        
         await hubContext.Clients.User(whitePlayerId).GameStarted(
             gameId, true, whiteInfo, blackInfo,
             totalMillisecondsForOnePlayerLeft);
