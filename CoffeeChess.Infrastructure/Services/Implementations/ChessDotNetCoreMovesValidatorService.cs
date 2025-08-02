@@ -7,7 +7,7 @@ using MoveType = CoffeeChess.Domain.Games.Enums.MoveType;
 
 namespace CoffeeChess.Infrastructure.Services.Implementations;
 
-public class ChessDotNetCoreRulesService : IChessRules
+public class ChessDotNetCoreMovesValidatorService : IChessMovesValidator
 {
     public MoveResult ApplyMove(string currentFen, PlayerColor playerColor, string from, string to, char? promotion)
     {
@@ -47,7 +47,7 @@ public class ChessDotNetCoreRulesService : IChessRules
             MoveKind.Promotion => MoveType.Promotion,
             MoveKind.EnPassant => MoveType.EnPassant,
             _ => throw new ArgumentOutOfRangeException(
-                $"[{nameof(ChessDotNetCoreRulesService)}.{nameof(ApplyMove)}] " +
+                $"[{nameof(ChessDotNetCoreMovesValidatorService)}.{nameof(ApplyMove)}] " +
                 $"parsing move type failed: {moveKind}]")
         };
 }

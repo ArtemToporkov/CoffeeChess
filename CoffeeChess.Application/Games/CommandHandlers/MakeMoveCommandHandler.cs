@@ -5,7 +5,7 @@ using MediatR;
 
 namespace CoffeeChess.Application.Games.CommandHandlers;
 
-public class MakeMoveCommandHandler(IGameRepository gameRepository, IChessRules chessRules) : IRequestHandler<MakeMoveCommand>
+public class MakeMoveCommandHandler(IGameRepository gameRepository, IChessMovesValidator chessMovesValidator) : IRequestHandler<MakeMoveCommand>
 {
     public async Task Handle(MakeMoveCommand request, CancellationToken cancellationToken)
     {
@@ -17,7 +17,7 @@ public class MakeMoveCommandHandler(IGameRepository gameRepository, IChessRules 
             throw new InvalidOperationException(
                 $"[{nameof(MakeMoveCommandHandler)}.{nameof(Handle)}]: game is over.");
 
-        game.ApplyMove(chessRules, request.PlayerId, request.From, request.To, request.Promotion);
+        game.ApplyMove(chessMovesValidator, request.PlayerId, request.From, request.To, request.Promotion);
         await gameRepository.SaveChangesAsync(game, cancellationToken);
     }
 }

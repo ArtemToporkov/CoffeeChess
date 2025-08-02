@@ -55,7 +55,7 @@ public class Game : AggregateRoot<IDomainEvent>
 
     [JsonConstructor] private Game() { }
 
-    public void ApplyMove(IChessRules chessRules, string playerId, string from, string to, string? promotion)
+    public void ApplyMove(IChessMovesValidator chessMovesValidator, string playerId, string from, string to, string? promotion)
     {
         var playerColor = GetColorById(playerId);
         var currentPlayerId = _currentPlayerColor == PlayerColor.White
@@ -69,7 +69,7 @@ public class Game : AggregateRoot<IDomainEvent>
         }
 
         var promotionChar = promotion?[0];
-        var moveResult = chessRules.ApplyMove(_currentFen, _currentPlayerColor, from, to, promotionChar);
+        var moveResult = chessMovesValidator.ApplyMove(_currentFen, _currentPlayerColor, from, to, promotionChar);
         if (!moveResult.Valid)
         {
             AddDomainEvent(new MoveFailed(playerId, MoveFailedReason.InvalidMove));

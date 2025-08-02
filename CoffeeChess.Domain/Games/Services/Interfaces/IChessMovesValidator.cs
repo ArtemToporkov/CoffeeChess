@@ -3,7 +3,7 @@ using CoffeeChess.Domain.Games.ValueObjects;
 
 namespace CoffeeChess.Domain.Games.Services.Interfaces;
 
-public interface IChessRules
+public interface IChessMovesValidator
 {
     public MoveResult ApplyMove(string currentFen, PlayerColor playerColor, string from, string to, char? promotion);
 }

@@ -48,7 +48,7 @@ builder.Services.AddMediatR(cfg =>
     cfg.RegisterServicesFromAssembly(typeof(DrawOfferDeclinedEventHandler).Assembly));
 
 builder.Services.AddScoped<IMatchmakingService, InMemoryMatchmakingService>();
-builder.Services.AddScoped<IChessRules, ChessDotNetCoreRulesService>();
+builder.Services.AddScoped<IChessMovesValidator, ChessDotNetCoreMovesValidatorService>();
 builder.Services.AddScoped<IRatingService, EloRatingService>();
 builder.Services.AddScoped<IPgnBuilderService, StringBuilderPgnBuilderService>();
 builder.Services.AddScoped<IGameEventNotifierService, SignalRGameEventNotifierService>();
