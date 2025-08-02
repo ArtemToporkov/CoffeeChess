@@ -2,14 +2,16 @@
 using ChessDotNetCore;
 using CoffeeChess.Domain.Games.Enums;
 using CoffeeChess.Domain.Games.Events;
+using CoffeeChess.Domain.Games.Services.Interfaces;
 using CoffeeChess.Domain.Shared.Abstractions;
 using CoffeeChess.Domain.Shared.Interfaces;
 using GameResult = CoffeeChess.Domain.Games.Enums.GameResult;
+using MoveType = CoffeeChess.Domain.Games.Enums.MoveType;
 using PlayerSide = ChessDotNetCore.Player;
 
 namespace CoffeeChess.Domain.Games.AggregatesRoots;
 
-public class Game : AggregateRoot<IDomainEvent>, IJsonOnDeserialized
+public class Game : AggregateRoot<IDomainEvent>
 {
     [JsonInclude] public string GameId { get; init; } = null!;
     [JsonInclude] public string WhitePlayerId { get; init; } = null!;
@@ -22,13 +24,13 @@ public class Game : AggregateRoot<IDomainEvent>, IJsonOnDeserialized
     [JsonInclude] private DateTime _lastTimeUpdate;
     [JsonInclude] private PlayerColor _currentPlayerColor;
     [JsonInclude] private PlayerColor? _playerWithDrawOffer;
-    [JsonInclude] private string _currentFenPosition = null!;
+    [JsonInclude] private string _currentFen = null!;
+    [JsonInclude] private Dictionary<string, int> _positionsForThreefoldCount = null!;
 
     // TODO: use MoveInfo class instead of string
     [JsonInclude] private List<string> _sanMovesHistory = null!;
-    // TODO: apply dependensy inversion by creating IChessRules
+    // TODO: apply dependency inversion by creating IChessRules
     // NOTE: done for optimization to check some properties without initializing ChessGame
-    [JsonIgnore] private Lazy<ChessGame> _chessGame = null!;
 
     public Game(
         string gameId,
@@ -44,18 +46,16 @@ public class Game : AggregateRoot<IDomainEvent>, IJsonOnDeserialized
         _lastTimeUpdate = DateTime.UtcNow;
         _currentPlayerColor = PlayerColor.White;
         IsOver = false;
-        _chessGame = new();
+        _positionsForThreefoldCount = new();
         _sanMovesHistory = new();
-        _currentFenPosition = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+        _currentFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
         AddDomainEvent(new GameStarted(
             GameId, WhitePlayerId, BlackPlayerId, (int)_whiteTimeLeft.TotalMilliseconds));
     }
-    
+
     [JsonConstructor] private Game() { }
 
-    public void OnDeserialized() => _chessGame = new(() => new(_currentFenPosition));
-
-    public void ApplyMove(string playerId, string from, string to, string? promotion)
+    public void ApplyMove(IChessRules chessRules, string playerId, string from, string to, string? promotion)
     {
         var playerColor = GetColorById(playerId);
         var currentPlayerId = _currentPlayerColor == PlayerColor.White
@@ -69,11 +69,8 @@ public class Game : AggregateRoot<IDomainEvent>, IJsonOnDeserialized
         }
 
         var promotionChar = promotion?[0];
-
-        var move = new Move(from, to, _currentPlayerColor == PlayerColor.White
-            ? PlayerSide.White
-            : PlayerSide.Black, promotionChar);
-        if (_chessGame.Value.MakeMove(move, false) is MoveType.Invalid)
+        var moveResult = chessRules.ApplyMove(_currentFen, _currentPlayerColor, from, to, promotionChar);
+        if (!moveResult.Valid)
         {
             AddDomainEvent(new MoveFailed(playerId, MoveFailedReason.InvalidMove));
             return;
@@ -85,7 +82,6 @@ public class Game : AggregateRoot<IDomainEvent>, IJsonOnDeserialized
         if (UpdateTimeAndCheckTimeout())
         {
             AddDomainEvent(new MoveFailed(playerId, MoveFailedReason.TimeRanOut));
-            _chessGame.Value.Resign(_currentPlayerColor == PlayerColor.White ? PlayerSide.White : PlayerSide.Black);
             var (result, reason) = _currentPlayerColor == PlayerColor.White
                 ? (GameResult.BlackWon, GameResultReason.WhiteTimeRanOut)
                 : (GameResult.WhiteWon, GameResultReason.BlackTimeRanOut);
@@ -95,8 +91,8 @@ public class Game : AggregateRoot<IDomainEvent>, IJsonOnDeserialized
         }
 
         DoIncrement();
-        _sanMovesHistory.Add(_chessGame.Value.LastMove!.SAN);
-        _currentFenPosition = _chessGame.Value.GetFen();
+        _sanMovesHistory.Add(moveResult.San);
+        _currentFen = moveResult.FenAfterMove;
         AddDomainEvent(new MoveMade(WhitePlayerId, BlackPlayerId,
             _sanMovesHistory.AsReadOnly(), _whiteTimeLeft, _blackTimeLeft));
 
@@ -104,33 +100,29 @@ public class Game : AggregateRoot<IDomainEvent>, IJsonOnDeserialized
             ? PlayerColor.Black
             : PlayerColor.White;
 
-        if (_chessGame.Value.ThreeFoldRepeatAndThisCanResultInDraw)
-        {
-            AddDomainEvent(new GameResultUpdated(
-                WhitePlayerId, BlackPlayerId, GameResult.Draw, GameResultReason.Threefold));
-            IsOver = true;
+        if (CheckThreefold(moveResult.MoveType is MoveType.Capture))
             return;
-        }
 
-        if (_chessGame.Value.FiftyMovesAndThisCanResultInDraw)
+        // TODO: implement 50-moves rule
+        /*if (FiftyMovesAndThisCanResultInDraw)
         {
             AddDomainEvent(new GameResultUpdated(WhitePlayerId, BlackPlayerId,
                 GameResult.Draw, GameResultReason.FiftyMovesRule));
             IsOver = true;
             return;
-        }
+        }*/
 
-        if (_chessGame.Value.IsCheckmated(PlayerSide.White) || _chessGame.Value.IsCheckmated(PlayerSide.Black))
+        if (moveResult.MoveResultType is MoveResultType.Checkmate)
         {
-            var (result, reason) = _chessGame.Value.IsCheckmated(PlayerSide.White)
-                ? (GameResult.BlackWon, GameResultReason.WhiteCheckmates)
-                : (GameResult.WhiteWon, GameResultReason.BlackCheckmates);
+            var (result, reason) = _currentPlayerColor == PlayerColor.White
+                ? (GameResult.WhiteWon, GameResultReason.WhiteCheckmates)
+                : (GameResult.BlackWon, GameResultReason.BlackCheckmates);
             AddDomainEvent(new GameResultUpdated(WhitePlayerId, BlackPlayerId, result, reason));
             IsOver = true;
             return;
         }
 
-        if (_chessGame.Value.IsStalemated(PlayerSide.White) || _chessGame.Value.IsStalemated(PlayerSide.Black))
+        if (moveResult.MoveResultType is MoveResultType.Stalemate)
         {
             AddDomainEvent(new GameResultUpdated(WhitePlayerId, BlackPlayerId,
                 GameResult.Draw, GameResultReason.Stalemate));
@@ -180,7 +172,6 @@ public class Game : AggregateRoot<IDomainEvent>, IJsonOnDeserialized
     public void Resign(string playerId)
     {
         var isWhite = GetColorById(playerId) == PlayerColor.White;
-        _chessGame.Value.Resign(isWhite ? PlayerSide.White : PlayerSide.Black);
         var (result, reason) = isWhite
             ? (GameResult.BlackWon, GameResultReason.WhiteResigns)
             : (GameResult.WhiteWon, GameResultReason.BlackResigns);
@@ -192,13 +183,31 @@ public class Game : AggregateRoot<IDomainEvent>, IJsonOnDeserialized
     {
         if (UpdateTimeAndCheckTimeout())
         {
-            _chessGame.Value.Resign(_currentPlayerColor == PlayerColor.White ? PlayerSide.White : PlayerSide.Black);
             var (result, reason) = _currentPlayerColor == PlayerColor.White
                 ? (GameResult.BlackWon, GameResultReason.WhiteTimeRanOut)
                 : (GameResult.WhiteWon, GameResultReason.BlackTimeRanOut);
             AddDomainEvent(new GameResultUpdated(WhitePlayerId, BlackPlayerId, result, reason));
             IsOver = true;
         }
+    }
+
+    private bool CheckThreefold(bool wasCapture)
+    {
+        if (!wasCapture)
+        {
+            _positionsForThreefoldCount[_currentFen]++;
+            if (_positionsForThreefoldCount[_currentFen] == 3)
+            {
+                AddDomainEvent(new GameResultUpdated(
+                    WhitePlayerId, BlackPlayerId, GameResult.Draw, GameResultReason.Threefold));
+                IsOver = true;
+                return true;
+            }
+        }
+        else 
+            _positionsForThreefoldCount.Clear();
+
+        return false;
     }
 
     private bool UpdateTimeAndCheckTimeout()
@@ -224,7 +233,7 @@ public class Game : AggregateRoot<IDomainEvent>, IJsonOnDeserialized
 
         return true;
     }
-
+    
     private void DoIncrement()
     {
         if (_currentPlayerColor is PlayerColor.White)
@@ -232,7 +241,7 @@ public class Game : AggregateRoot<IDomainEvent>, IJsonOnDeserialized
         else
             _blackTimeLeft += _increment;
     }
-    
+
     private PlayerColor GetColorById(string playerId)
     {
         if (playerId == WhitePlayerId)
