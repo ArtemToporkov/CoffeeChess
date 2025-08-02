@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Text.Json.Serialization;
 using CoffeeChess.Domain.Games.Enums;
 using CoffeeChess.Domain.Games.Events;
 using CoffeeChess.Domain.Games.Services.Interfaces;
@@ -24,10 +25,10 @@ public class Game : AggregateRoot<IDomainEvent>
     [JsonInclude] private PlayerColor _currentPlayerColor;
     [JsonInclude] private PlayerColor? _playerWithDrawOffer;
     // TODO: create and use struct Fen instead
-    [JsonInclude] private string _currentFen = null!;
-    [JsonInclude] private Dictionary<string, int> _positionsForThreefoldCount = null!;
+    [JsonInclude] private Fen _currentFen;
+    [JsonInclude] private Dictionary<Fen, int> _positionsForThreefoldCount = null!;
     // TODO: create and use struct SanMove instead
-    [JsonInclude] private List<string> _sanMovesHistory = null!;
+    [JsonInclude] private List<SanMove> _sanMovesHistory = null!;
 
     public Game(
         string gameId,
@@ -45,7 +46,7 @@ public class Game : AggregateRoot<IDomainEvent>
         IsOver = false;
         _positionsForThreefoldCount = new();
         _sanMovesHistory = new();
-        _currentFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+        _currentFen = new Fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
         AddDomainEvent(new GameStarted(
             GameId, WhitePlayerId, BlackPlayerId, (int)_whiteTimeLeft.TotalMilliseconds));
     }
@@ -63,7 +64,7 @@ public class Game : AggregateRoot<IDomainEvent>
         DeclineDrawOfferIfPending(playerId);
         ReduceTime();
 
-        if (CheckAndPublishTimeout(playerId)) return;
+        if (CheckAndPublishTimeout(movingPlayerId: playerId)) return;
         
         UpdateAndPublishAfterSuccessMove(moveResult);
         DoIncrement();
@@ -127,14 +128,8 @@ public class Game : AggregateRoot<IDomainEvent>
 
     public void CheckTimeout()
     {
-        if (UpdateTimeAndCheckTimeout())
-        {
-            var (result, reason) = _currentPlayerColor == PlayerColor.White
-                ? (GameResult.BlackWon, GameResultReason.WhiteTimeRanOut)
-                : (GameResult.WhiteWon, GameResultReason.BlackTimeRanOut);
-            AddDomainEvent(new GameResultUpdated(WhitePlayerId, BlackPlayerId, result, reason));
-            IsOver = true;
-        }
+        ReduceTime();
+        CheckAndPublishTimeout();
     }
 
     private bool CheckAndPublishNotYourTurn(string playerId)
@@ -186,15 +181,16 @@ public class Game : AggregateRoot<IDomainEvent>
         AddDomainEvent(new MoveFailed(playerId, MoveFailedReason.InvalidMove));
         return true;
     }
-
-    private bool CheckAndPublishTimeout(string playerId)
+    
+    private bool CheckAndPublishTimeout(string? movingPlayerId = null)
     {
         if (_currentPlayerColor is PlayerColor.White)
         {
             if (_whiteTimeLeft > TimeSpan.Zero)
                 return false;
             _whiteTimeLeft = TimeSpan.Zero;
-            AddDomainEvent(new MoveFailed(playerId, MoveFailedReason.TimeRanOut));
+            if (!string.IsNullOrEmpty(movingPlayerId))
+                AddDomainEvent(new MoveFailed(movingPlayerId, MoveFailedReason.TimeRanOut));
             EndGameAndPublish(GameResult.BlackWon, GameResultReason.WhiteTimeRanOut);
         }
         else
@@ -202,7 +198,8 @@ public class Game : AggregateRoot<IDomainEvent>
             if (_blackTimeLeft > TimeSpan.Zero)
                 return false;
             
-            AddDomainEvent(new MoveFailed(playerId, MoveFailedReason.TimeRanOut));
+            if (!string.IsNullOrEmpty(movingPlayerId))
+                AddDomainEvent(new MoveFailed(movingPlayerId, MoveFailedReason.TimeRanOut));
             EndGameAndPublish(GameResult.WhiteWon, GameResultReason.BlackTimeRanOut);
             _blackTimeLeft = TimeSpan.Zero;
         }
@@ -211,8 +208,8 @@ public class Game : AggregateRoot<IDomainEvent>
 
     private void UpdateAndPublishAfterSuccessMove(MoveResult moveResult)
     {
-        _sanMovesHistory.Add(moveResult.San!);
-        _currentFen = moveResult.FenAfterMove!;
+        _sanMovesHistory.Add(moveResult.San!.Value);
+        _currentFen = moveResult.FenAfterMove!.Value;
         AddDomainEvent(new MoveMade(WhitePlayerId, BlackPlayerId,
             _sanMovesHistory.AsReadOnly(), _whiteTimeLeft, _blackTimeLeft));
     }
@@ -251,30 +248,6 @@ public class Game : AggregateRoot<IDomainEvent>
             _positionsForThreefoldCount.Clear();
 
         return false;
-    }
-
-    private bool UpdateTimeAndCheckTimeout()
-    {
-        var deltaTime = DateTime.UtcNow - _lastTimeUpdate;
-        _lastTimeUpdate = DateTime.UtcNow;
-        if (_currentPlayerColor is PlayerColor.White)
-        {
-            _whiteTimeLeft -= deltaTime;
-            if (_whiteTimeLeft >= TimeSpan.Zero)
-                return false;
-
-            _whiteTimeLeft = TimeSpan.Zero;
-        }
-        else
-        {
-            _blackTimeLeft -= deltaTime;
-            if (_blackTimeLeft >= TimeSpan.Zero)
-                return false;
-
-            _blackTimeLeft = TimeSpan.Zero;
-        }
-
-        return true;
     }
     
     private void DoIncrement()

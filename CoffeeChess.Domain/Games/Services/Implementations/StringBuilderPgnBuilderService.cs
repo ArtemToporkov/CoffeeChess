@@ -1,11 +1,12 @@
 ﻿using System.Text;
 using CoffeeChess.Domain.Games.Services.Interfaces;
+using CoffeeChess.Domain.Games.ValueObjects;
 
 namespace CoffeeChess.Domain.Games.Services.Implementations;
 
 public class StringBuilderPgnBuilderService : IPgnBuilderService
 {
-    public string GetPgn(IReadOnlyCollection<string> sanMovesHistory)
+    public string GetPgn(IReadOnlyCollection<SanMove> sanMovesHistory)
     {
         var sb = new StringBuilder();
         var currentPly = 0;

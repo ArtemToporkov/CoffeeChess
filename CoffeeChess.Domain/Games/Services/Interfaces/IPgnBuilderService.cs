@@ -1,6 +1,8 @@
-﻿namespace CoffeeChess.Domain.Games.Services.Interfaces;
+﻿using CoffeeChess.Domain.Games.ValueObjects;
+
+namespace CoffeeChess.Domain.Games.Services.Interfaces;
 
 public interface IPgnBuilderService
 {
-    public string GetPgn(IReadOnlyCollection<string> sanMovesHistory);
+    public string GetPgn(IReadOnlyCollection<SanMove> sanMovesHistory);
 }

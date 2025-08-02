@@ -3,7 +3,7 @@ using CoffeeChess.Domain.Games.Enums;
 
 namespace CoffeeChess.Domain.Games.ValueObjects;
 
-public struct MoveResult
+public readonly struct MoveResult
 {
     [MemberNotNullWhen(
         true, 
@@ -14,8 +14,8 @@ public struct MoveResult
         nameof(MoveResultType))]
     public bool Valid { get; init; }
     
-    public string? San { get; init; }
-    public string? FenAfterMove { get; init; }
+    public SanMove? San { get; init; }
+    public Fen? FenAfterMove { get; init; }
     public MoveType? MoveType { get; init; }
     public MoveResultType? MoveResultType { get; init; }
 }

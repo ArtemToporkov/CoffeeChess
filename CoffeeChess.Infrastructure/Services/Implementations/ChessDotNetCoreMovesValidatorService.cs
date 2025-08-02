@@ -9,7 +9,7 @@ namespace CoffeeChess.Infrastructure.Services.Implementations;
 
 public class ChessDotNetCoreMovesValidatorService : IChessMovesValidator
 {
-    public MoveResult ApplyMove(string currentFen, PlayerColor playerColor, string from, string to, char? promotion)
+    public MoveResult ApplyMove(Fen currentFen, PlayerColor playerColor, string from, string to, char? promotion)
     {
         var game = new ChessGame(currentFen);
         var player = playerColor == PlayerColor.White ? Player.White : Player.Black;
@@ -20,8 +20,8 @@ public class ChessDotNetCoreMovesValidatorService : IChessMovesValidator
             return new MoveResult { Valid = false };
 
         var moveType = ParseMoveKind(moveKind);
-        var san = game.LastMove!.SAN;
-        var fenAfterMove = game.GetFen();
+        var san = new SanMove(game.LastMove!.SAN);
+        var fenAfterMove = new Fen(game.GetFen());
         var moveResultType = MoveResultType.None;
         if (game.IsStalemated(Player.White) || game.IsStalemated(Player.Black))
             moveResultType = MoveResultType.Stalemate;
