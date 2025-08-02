@@ -15,6 +15,7 @@ using CoffeeChess.Domain.Players.Services.Interfaces;
 using CoffeeChess.Infrastructure.Identity;
 using CoffeeChess.Infrastructure.Persistence;
 using CoffeeChess.Infrastructure.Repositories.Implementations;
+using CoffeeChess.Infrastructure.Services.Implementations;
 using CoffeeChess.Web.BackgroundWorkers;
 using CoffeeChess.Web.Hubs;
 using CoffeeChess.Web.Services;
@@ -47,6 +48,7 @@ builder.Services.AddMediatR(cfg =>
     cfg.RegisterServicesFromAssembly(typeof(DrawOfferDeclinedEventHandler).Assembly));
 
 builder.Services.AddScoped<IMatchmakingService, InMemoryMatchmakingService>();
+builder.Services.AddScoped<IChessRules, ChessDotNetCoreRulesService>();
 builder.Services.AddScoped<IRatingService, EloRatingService>();
 builder.Services.AddScoped<IPgnBuilderService, StringBuilderPgnBuilderService>();
 builder.Services.AddScoped<IGameEventNotifierService, SignalRGameEventNotifierService>();

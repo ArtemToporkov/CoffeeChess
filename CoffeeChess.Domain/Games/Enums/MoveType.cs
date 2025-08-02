@@ -2,8 +2,9 @@
 
 public enum MoveType
 {
-    Invalid,
+    Move,
     Capture,
-    Castle,
-    EnPassant
+    Castling,
+    EnPassant,
+    Promotion
 }

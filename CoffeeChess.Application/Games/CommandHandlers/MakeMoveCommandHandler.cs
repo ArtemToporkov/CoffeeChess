@@ -1,10 +1,11 @@
 ﻿using CoffeeChess.Application.Games.Commands;
 using CoffeeChess.Domain.Games.Repositories.Interfaces;
+using CoffeeChess.Domain.Games.Services.Interfaces;
 using MediatR;
 
 namespace CoffeeChess.Application.Games.CommandHandlers;
 
-public class MakeMoveCommandHandler(IGameRepository gameRepository) : IRequestHandler<MakeMoveCommand>
+public class MakeMoveCommandHandler(IGameRepository gameRepository, IChessRules chessRules) : IRequestHandler<MakeMoveCommand>
 {
     public async Task Handle(MakeMoveCommand request, CancellationToken cancellationToken)
     {
@@ -16,7 +17,7 @@ public class MakeMoveCommandHandler(IGameRepository gameRepository) : IRequestHa
             throw new InvalidOperationException(
                 $"[{nameof(MakeMoveCommandHandler)}.{nameof(Handle)}]: game is over.");
 
-        game.ApplyMove(request.PlayerId, request.From, request.To, request.Promotion);
+        game.ApplyMove(chessRules, request.PlayerId, request.From, request.To, request.Promotion);
         await gameRepository.SaveChangesAsync(game, cancellationToken);
     }
 }
