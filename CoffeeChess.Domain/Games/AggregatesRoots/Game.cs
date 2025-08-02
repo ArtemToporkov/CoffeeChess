@@ -1,13 +1,12 @@
 ﻿using System.Text.Json.Serialization;
-using ChessDotNetCore;
 using CoffeeChess.Domain.Games.Enums;
 using CoffeeChess.Domain.Games.Events;
 using CoffeeChess.Domain.Games.Services.Interfaces;
+using CoffeeChess.Domain.Games.ValueObjects;
 using CoffeeChess.Domain.Shared.Abstractions;
 using CoffeeChess.Domain.Shared.Interfaces;
 using GameResult = CoffeeChess.Domain.Games.Enums.GameResult;
 using MoveType = CoffeeChess.Domain.Games.Enums.MoveType;
-using PlayerSide = ChessDotNetCore.Player;
 
 namespace CoffeeChess.Domain.Games.AggregatesRoots;
 
@@ -24,13 +23,11 @@ public class Game : AggregateRoot<IDomainEvent>
     [JsonInclude] private DateTime _lastTimeUpdate;
     [JsonInclude] private PlayerColor _currentPlayerColor;
     [JsonInclude] private PlayerColor? _playerWithDrawOffer;
+    // TODO: create and use struct Fen instead
     [JsonInclude] private string _currentFen = null!;
     [JsonInclude] private Dictionary<string, int> _positionsForThreefoldCount = null!;
-
-    // TODO: use MoveInfo class instead of string
+    // TODO: create and use struct SanMove instead
     [JsonInclude] private List<string> _sanMovesHistory = null!;
-    // TODO: apply dependency inversion by creating IChessRules
-    // NOTE: done for optimization to check some properties without initializing ChessGame
 
     public Game(
         string gameId,
@@ -55,79 +52,28 @@ public class Game : AggregateRoot<IDomainEvent>
 
     [JsonConstructor] private Game() { }
 
-    public void ApplyMove(IChessMovesValidator chessMovesValidator, string playerId, string from, string to, string? promotion)
+    public void ApplyMove(IChessMovesValidator chessMovesValidator, 
+        string playerId, string from, string to, string? promotion)
     {
-        var playerColor = GetColorById(playerId);
-        var currentPlayerId = _currentPlayerColor == PlayerColor.White
-            ? WhitePlayerId
-            : BlackPlayerId;
+        if (CheckAndPublishNotYourTurn(playerId)) return;
 
-        if (playerId != currentPlayerId)
-        {
-            AddDomainEvent(new MoveFailed(playerId, MoveFailedReason.NotYourTurn));
-            return;
-        }
+        var moveResult = chessMovesValidator.ApplyMove(_currentFen, _currentPlayerColor, from, to, promotion?[0]);
+        if (CheckAndPublishInvalidMove(playerId, moveResult)) return;
+        
+        DeclineDrawOfferIfPending(playerId);
+        ReduceTime();
 
-        var promotionChar = promotion?[0];
-        var moveResult = chessMovesValidator.ApplyMove(_currentFen, _currentPlayerColor, from, to, promotionChar);
-        if (!moveResult.Valid)
-        {
-            AddDomainEvent(new MoveFailed(playerId, MoveFailedReason.InvalidMove));
-            return;
-        }
-
-        if (_playerWithDrawOffer.HasValue && playerColor != _playerWithDrawOffer)
-            DeclineDrawOffer(playerId);
-
-        if (UpdateTimeAndCheckTimeout())
-        {
-            AddDomainEvent(new MoveFailed(playerId, MoveFailedReason.TimeRanOut));
-            var (result, reason) = _currentPlayerColor == PlayerColor.White
-                ? (GameResult.BlackWon, GameResultReason.WhiteTimeRanOut)
-                : (GameResult.WhiteWon, GameResultReason.BlackTimeRanOut);
-            AddDomainEvent(new GameResultUpdated(WhitePlayerId, BlackPlayerId, result, reason));
-            IsOver = true;
-            return;
-        }
-
+        if (CheckAndPublishTimeout(playerId)) return;
+        
+        UpdateAndPublishAfterSuccessMove(moveResult);
         DoIncrement();
-        _sanMovesHistory.Add(moveResult.San);
-        _currentFen = moveResult.FenAfterMove;
-        AddDomainEvent(new MoveMade(WhitePlayerId, BlackPlayerId,
-            _sanMovesHistory.AsReadOnly(), _whiteTimeLeft, _blackTimeLeft));
 
-        _currentPlayerColor = _currentPlayerColor == PlayerColor.White
-            ? PlayerColor.Black
-            : PlayerColor.White;
-
-        if (CheckThreefold(moveResult.MoveType is MoveType.Capture))
-            return;
-
+        if (CheckAndPublishThreefold(moveResult)) return;
+        if (CheckAndPublishCheckmate(moveResult)) return;
+        if (CheckAndPublishStalemate(moveResult)) return;
         // TODO: implement 50-moves rule
-        /*if (FiftyMovesAndThisCanResultInDraw)
-        {
-            AddDomainEvent(new GameResultUpdated(WhitePlayerId, BlackPlayerId,
-                GameResult.Draw, GameResultReason.FiftyMovesRule));
-            IsOver = true;
-            return;
-        }*/
-
-        if (moveResult.MoveResultType is MoveResultType.Checkmate)
-        {
-            var (result, reason) = _currentPlayerColor == PlayerColor.White
-                ? (GameResult.WhiteWon, GameResultReason.WhiteCheckmates)
-                : (GameResult.BlackWon, GameResultReason.BlackCheckmates);
-            AddDomainEvent(new GameResultUpdated(WhitePlayerId, BlackPlayerId, result, reason));
-            IsOver = true;
-            return;
-        }
-
-        if (moveResult.MoveResultType is MoveResultType.Stalemate)
-        {
-            AddDomainEvent(new GameResultUpdated(WhitePlayerId, BlackPlayerId,
-                GameResult.Draw, GameResultReason.Stalemate));
-            IsOver = true;
-        }
+        
+        SwapColors();
     }
 
     public void OfferADraw(string playerId)
@@ -191,9 +137,106 @@ public class Game : AggregateRoot<IDomainEvent>
         }
     }
 
-    private bool CheckThreefold(bool wasCapture)
+    private bool CheckAndPublishNotYourTurn(string playerId)
     {
-        if (!wasCapture)
+        var playerColor = GetColorById(playerId);
+        if (playerColor == _currentPlayerColor) 
+            return false;
+        
+        AddDomainEvent(new MoveFailed(playerId, MoveFailedReason.NotYourTurn));
+        return true;
+    }
+
+    private void ReduceTime()
+    {
+        var deltaTime = DateTime.UtcNow - _lastTimeUpdate;
+        _lastTimeUpdate = DateTime.UtcNow;
+        if (_currentPlayerColor is PlayerColor.White)
+            _whiteTimeLeft -= deltaTime;
+        else
+            _blackTimeLeft -= deltaTime;
+    }
+
+    private bool CheckAndPublishCheckmate(MoveResult moveResult)
+    {
+        if (moveResult.MoveResultType is not MoveResultType.Checkmate)
+            return false;
+        
+        var (result, reason) = _currentPlayerColor == PlayerColor.White
+            ? (GameResult.WhiteWon, GameResultReason.WhiteCheckmates)
+            : (GameResult.BlackWon, GameResultReason.BlackCheckmates);
+        EndGameAndPublish(result, reason);
+        return true;
+    }
+    
+    private bool CheckAndPublishStalemate(MoveResult moveResult)
+    {
+        if (moveResult.MoveResultType is not MoveResultType.Stalemate)
+            return false;
+        
+        EndGameAndPublish(GameResult.Draw, GameResultReason.Stalemate);
+        return true;
+    }
+
+    private bool CheckAndPublishInvalidMove(string playerId, MoveResult moveResult)
+    {
+        if (moveResult.Valid)
+            return false;
+        
+        AddDomainEvent(new MoveFailed(playerId, MoveFailedReason.InvalidMove));
+        return true;
+    }
+
+    private bool CheckAndPublishTimeout(string playerId)
+    {
+        if (_currentPlayerColor is PlayerColor.White)
+        {
+            if (_whiteTimeLeft > TimeSpan.Zero)
+                return false;
+            _whiteTimeLeft = TimeSpan.Zero;
+            AddDomainEvent(new MoveFailed(playerId, MoveFailedReason.TimeRanOut));
+            EndGameAndPublish(GameResult.BlackWon, GameResultReason.WhiteTimeRanOut);
+        }
+        else
+        {
+            if (_blackTimeLeft > TimeSpan.Zero)
+                return false;
+            
+            AddDomainEvent(new MoveFailed(playerId, MoveFailedReason.TimeRanOut));
+            EndGameAndPublish(GameResult.WhiteWon, GameResultReason.BlackTimeRanOut);
+            _blackTimeLeft = TimeSpan.Zero;
+        }
+        return true;
+    }
+
+    private void UpdateAndPublishAfterSuccessMove(MoveResult moveResult)
+    {
+        _sanMovesHistory.Add(moveResult.San!);
+        _currentFen = moveResult.FenAfterMove!;
+        AddDomainEvent(new MoveMade(WhitePlayerId, BlackPlayerId,
+            _sanMovesHistory.AsReadOnly(), _whiteTimeLeft, _blackTimeLeft));
+    }
+    private void DeclineDrawOfferIfPending(string playerId)
+    {
+        if (_playerWithDrawOffer.HasValue && GetColorById(playerId) != _playerWithDrawOffer)
+            DeclineDrawOffer(playerId);
+    }
+
+    private void SwapColors() 
+        => _currentPlayerColor = _currentPlayerColor == PlayerColor.White
+            ? PlayerColor.Black
+            : PlayerColor.White;
+
+    private void EndGameAndPublish(GameResult result, GameResultReason reason)
+    {
+        AddDomainEvent(new GameResultUpdated(WhitePlayerId, BlackPlayerId, result, reason));
+        IsOver = true;
+    }
+    
+    private bool CheckAndPublishThreefold(MoveResult moveResult)
+    {
+        // TODO: also check if it's neither pawn nor promotion
+        if (moveResult.MoveType is not MoveType.Capture)
         {
             _positionsForThreefoldCount[_currentFen]++;
             if (_positionsForThreefoldCount[_currentFen] == 3)
