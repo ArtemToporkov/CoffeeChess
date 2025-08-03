@@ -14,10 +14,9 @@ public class Chat(string gameId) : AggregateRoot<IDomainEvent>
     
     private readonly ConcurrentQueue<ChatMessage> _messages = new();
 
-    public Task AddMessage(string username, string message)
+    public void AddMessage(string username, string message)
     {
         _messages.Enqueue(new(username, message, DateTime.UtcNow));
         AddDomainEvent(new ChatMessageAdded(GameId, username, message));
-        return Task.CompletedTask;
     }
 }

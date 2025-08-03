@@ -17,6 +17,6 @@ public class MoveFailedEventHandler(
         MoveFailedReason.InvalidMove => "Invalid move.",
         MoveFailedReason.TimeRanOut => "Your time is run up.",
         MoveFailedReason.NotYourTurn => "It's not your turn.",
-        _ => throw new ArgumentOutOfRangeException(nameof(reason), reason, null)
+        _ => throw new ArgumentOutOfRangeException(nameof(reason), reason, "Unexpected move failure reason.")
     };
 }

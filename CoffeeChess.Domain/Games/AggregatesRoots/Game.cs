@@ -2,6 +2,7 @@
 using System.Text.Json.Serialization;
 using CoffeeChess.Domain.Games.Enums;
 using CoffeeChess.Domain.Games.Events;
+using CoffeeChess.Domain.Games.Exceptions;
 using CoffeeChess.Domain.Games.Services.Interfaces;
 using CoffeeChess.Domain.Games.ValueObjects;
 using CoffeeChess.Domain.Shared.Abstractions;
@@ -24,10 +25,8 @@ public class Game : AggregateRoot<IDomainEvent>
     [JsonInclude] private DateTime _lastTimeUpdate;
     [JsonInclude] private PlayerColor _currentPlayerColor;
     [JsonInclude] private PlayerColor? _playerWithDrawOffer;
-    // TODO: create and use struct Fen instead
     [JsonInclude] private Fen _currentFen;
     [JsonInclude] private Dictionary<string, int> _positionsForThreefoldCount = null!;
-    // TODO: create and use struct SanMove instead
     [JsonInclude] private List<SanMove> _sanMovesHistory = null!;
 
     public Game(
@@ -56,6 +55,7 @@ public class Game : AggregateRoot<IDomainEvent>
     public void ApplyMove(IChessMovesValidator chessMovesValidator, 
         string playerId, ChessSquare from, ChessSquare to, Promotion? promotion)
     {
+        if (IsOver) throw new InvalidGameOperationException("Game is over.");
         if (CheckAndPublishNotYourTurn(playerId)) return;
 
         var moveResult = chessMovesValidator.ApplyMove(_currentFen, _currentPlayerColor, from, to, promotion);
@@ -80,7 +80,7 @@ public class Game : AggregateRoot<IDomainEvent>
     public void OfferADraw(string playerId)
     {
         if (_playerWithDrawOffer.HasValue)
-            throw new InvalidOperationException("There's already pending draw offer.");
+            throw new InvalidGameOperationException("There's already pending draw offer.");
         _playerWithDrawOffer = playerId == WhitePlayerId ? PlayerColor.White : PlayerColor.Black;
         var senderColor = GetColorById(playerId);
         var (senderId, receiverId) = senderColor == PlayerColor.White
@@ -92,23 +92,21 @@ public class Game : AggregateRoot<IDomainEvent>
     public void AcceptDrawOffer(string playerId)
     {
         if (!_playerWithDrawOffer.HasValue)
-            throw new InvalidOperationException("There's no pending draw offers.");
+            throw new InvalidGameOperationException("There's no pending draw offers.");
         var playerColor = GetColorById(playerId);
         if (_playerWithDrawOffer == playerColor)
-            throw new InvalidOperationException("The same side tries to offer and accept a draw.");
+            throw new InvalidGameOperationException("The same side tries to offer and accept a draw.");
         _playerWithDrawOffer = null;
-        AddDomainEvent(new GameResultUpdated(
-            WhitePlayerId, BlackPlayerId, GameResult.Draw, GameResultReason.Agreement));
-        IsOver = true;
+        EndGameAndPublish(GameResult.Draw, GameResultReason.Agreement);
     }
 
     public void DeclineDrawOffer(string playerId)
     {
         if (!_playerWithDrawOffer.HasValue)
-            throw new InvalidOperationException("There's no pending draw offers.");
+            throw new InvalidGameOperationException("There's no pending draw offers.");
         var playerColor = GetColorById(playerId);
         if (_playerWithDrawOffer == playerColor)
-            throw new InvalidOperationException("The same side tries to offer and decline a draw.");
+            throw new InvalidGameOperationException("The same side tries to offer and decline a draw.");
         _playerWithDrawOffer = null;
         var (rejectingId, senderId) = _playerWithDrawOffer == PlayerColor.White
             ? (BlackPlayerId, WhitePlayerId)
@@ -271,6 +269,6 @@ public class Game : AggregateRoot<IDomainEvent>
             return PlayerColor.White;
         if (playerId == BlackPlayerId)
             return PlayerColor.Black;
-        throw new InvalidOperationException("There's no such player in the game.");
+        throw new InvalidGameOperationException("There's no such player in the game.");
     }
 }

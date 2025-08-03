@@ -7,6 +7,12 @@ public readonly record struct ChessSquare
     
     public ChessSquare(string squareValue)
     {
+        if (string.IsNullOrEmpty(squareValue))
+            throw new ArgumentNullException(nameof(squareValue));
+
+        if (squareValue.Length != 2)
+            throw new ArgumentException("Chess square notation should consist of 2 characters: column and row.");
+        
         var column = squareValue[0];
         if (column is < 'a' or > 'h')
             throw new ArgumentException(

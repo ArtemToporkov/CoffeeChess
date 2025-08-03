@@ -92,8 +92,8 @@ public class InMemoryMatchmakingService(
             ColorPreference.White => ColorPreference.White,
             ColorPreference.Black => ColorPreference.Black,
             ColorPreference.Any => GetRandomColor(),
-            _ => throw new ArgumentException($"[{nameof(InMemoryMatchmakingService)}.{nameof(ChooseColor)}]: " +
-                                             $"Unsupported color preference.")
+            _ => throw new ArgumentOutOfRangeException(
+                nameof(settings.ColorPreference), settings.ColorPreference, "Unexpected color preference.")
         };
 
     private static ColorPreference GetRandomColor()

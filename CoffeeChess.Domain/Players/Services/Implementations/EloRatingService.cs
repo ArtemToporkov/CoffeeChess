@@ -5,7 +5,7 @@ namespace CoffeeChess.Domain.Players.Services.Implementations;
 
 public class EloRatingService : IRatingService
 {
-    private static int KFactor { get; set; } = 15;
+    private const int KFactor = 15;
 
     public (int NewWhiteRating, int NewBlackRating) CalculateNewRatings(int whiteRating, int blackRating,
         GameResult gameResult)

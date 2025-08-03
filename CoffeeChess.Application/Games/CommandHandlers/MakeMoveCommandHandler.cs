@@ -1,29 +1,36 @@
 ﻿using CoffeeChess.Application.Games.Commands;
+using CoffeeChess.Application.Shared.Exceptions;
+using CoffeeChess.Domain.Games.AggregatesRoots;
 using CoffeeChess.Domain.Games.Enums;
+using CoffeeChess.Domain.Games.Exceptions;
 using CoffeeChess.Domain.Games.Repositories.Interfaces;
 using CoffeeChess.Domain.Games.Services.Interfaces;
 using CoffeeChess.Domain.Games.ValueObjects;
 using MediatR;
+using Microsoft.Extensions.Logging;
 
 namespace CoffeeChess.Application.Games.CommandHandlers;
 
-public class MakeMoveCommandHandler(IGameRepository gameRepository, IChessMovesValidator chessMovesValidator) : IRequestHandler<MakeMoveCommand>
+public class MakeMoveCommandHandler(
+    IGameRepository gameRepository, 
+    IChessMovesValidator chessMovesValidator) : IRequestHandler<MakeMoveCommand>
 {
     public async Task Handle(MakeMoveCommand request, CancellationToken cancellationToken)
     {
         var game = await gameRepository.GetByIdAsync(request.GameId, cancellationToken) 
-                   ?? throw new InvalidOperationException(
-                       $"[{nameof(MakeMoveCommandHandler)}.{nameof(Handle)}]: game not found.");
+                   ?? throw new NotFoundException(nameof(Game), request.GameId);
 
-        if (game.IsOver)
-            throw new InvalidOperationException(
-                $"[{nameof(MakeMoveCommandHandler)}.{nameof(Handle)}]: game is over.");
+        try
+        {
+            game.ApplyMove(chessMovesValidator,
+                request.PlayerId,
+                new ChessSquare(request.From),
+                new ChessSquare(request.To),
+                ConvertCharToPromotion(request.Promotion));
+        }
+        catch (InvalidGameOperationException ex) { /* TODO */ }
+        catch (ArgumentException ex) { /* TODO */ }
         
-        game.ApplyMove(chessMovesValidator, 
-            request.PlayerId, 
-            new ChessSquare(request.From), 
-            new ChessSquare(request.To), 
-            ConvertCharToPromotion(request.Promotion));
         await gameRepository.SaveChangesAsync(game, cancellationToken);
     }
 

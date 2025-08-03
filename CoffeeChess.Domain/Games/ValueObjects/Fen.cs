@@ -13,8 +13,7 @@ public readonly partial record struct Fen
     public Fen(string fenValue)
     {
         if (string.IsNullOrEmpty(fenValue))
-            throw new ArgumentNullException(
-                nameof(fenValue), $"Position in FEN notation can't be empty.");
+            throw new ArgumentException("Position in FEN notation can't be empty.");
         
         if (!FenRegex.IsMatch(fenValue))
             throw new ArgumentException($"Position in FEN notation \"{fenValue}\" can't be matched.");

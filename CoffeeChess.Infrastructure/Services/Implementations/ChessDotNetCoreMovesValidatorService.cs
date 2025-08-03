@@ -50,8 +50,8 @@ public class ChessDotNetCoreMovesValidatorService : IChessMovesValidator
             MoveKind.Promotion => MoveType.Promotion,
             MoveKind.EnPassant => MoveType.EnPassant,
             _ => throw new ArgumentOutOfRangeException(
-                $"[{nameof(ChessDotNetCoreMovesValidatorService)}.{nameof(ApplyMove)}] " +
-                $"parsing move type failed: {moveKind}]")
+                nameof(moveKind), moveKind, 
+                "Unexpected ChessDotNetCore.MoveType argument to parse to CoffeeChess.MoveType.")
         };
 
     private static char? ConvertPromotionToChar(Promotion? promotion)

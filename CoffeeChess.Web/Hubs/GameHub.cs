@@ -17,7 +17,7 @@ public class GameHub(
 {
     private async Task<UserModel> GetUserAsync()
         => await userManager.GetUserAsync(Context.User!)
-           ?? throw new HubException($"[{nameof(GameHub)}.{nameof(GetUserAsync)}]: User not found.");
+           ?? throw new HubException($"User {Context.UserIdentifier} not found.");
 
     public async Task QueueChallenge(GameSettings settings)
     {

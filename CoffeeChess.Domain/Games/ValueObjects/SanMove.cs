@@ -10,7 +10,7 @@ public readonly partial struct SanMove
     public SanMove(string sanMoveValue)
     {
         if (string.IsNullOrEmpty(sanMoveValue))
-            throw new ArgumentNullException(nameof(sanMoveValue), "Move in SAN notation can't be empty.");
+            throw new ArgumentException("Move in SAN notation can't be empty.");
         
         if (!SanRegex.IsMatch(sanMoveValue))
             throw new ArgumentException($"Move in SAN notation \"{sanMoveValue}\" can't be matched.");
