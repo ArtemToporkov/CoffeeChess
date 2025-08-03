@@ -4,6 +4,7 @@ using CoffeeChess.Application.Matchmaking.Services.Interfaces;
 using CoffeeChess.Domain.Games.Enums;
 using CoffeeChess.Domain.Games.ValueObjects;
 using CoffeeChess.Infrastructure.Identity;
+using CoffeeChess.Web.Exceptions;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.SignalR;
@@ -17,7 +18,7 @@ public class GameHub(
 {
     private async Task<UserModel> GetUserAsync()
         => await userManager.GetUserAsync(Context.User!)
-           ?? throw new HubException($"User {Context.UserIdentifier} not found.");
+           ?? throw new UserNotFoundException(Context.UserIdentifier!);
 
     public async Task QueueChallenge(GameSettings settings)
     {

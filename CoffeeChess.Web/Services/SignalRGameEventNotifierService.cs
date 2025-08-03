@@ -3,6 +3,7 @@ using CoffeeChess.Application.Games.Services.Interfaces;
 using CoffeeChess.Domain.Games.Enums;
 using CoffeeChess.Domain.Players.AggregatesRoots;
 using CoffeeChess.Domain.Players.Repositories.Interfaces;
+using CoffeeChess.Web.Exceptions;
 using CoffeeChess.Web.Hubs;
 using CoffeeChess.Web.Models.ViewModels;
 using Microsoft.AspNetCore.SignalR;
@@ -56,12 +57,12 @@ public class SignalRGameEventNotifierService(IPlayerRepository playerRepository,
     public async Task NotifyGameStarted(string gameId, string whitePlayerId, string blackPlayerId,
         int totalMillisecondsForOnePlayerLeft, CancellationToken cancellationToken = default)
     {
-        var whitePlayer = await playerRepository.GetByIdAsync(whitePlayerId, cancellationToken) ?? throw new InvalidOperationException(
-            $"[{nameof(SignalRGameEventNotifierService)}.{nameof(NotifyGameStarted)}]: white player not found.");
+        var whitePlayer = await playerRepository.GetByIdAsync(whitePlayerId, cancellationToken) 
+                          ?? throw new UserNotFoundException(whitePlayerId);
         var whiteInfo = new PlayerInfoViewModel(whitePlayer.Name, whitePlayer.Rating);
         
-        var blackPlayer = await playerRepository.GetByIdAsync(blackPlayerId, cancellationToken) ?? throw new InvalidOperationException(
-            $"[{nameof(SignalRGameEventNotifierService)}.{nameof(NotifyGameStarted)}]: black player not found.");
+        var blackPlayer = await playerRepository.GetByIdAsync(blackPlayerId, cancellationToken) 
+                          ?? throw new UserNotFoundException(blackPlayerId);
         var blackInfo = new PlayerInfoViewModel(blackPlayer.Name, blackPlayer.Rating);
         
         await hubContext.Clients.User(whitePlayerId).GameStarted(

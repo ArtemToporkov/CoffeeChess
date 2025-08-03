@@ -37,10 +37,6 @@ $(document).ready(() => {
         gameManager.undoLastMove();
         chatManager.addMessageToChat("CoffeeChess", errorMessage);
     });
-    
-    connection.on(GameHubEvents.CriticalErrorOccured, (errorMessage) => {
-        console.error(errorMessage);
-    });
 
     connection.on(GameHubEvents.ChatMessageReceived, (user, message) => {
         chatManager.addMessageToChat(user, message);

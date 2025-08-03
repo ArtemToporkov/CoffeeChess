@@ -27,13 +27,8 @@ public class GameResultUpdatedEventHandler(
             white.Rating, black.Rating,
             notification.GameResult);
 
-        try
-        {
-            await UpdateRatingAndSave(white.Id, newWhiteRating, cancellationToken);
-            await UpdateRatingAndSave(black.Id, newBlackRating, cancellationToken);
-        }
-        catch (NotFoundException ex) { /* TODO */ }
-        catch (InvalidRatingException ex) { /* TODO */ }
+        await UpdateRatingAndSave(white.Id, newWhiteRating, cancellationToken);
+        await UpdateRatingAndSave(black.Id, newBlackRating, cancellationToken);
 
         var (whiteReason, blackReason) = GetMessageByGameResultReason(
             notification.GameResultReason, white.Name, black.Name);

@@ -2,12 +2,10 @@
 using CoffeeChess.Application.Shared.Exceptions;
 using CoffeeChess.Domain.Games.AggregatesRoots;
 using CoffeeChess.Domain.Games.Enums;
-using CoffeeChess.Domain.Games.Exceptions;
 using CoffeeChess.Domain.Games.Repositories.Interfaces;
 using CoffeeChess.Domain.Games.Services.Interfaces;
 using CoffeeChess.Domain.Games.ValueObjects;
 using MediatR;
-using Microsoft.Extensions.Logging;
 
 namespace CoffeeChess.Application.Games.CommandHandlers;
 
@@ -20,16 +18,11 @@ public class MakeMoveCommandHandler(
         var game = await gameRepository.GetByIdAsync(request.GameId, cancellationToken) 
                    ?? throw new NotFoundException(nameof(Game), request.GameId);
 
-        try
-        {
-            game.ApplyMove(chessMovesValidator,
-                request.PlayerId,
-                new ChessSquare(request.From),
-                new ChessSquare(request.To),
-                ConvertCharToPromotion(request.Promotion));
-        }
-        catch (InvalidGameOperationException ex) { /* TODO */ }
-        catch (ArgumentException ex) { /* TODO */ }
+        game.ApplyMove(chessMovesValidator,
+            request.PlayerId,
+            new ChessSquare(request.From),
+            new ChessSquare(request.To),
+            ConvertCharToPromotion(request.Promotion));
         
         await gameRepository.SaveChangesAsync(game, cancellationToken);
     }

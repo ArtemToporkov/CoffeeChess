@@ -12,8 +12,6 @@ public interface IGameClient
 
     public Task ChatMessageReceived(string username, string message, CancellationToken cancellationToken = default);
 
-    public Task CriticalErrorOccured(string message, CancellationToken cancellationToken = default);
-
     public Task MoveMade(string pgn, double whiteMillisecondsLeft, double blackMillisecondsLeft,
         CancellationToken cancellationToken = default);
 
