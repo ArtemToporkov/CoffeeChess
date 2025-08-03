@@ -1,6 +1,6 @@
 ﻿namespace CoffeeChess.Domain.Games.ValueObjects;
 
-public readonly struct Fen
+public readonly record struct Fen
 {
     private readonly string _value;
     
