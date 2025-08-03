@@ -26,7 +26,7 @@ public class Game : AggregateRoot<IDomainEvent>
     [JsonInclude] private PlayerColor? _playerWithDrawOffer;
     // TODO: create and use struct Fen instead
     [JsonInclude] private Fen _currentFen;
-    [JsonInclude] private Dictionary<Fen, int> _positionsForThreefoldCount = null!;
+    [JsonInclude] private Dictionary<string, int> _positionsForThreefoldCount = null!;
     // TODO: create and use struct SanMove instead
     [JsonInclude] private List<SanMove> _sanMovesHistory = null!;
 
@@ -69,10 +69,10 @@ public class Game : AggregateRoot<IDomainEvent>
         UpdateAndPublishAfterSuccessMove(moveResult);
         DoIncrement();
 
-        if (CheckAndPublishThreefold(moveResult)) return;
         if (CheckAndPublishCheckmate(moveResult)) return;
         if (CheckAndPublishStalemate(moveResult)) return;
-        // TODO: implement 50-moves rule
+        if (CheckAndPublishFiftyMovesRule(moveResult)) return;
+        if (CheckAndPublishThreefold(moveResult)) return;
         
         SwapColors();
     }
@@ -235,12 +235,10 @@ public class Game : AggregateRoot<IDomainEvent>
         // TODO: also check if it's neither pawn nor promotion
         if (moveResult.MoveType is not MoveType.Capture)
         {
-            _positionsForThreefoldCount[_currentFen]++;
-            if (_positionsForThreefoldCount[_currentFen] == 3)
+            _positionsForThreefoldCount[_currentFen.PiecesPlacement]++;
+            if (_positionsForThreefoldCount[_currentFen.PiecesPlacement] == 3)
             {
-                AddDomainEvent(new GameResultUpdated(
-                    WhitePlayerId, BlackPlayerId, GameResult.Draw, GameResultReason.Threefold));
-                IsOver = true;
+                EndGameAndPublish(GameResult.Draw, GameResultReason.Threefold);
                 return true;
             }
         }
@@ -248,6 +246,15 @@ public class Game : AggregateRoot<IDomainEvent>
             _positionsForThreefoldCount.Clear();
 
         return false;
+    }
+
+    private bool CheckAndPublishFiftyMovesRule(MoveResult moveResult)
+    {
+        if (moveResult.FenAfterMove!.Value.PliesCount < 100)
+            return false;
+        
+        EndGameAndPublish(GameResult.Draw, GameResultReason.FiftyMovesRule);
+        return true;
     }
     
     private void DoIncrement()
