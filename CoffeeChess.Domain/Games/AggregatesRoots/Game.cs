@@ -54,11 +54,11 @@ public class Game : AggregateRoot<IDomainEvent>
     [JsonConstructor] private Game() { }
 
     public void ApplyMove(IChessMovesValidator chessMovesValidator, 
-        string playerId, string from, string to, string? promotion)
+        string playerId, ChessSquare from, ChessSquare to, Promotion? promotion)
     {
         if (CheckAndPublishNotYourTurn(playerId)) return;
 
-        var moveResult = chessMovesValidator.ApplyMove(_currentFen, _currentPlayerColor, from, to, promotion?[0]);
+        var moveResult = chessMovesValidator.ApplyMove(_currentFen, _currentPlayerColor, from, to, promotion);
         if (CheckAndPublishInvalidMove(playerId, moveResult)) return;
         
         DeclineDrawOfferIfPending(playerId);

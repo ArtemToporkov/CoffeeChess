@@ -1,4 +1,6 @@
-﻿using MediatR;
+﻿using CoffeeChess.Domain.Games.Enums;
+using CoffeeChess.Domain.Games.ValueObjects;
+using MediatR;
 
 namespace CoffeeChess.Application.Games.Commands;
 

@@ -5,5 +5,6 @@ namespace CoffeeChess.Domain.Games.Services.Interfaces;
 
 public interface IChessMovesValidator
 {
-    public MoveResult ApplyMove(Fen currentFen, PlayerColor playerColor, string from, string to, char? promotion);
+    public MoveResult ApplyMove(Fen currentFen, PlayerColor playerColor, 
+        ChessSquare from, ChessSquare to, Promotion? promotion);
 }

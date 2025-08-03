@@ -9,11 +9,14 @@ namespace CoffeeChess.Infrastructure.Services.Implementations;
 
 public class ChessDotNetCoreMovesValidatorService : IChessMovesValidator
 {
-    public MoveResult ApplyMove(Fen currentFen, PlayerColor playerColor, string from, string to, char? promotion)
+    public MoveResult ApplyMove(Fen currentFen, PlayerColor playerColor, ChessSquare from, 
+        ChessSquare to, Promotion? promotion)
     {
         var game = new ChessGame(currentFen);
         var player = playerColor == PlayerColor.White ? Player.White : Player.Black;
-        var move = new Move(from, to, player, promotion);
+        var promotionChar = ConvertPromotionToChar(promotion);
+        
+        var move = new Move(from, to, player, promotionChar);
         var moveKind = game.MakeMove(move, false);
 
         if (moveKind is MoveKind.Invalid)
@@ -50,4 +53,16 @@ public class ChessDotNetCoreMovesValidatorService : IChessMovesValidator
                 $"[{nameof(ChessDotNetCoreMovesValidatorService)}.{nameof(ApplyMove)}] " +
                 $"parsing move type failed: {moveKind}]")
         };
+
+    private static char? ConvertPromotionToChar(Promotion? promotion)
+     => promotion switch
+     {
+         Promotion.Knight => 'k',
+         Promotion.Bishop => 'b',
+         Promotion.Rook => 'r',
+         Promotion.Queen => 'q',
+         null => null,
+         _ => throw new ArgumentOutOfRangeException(
+             nameof(promotion), promotion, "Unexpected value for enum Promotion.")
+     };
 }
