@@ -27,7 +27,7 @@ public class MakeMoveCommandHandler(
         await gameRepository.SaveChangesAsync(game, cancellationToken);
     }
 
-    private Promotion? ConvertCharToPromotion(string? promotion)
+    private static Promotion? ConvertCharToPromotion(string? promotion)
         => promotion?[0] switch
         {
             'b' => Promotion.Bishop,

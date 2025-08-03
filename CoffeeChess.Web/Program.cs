@@ -55,8 +55,8 @@ builder.Services.AddScoped<IGameEventNotifierService, SignalRGameEventNotifierSe
 builder.Services.AddScoped<IPlayerEventNotifierService, SignalRPlayerEventNotifierService>();
 builder.Services.AddScoped<IChatEventNotifierService, SignalRChatEventNotifierService>();
 
-builder.Services.AddSingleton<IChallengeRepository, InMemoryChallengeRepository>();
-builder.Services.AddSingleton<IChatRepository, InMemoryChatRepository>();
+builder.Services.AddSingleton<IChallengeRepository, RedisChallengeRepository>();
+builder.Services.AddSingleton<IChatRepository, RedisChatRepository>();
 builder.Services.AddSingleton<IGameRepository, RedisGameRepository>();
 builder.Services.AddScoped<IPlayerRepository, SqlPlayerRepository>();
 
