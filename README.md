@@ -5,9 +5,9 @@ Implementing cute chess website using asp.net mvc, signalr.
 ## Status
 
 | Status | Description |
-|--------|--------|
-| 🟢 Done | Authorization, full game logic with move and time validation, moves history |
-| 🟡 In progress | Game loss, resignation and draw offer |
+|--------|-------------|
+| 🟢 Done | Authorization, full game logic with move and time validation, ratings calculation, moves history, etc. |
+| 🟡 In progress | Saving games, reconnection, games history |
 | 🔴 Hasn't been started | Music player |
 
 ## Description
@@ -21,4 +21,5 @@ This project is being done for educational purposes to practice creating project
 - [ ] add viewing of past games
 - [ ] send all game info after reconnection
 - [ ] handle the case when a user who is not part of the game connects to it
+- [ ] move to typescript to create an SPA
 ---
