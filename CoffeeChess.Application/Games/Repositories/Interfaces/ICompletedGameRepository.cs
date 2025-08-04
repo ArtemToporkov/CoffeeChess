@@ -4,5 +4,6 @@ namespace CoffeeChess.Application.Games.Repositories.Interfaces;
 
 public interface ICompletedGameRepository
 {
-    public Task<CompletedGameReadModel?> GetCompletedGameByIdAsync(string gameId);
+    public Task<CompletedGameReadModel?> GetCompletedGameByIdAsync(string gameId, 
+        CancellationToken cancellationToken = default);
 }

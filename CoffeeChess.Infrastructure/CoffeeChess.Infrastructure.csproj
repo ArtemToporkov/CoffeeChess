@@ -13,6 +13,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\CoffeeChess.Application\CoffeeChess.Application.csproj" />
       <ProjectReference Include="..\CoffeeChess.Domain\CoffeeChess.Domain.csproj" />
     </ItemGroup>
 

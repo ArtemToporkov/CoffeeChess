@@ -1,4 +1,5 @@
-﻿using CoffeeChess.Domain.Players.AggregatesRoots;
+﻿using CoffeeChess.Application.Games.ReadModels;
+using CoffeeChess.Domain.Players.AggregatesRoots;
 using CoffeeChess.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -9,6 +10,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     : IdentityDbContext<UserModel>(options)
 {
     public DbSet<Player> Players { get; set; }
+    public DbSet<CompletedGameReadModel> CompletedGames { get; set; }
     
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -26,6 +28,22 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             entity.HasOne<UserModel>()
                 .WithOne()
                 .HasForeignKey<Player>(p => p.Id);
+        });
+        builder.Entity<CompletedGameReadModel>(entity =>
+        {
+            entity.HasKey(g => g.GameId);
+            entity.Property(g => g.WhitePlayerId).IsRequired();
+            entity.Property(g => g.WhitePlayerName).IsRequired();
+            entity.Property(g => g.BlackPlayerId).IsRequired();
+            entity.Property(g => g.BlackPlayerName).IsRequired();
+            entity.HasOne<Player>()
+                .WithMany()
+                .HasForeignKey(g => g.WhitePlayerId)
+                .OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne<Player>()
+                .WithMany()
+                .HasForeignKey(g => g.BlackPlayerId)
+                .OnDelete(DeleteBehavior.Restrict);
         });
     }
 }
