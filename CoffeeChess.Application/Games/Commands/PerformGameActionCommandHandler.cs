@@ -1,11 +1,10 @@
-﻿using CoffeeChess.Application.Games.Commands;
-using CoffeeChess.Application.Shared.Exceptions;
+﻿using CoffeeChess.Application.Shared.Exceptions;
 using CoffeeChess.Domain.Games.AggregatesRoots;
 using CoffeeChess.Domain.Games.Enums;
 using CoffeeChess.Domain.Games.Repositories.Interfaces;
 using MediatR;
 
-namespace CoffeeChess.Application.Games.CommandHandlers;
+namespace CoffeeChess.Application.Games.Commands;
 
 public class PerformGameActionCommandHandler(
     IGameRepository gameRepository) : IRequestHandler<PerformGameActionCommand>

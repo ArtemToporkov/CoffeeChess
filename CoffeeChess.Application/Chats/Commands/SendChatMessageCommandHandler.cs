@@ -1,11 +1,8 @@
-﻿using CoffeeChess.Application.Chats.Commands;
-using CoffeeChess.Application.Games.CommandHandlers;
-using CoffeeChess.Application.Shared.Exceptions;
-using CoffeeChess.Domain.Chats.AggregatesRoots;
+﻿using CoffeeChess.Application.Shared.Exceptions;
 using CoffeeChess.Domain.Chats.Repositories.Interfaces;
 using MediatR;
 
-namespace CoffeeChess.Application.Chats.CommandHandlers;
+namespace CoffeeChess.Application.Chats.Commands;
 
 public class SendChatMessageCommandHandler(IChatRepository chatRepository) : IRequestHandler<SendChatMessageCommand>
 {

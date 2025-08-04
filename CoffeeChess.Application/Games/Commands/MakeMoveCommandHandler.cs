@@ -1,5 +1,4 @@
-﻿using CoffeeChess.Application.Games.Commands;
-using CoffeeChess.Application.Shared.Exceptions;
+﻿using CoffeeChess.Application.Shared.Exceptions;
 using CoffeeChess.Domain.Games.AggregatesRoots;
 using CoffeeChess.Domain.Games.Enums;
 using CoffeeChess.Domain.Games.Repositories.Interfaces;
@@ -7,7 +6,7 @@ using CoffeeChess.Domain.Games.Services.Interfaces;
 using CoffeeChess.Domain.Games.ValueObjects;
 using MediatR;
 
-namespace CoffeeChess.Application.Games.CommandHandlers;
+namespace CoffeeChess.Application.Games.Commands;
 
 public class MakeMoveCommandHandler(
     IGameRepository gameRepository, 
