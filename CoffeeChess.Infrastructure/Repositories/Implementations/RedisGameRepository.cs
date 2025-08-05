@@ -1,6 +1,12 @@
-﻿using System.Text.Json;
+﻿using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.Serialization;
+using System.Text.Json;
+using System.Text.Json.Serialization.Metadata;
 using CoffeeChess.Domain.Games.AggregatesRoots;
 using CoffeeChess.Domain.Games.Repositories.Interfaces;
+using CoffeeChess.Domain.Shared.Abstractions;
+using CoffeeChess.Domain.Shared.Interfaces;
 using CoffeeChess.Infrastructure.Serialization;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
@@ -37,6 +43,7 @@ public class RedisGameRepository(
     public async Task SaveChangesAsync(Game game, CancellationToken cancellationToken = default)
     {
         var serializedGame = JsonSerializer.Serialize(game, GameSerializationOptions);
+        Console.WriteLine(serializedGame);
         await _database.StringSetAsync($"{GameKeyPrefix}:{game.GameId}", serializedGame);
 
         using var scope = serviceProvider.CreateScope();
@@ -53,5 +60,38 @@ public class RedisGameRepository(
     }
 
     private static JsonSerializerOptions GetGameSerializationOptions()
-        => new() { Converters = { new FenConverter(), new SanMoveConverter() } };
+    {
+        var jsonTypeResolver = new DefaultJsonTypeInfoResolver();
+        jsonTypeResolver.Modifiers.Add(jsonTypeInfo =>
+        {
+            if (jsonTypeInfo.Type != typeof(Game)) return;
+            foreach (var field in typeof(Game).GetFields(BindingFlags.NonPublic | BindingFlags.Instance)
+                         .Where(f => !f.Name.StartsWith('<')))
+            {
+                var fieldInfo = jsonTypeInfo.CreateJsonPropertyInfo(field.FieldType, field.Name);
+                fieldInfo.Get = field.GetValue;
+                fieldInfo.Set = field.SetValue;
+                jsonTypeInfo.Properties.Add(fieldInfo);
+            }
+
+            var domainEventsProp = jsonTypeInfo.Properties
+                .FirstOrDefault(p => p.Name == nameof(AggregateRoot<IDomainEvent>.DomainEvents));
+            if (domainEventsProp is not null)
+                jsonTypeInfo.Properties.Remove(domainEventsProp);
+            jsonTypeInfo.CreateObject = () =>
+            {
+                var game = (Game)RuntimeHelpers.GetUninitializedObject(typeof(Game));
+                var domainEventsField = typeof(AggregateRoot<IDomainEvent>).GetField(
+                    "_domainEvents", BindingFlags.NonPublic | BindingFlags.Instance) 
+                                        ?? throw new SerializationException("Can't find \"_domainEvents\" field.");
+                domainEventsField.SetValue(game, new List<IDomainEvent>());
+                return game;
+            };
+        });
+        return new()
+        {
+            TypeInfoResolver = jsonTypeResolver,
+            Converters = { new FenConverter(), new SanMoveConverter() }
+        };
+    }
 }

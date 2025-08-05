@@ -12,20 +12,20 @@ namespace CoffeeChess.Domain.Games.AggregatesRoots;
 
 public class Game : AggregateRoot<IDomainEvent>
 {
-    [JsonInclude] public string GameId { get; init; } = null!;
-    [JsonInclude] public string WhitePlayerId { get; init; } = null!;
-    [JsonInclude] public string BlackPlayerId { get; init; } = null!;
-    [JsonInclude] public bool IsOver { get; private set; }
+    public string GameId { get; init; } = null!;
+    public string WhitePlayerId { get; init; } = null!;
+    public string BlackPlayerId { get; init; } = null!;
+    public bool IsOver { get; private set; }
 
-    [JsonInclude] private TimeSpan _whiteTimeLeft;
-    [JsonInclude] private TimeSpan _blackTimeLeft;
-    [JsonInclude] private TimeSpan _increment;
-    [JsonInclude] private DateTime _lastTimeUpdate;
-    [JsonInclude] private PlayerColor _currentPlayerColor;
-    [JsonInclude] private PlayerColor? _playerWithDrawOffer;
-    [JsonInclude] private Fen _currentFen;
-    [JsonInclude] private Dictionary<string, int> _positionsForThreefoldCount = null!;
-    [JsonInclude] private List<SanMove> _sanMovesHistory = null!;
+    private TimeSpan _whiteTimeLeft;
+    private TimeSpan _blackTimeLeft;
+    private TimeSpan _increment;
+    private DateTime _lastTimeUpdate;
+    private PlayerColor _currentPlayerColor;
+    private PlayerColor? _playerWithDrawOffer;
+    private Fen _currentFen;
+    private Dictionary<string, int> _positionsForThreefoldCount = null!;
+    private List<SanMove> _sanMovesHistory = null!;
 
     public Game(
         string gameId,
@@ -47,8 +47,6 @@ public class Game : AggregateRoot<IDomainEvent>
         AddDomainEvent(new GameStarted(
             GameId, WhitePlayerId, BlackPlayerId, (int)_whiteTimeLeft.TotalMilliseconds));
     }
-
-    [JsonConstructor] private Game() { }
 
     public void ApplyMove(IChessMovesValidator chessMovesValidator, 
         string playerId, ChessSquare from, ChessSquare to, Promotion? promotion)

@@ -13,6 +13,4 @@ public class GameChallenge
         PlayerId = playerId;
         GameSettings = gameSettings;
     }
-    
-    [JsonConstructor] private GameChallenge() { }
 }

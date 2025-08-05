@@ -9,11 +9,11 @@ namespace CoffeeChess.Domain.Chats.AggregatesRoots;
 
 public class Chat : AggregateRoot<IDomainEvent>
 {
-    [JsonInclude] public string GameId { get; init; } = null!;
+    public string GameId { get; init; } = null!;
 
-    [JsonIgnore] public IEnumerable<ChatMessage> Messages => _messages.AsEnumerable();
+    public IEnumerable<ChatMessage> Messages => _messages.AsEnumerable();
     
-    [JsonInclude] private readonly ConcurrentQueue<ChatMessage> _messages = null!;
+    private readonly ConcurrentQueue<ChatMessage> _messages = null!;
 
     public Chat(string gameId)
     {
@@ -26,6 +26,4 @@ public class Chat : AggregateRoot<IDomainEvent>
         _messages.Enqueue(new(username, message, DateTime.UtcNow));
         AddDomainEvent(new ChatMessageAdded(GameId, username, message));
     }
-    
-    [JsonConstructor] private Chat() { }
 }
