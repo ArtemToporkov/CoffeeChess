@@ -20,7 +20,7 @@ public readonly partial record struct Fen
         
         var fenParts = fenValue.Split(' ');
         PiecesPlacement = fenParts[0];
-        if (int.TryParse(fenParts[4], out var pliesCount))
+        if (!int.TryParse(fenParts[4], out var pliesCount))
             throw new ArgumentException(
                 $"Position in FEN notation \"{fenValue}\" should contain an info about plies count.");
         PliesCount = pliesCount;
