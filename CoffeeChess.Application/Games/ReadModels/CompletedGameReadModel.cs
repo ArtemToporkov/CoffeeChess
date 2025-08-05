@@ -16,7 +16,9 @@ public class CompletedGameReadModel
     public int BlackPlayerRating { get; init; }
     public int BlackPlayerNewRating { get; init; }
     
+    public int Minutes { get; init; }
+    public int Increment { get; init; }
+    
     public GameResult GameResult { get; init; }
     public DateTime PlayedDate { get; init; }
-    public string Pgn { get; init; }
 }
