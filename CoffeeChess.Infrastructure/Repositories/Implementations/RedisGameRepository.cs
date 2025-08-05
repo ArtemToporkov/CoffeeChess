@@ -1,6 +1,7 @@
 ﻿using System.Text.Json;
 using CoffeeChess.Domain.Games.AggregatesRoots;
 using CoffeeChess.Domain.Games.Repositories.Interfaces;
+using CoffeeChess.Infrastructure.Serialization;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using StackExchange.Redis;
@@ -13,6 +14,7 @@ public class RedisGameRepository(
 {
     private readonly IDatabase _database = redis.GetDatabase();
     private const string GameKeyPrefix = "game";
+    private static readonly JsonSerializerOptions GameSerializationOptions = GetGameSerializationOptions();
 
     public async Task<Game?> GetByIdAsync(string id, CancellationToken cancellationToken = default)
     {
@@ -20,12 +22,12 @@ public class RedisGameRepository(
         if (redisValue.IsNullOrEmpty)
             return null;
 
-        return JsonSerializer.Deserialize<Game>(redisValue!);
+        return JsonSerializer.Deserialize<Game>(redisValue!, GameSerializationOptions);
     }
 
     public async Task AddAsync(Game game, CancellationToken cancellationToken = default)
     {
-        var serializedGame = JsonSerializer.Serialize(game);
+        var serializedGame = JsonSerializer.Serialize(game, GameSerializationOptions);
         await _database.StringSetAsync($"{GameKeyPrefix}:{game.GameId}", serializedGame, when: When.NotExists);
     }
 
@@ -34,19 +36,23 @@ public class RedisGameRepository(
 
     public async Task SaveChangesAsync(Game game, CancellationToken cancellationToken = default)
     {
-        var serializedGame = JsonSerializer.Serialize(game);
+        var serializedGame = JsonSerializer.Serialize(game, GameSerializationOptions);
+        Console.WriteLine(serializedGame);
         await _database.StringSetAsync($"{GameKeyPrefix}:{game.GameId}", serializedGame);
-        
+
         using var scope = serviceProvider.CreateScope();
         var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
         foreach (var @event in game.DomainEvents)
             await mediator.Publish(@event, cancellationToken);
         game.ClearDomainEvents();
     }
-    
+
     public IEnumerable<Game> GetActiveGames()
     {
         // TODO: implement
         return [];
     }
+
+    private static JsonSerializerOptions GetGameSerializationOptions()
+        => new() { Converters = { new FenConverter(), new SanMoveConverter() } };
 }

@@ -18,11 +18,14 @@ public readonly record struct ChessSquare
             throw new ArgumentException(
                 $"Chess square notation \"{squareValue}\" " +
                 $"should have a character a, b, c, d, e, f, g or h at first position.");
-        _column = squareValue[1];
-        if (!(int.TryParse(squareValue, out _row) && _row is >= 1 and <= 8))
+        _column = column;
+        if (!(int.TryParse(squareValue[1].ToString(), out var row) && row is >= 1 and <= 8))
             throw new ArgumentException(
                 $"Chess square notation \"{squareValue}\" should have a number 1-8 at second position.");
+        _row = row;
     }
 
     public static implicit operator string(ChessSquare squareValue) => $"{squareValue._column}{squareValue._row}";
+
+    public override string ToString() => $"{_column}{_row}";
 }

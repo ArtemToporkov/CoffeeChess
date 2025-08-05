@@ -1,11 +1,12 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Text.Json.Serialization;
+using System.Text.RegularExpressions;
 
 namespace CoffeeChess.Domain.Games.ValueObjects;
 
 public readonly partial record struct Fen
 {
-    public string PiecesPlacement { get; }
-    public int PliesCount { get; }
+    public string PiecesPlacement { get; private init; }
+    public int PliesCount { get; private init; }
     
     private readonly string _value;
     private static readonly Regex FenRegex = RegexForFen();
@@ -28,6 +29,8 @@ public readonly partial record struct Fen
     }
 
     public static implicit operator string(Fen fen) => fen._value;
+
+    public override string ToString() => _value;
 
     [GeneratedRegex("""
                     ^(?:[PNBRQKpnbrqk1-8]{1,8}(?:\/[PNBRQKpnbrqk1-8]{1,8}){7})\s(?:[wb])\s(?:-

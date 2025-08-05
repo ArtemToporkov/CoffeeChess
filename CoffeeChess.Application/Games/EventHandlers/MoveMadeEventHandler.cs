@@ -14,5 +14,6 @@ public class MoveMadeEventHandler(
         await notifier.NotifyMoveMade(notification.WhiteId, notification.BlackId,
         pgnBuilder.GetPgn(notification.SanMovesHistory), notification.WhiteTimeLeft.TotalMilliseconds,
         notification.BlackTimeLeft.TotalMilliseconds, cancellationToken);
+        Console.WriteLine(pgnBuilder.GetPgn(notification.SanMovesHistory));
     }
 }

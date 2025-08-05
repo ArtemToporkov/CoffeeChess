@@ -16,6 +16,7 @@ using CoffeeChess.Domain.Players.Services.Interfaces;
 using CoffeeChess.Infrastructure.Identity;
 using CoffeeChess.Infrastructure.Persistence;
 using CoffeeChess.Infrastructure.Repositories.Implementations;
+using CoffeeChess.Infrastructure.Serialization;
 using CoffeeChess.Infrastructure.Services.Implementations;
 using CoffeeChess.Web.BackgroundWorkers;
 using CoffeeChess.Web.Hubs;
@@ -44,9 +45,9 @@ builder.Services.AddIdentity<UserModel, IdentityRole>(options =>
     .AddDefaultTokenProviders();
 
 builder.Services.AddControllersWithViews();
-builder.Services.AddSignalR();
-builder.Services.AddMediatR(cfg => 
-    cfg.RegisterServicesFromAssembly(typeof(DrawOfferDeclinedEventHandler).Assembly));
+builder.Services.AddSignalR(cfg => cfg.EnableDetailedErrors = true);
+builder.Services.AddMediatR(cfg => cfg
+    .RegisterServicesFromAssembly(typeof(DrawOfferDeclinedEventHandler).Assembly));
 
 builder.Services.AddScoped<IMatchmakingService, InMemoryMatchmakingService>();
 builder.Services.AddScoped<IChessMovesValidator, ChessDotNetCoreMovesValidatorService>();

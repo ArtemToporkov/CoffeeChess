@@ -1,10 +1,12 @@
-﻿namespace CoffeeChess.Domain.Shared.Abstractions;
+﻿using System.Text.Json.Serialization;
+
+namespace CoffeeChess.Domain.Shared.Abstractions;
 
 public abstract class AggregateRoot<TDomainEvent>
 {
-    public IReadOnlyCollection<TDomainEvent> DomainEvents => _domainEvents.AsReadOnly();
+    [JsonIgnore] public IReadOnlyCollection<TDomainEvent> DomainEvents => _domainEvents.AsReadOnly();
 
-    private readonly List<TDomainEvent> _domainEvents = [];
+    [JsonIgnore] private readonly List<TDomainEvent> _domainEvents = [];
 
     public void ClearDomainEvents() => _domainEvents.Clear();
     

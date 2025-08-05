@@ -19,6 +19,8 @@ public readonly partial struct SanMove
     }
 
     public static implicit operator string(SanMove move) => move._value;
+    
+    public override string ToString() => _value;
 
     [GeneratedRegex(@"^([NBRQK]?[a-h]?[1-8]?[x-]?[a-h][1-8](=[NBRQ]| ?e\.p\.)?|^O-O(?:-O)?)[+#$]?$")]
     private static partial Regex RegexForSan();

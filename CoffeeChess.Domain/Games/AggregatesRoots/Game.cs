@@ -233,6 +233,7 @@ public class Game : AggregateRoot<IDomainEvent>
         // TODO: also check if it's neither pawn nor promotion
         if (moveResult.MoveType is not MoveType.Capture)
         {
+            _positionsForThreefoldCount.TryAdd(_currentFen.PiecesPlacement, 0);
             _positionsForThreefoldCount[_currentFen.PiecesPlacement]++;
             if (_positionsForThreefoldCount[_currentFen.PiecesPlacement] == 3)
             {
