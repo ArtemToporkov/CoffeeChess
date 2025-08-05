@@ -37,7 +37,6 @@ public class RedisGameRepository(
     public async Task SaveChangesAsync(Game game, CancellationToken cancellationToken = default)
     {
         var serializedGame = JsonSerializer.Serialize(game, GameSerializationOptions);
-        Console.WriteLine(serializedGame);
         await _database.StringSetAsync($"{GameKeyPrefix}:{game.GameId}", serializedGame);
 
         using var scope = serviceProvider.CreateScope();

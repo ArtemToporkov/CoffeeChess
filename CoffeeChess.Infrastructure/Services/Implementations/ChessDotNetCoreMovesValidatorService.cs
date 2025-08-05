@@ -2,8 +2,6 @@
 using CoffeeChess.Domain.Games.Enums;
 using CoffeeChess.Domain.Games.Services.Interfaces;
 using CoffeeChess.Domain.Games.ValueObjects;
-using MoveKind = ChessDotNetCore.MoveType;
-using MoveType = CoffeeChess.Domain.Games.Enums.MoveType;
 
 namespace CoffeeChess.Infrastructure.Services.Implementations;
 
@@ -19,10 +17,11 @@ public class ChessDotNetCoreMovesValidatorService : IChessMovesValidator
         var move = new Move(from, to, player, promotionChar);
         var moveKind = game.MakeMove(move, false);
 
-        if (moveKind is MoveKind.Invalid)
+        if (moveKind is MoveType.Invalid)
             return new MoveResult { Valid = false };
 
-        var moveType = ParseMoveKind(moveKind);
+        var isCaptureOrPawnMove = game.LastMove!.CapturedPiece is not null ||
+                                  game.LastMove!.Piece.GetFenCharacter() is 'p' or 'P';
         var san = new SanMove(game.LastMove!.SAN);
         var fenAfterMove = new Fen(game.GetFen());
         var moveResultType = MoveResultType.None;
@@ -36,23 +35,10 @@ public class ChessDotNetCoreMovesValidatorService : IChessMovesValidator
             Valid = true,
             San = san,
             FenAfterMove = fenAfterMove,
-            MoveType = moveType,
+            IsCaptureOrPawnMove = isCaptureOrPawnMove,
             MoveResultType = moveResultType,
         };
     }
-
-    private static MoveType ParseMoveKind(MoveKind moveKind)
-        => moveKind switch
-        {
-            MoveKind.Capture => MoveType.Capture,
-            MoveKind.Move => MoveType.Move,
-            MoveKind.Castling => MoveType.Castling,
-            MoveKind.Promotion => MoveType.Promotion,
-            MoveKind.EnPassant => MoveType.EnPassant,
-            _ => throw new ArgumentOutOfRangeException(
-                nameof(moveKind), moveKind, 
-                "Unexpected ChessDotNetCore.MoveType argument to parse to CoffeeChess.MoveType.")
-        };
 
     private static char? ConvertPromotionToChar(Promotion? promotion)
      => promotion switch

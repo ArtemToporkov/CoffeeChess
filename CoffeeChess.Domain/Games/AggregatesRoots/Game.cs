@@ -1,5 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 using CoffeeChess.Domain.Games.Enums;
 using CoffeeChess.Domain.Games.Events;
 using CoffeeChess.Domain.Games.Exceptions;
@@ -8,7 +7,6 @@ using CoffeeChess.Domain.Games.ValueObjects;
 using CoffeeChess.Domain.Shared.Abstractions;
 using CoffeeChess.Domain.Shared.Interfaces;
 using GameResult = CoffeeChess.Domain.Games.Enums.GameResult;
-using MoveType = CoffeeChess.Domain.Games.Enums.MoveType;
 
 namespace CoffeeChess.Domain.Games.AggregatesRoots;
 
@@ -230,8 +228,7 @@ public class Game : AggregateRoot<IDomainEvent>
     
     private bool CheckAndPublishThreefold(MoveResult moveResult)
     {
-        // TODO: also check if it's neither pawn nor promotion
-        if (moveResult.MoveType is not MoveType.Capture)
+        if (!moveResult.IsCaptureOrPawnMove!.Value)
         {
             _positionsForThreefoldCount.TryAdd(_currentFen.PiecesPlacement, 0);
             _positionsForThreefoldCount[_currentFen.PiecesPlacement]++;
