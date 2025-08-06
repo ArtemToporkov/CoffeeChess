@@ -89,6 +89,10 @@ app.MapControllerRoute(
         name: "game",
         pattern: "{controller=Game}/{action=Play}/{id?}")
     .WithStaticAssets();
+app.MapControllerRoute(
+        name: "game",
+        pattern: "{controller=GamesHistory}/{action=Review}/{gameId?}")
+    .WithStaticAssets();
 
 app.MapHub<GameHub>("/gameHub");
 

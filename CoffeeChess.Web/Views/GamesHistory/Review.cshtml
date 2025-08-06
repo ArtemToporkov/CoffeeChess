@@ -1,0 +1,9 @@
+﻿@using System.Security.Claims
+@model CoffeeChess.Application.Games.ReadModels.CompletedGameReadModel
+@{
+    var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+    var isWhite = Model.WhitePlayerId == userId;
+    ViewBag.Title = isWhite ? $"Review vs. {Model.BlackPlayerName}" : $"Review vs. {Model.WhitePlayerName}";
+}
+
+@await Html.PartialAsync("_Review", Model);

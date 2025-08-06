@@ -9,7 +9,7 @@ public class SendChatMessageCommandHandler(IChatRepository chatRepository) : IRe
     public async Task Handle(SendChatMessageCommand request, CancellationToken cancellationToken)
     {
         var chat = await chatRepository.GetByIdAsync(request.GameId, cancellationToken) 
-                   ?? throw new NotFoundException($"Chat of game with id {request.GameId} was not found.");
+                   ?? throw new NotFoundException($"Chat of game with ID {request.GameId} was not found.");
         chat.AddMessage(request.Username, request.Message);
         await chatRepository.SaveChangesAsync(chat, cancellationToken);
     }
