@@ -8,8 +8,11 @@ namespace CoffeeChess.Infrastructure.Repositories.Implementations;
 
 public class SqlCompletedGameRepository(ApplicationDbContext dbContext) : ICompletedGameRepository
 {
-    public async Task AddAsync(CompletedGameReadModel game)
-        => await dbContext.CompletedGames.AddAsync(game);
+    public async Task AddAsync(CompletedGameReadModel game, CancellationToken cancellationToken = default)
+    {
+        await dbContext.CompletedGames.AddAsync(game, cancellationToken);
+        await dbContext.SaveChangesAsync(cancellationToken);
+    }
         
     public async Task<CompletedGameReadModel?> GetCompletedGameByIdAsync(string gameId, 
         CancellationToken cancellationToken = default)

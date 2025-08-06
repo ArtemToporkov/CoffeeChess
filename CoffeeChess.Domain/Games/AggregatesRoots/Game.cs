@@ -16,11 +16,13 @@ public class Game : AggregateRoot<IDomainEvent>
     public string WhitePlayerId { get; init; } = null!;
     public string BlackPlayerId { get; init; } = null!;
     public bool IsOver { get; private set; }
+    public TimeSpan InitialTimeForOnePlayer { get; init; }
+    public TimeSpan Increment { get; init; }
+    public DateTime LastTimeUpdate { get; private set; }
+    public IReadOnlyList<SanMove> SanMovesHistory => _sanMovesHistory.AsReadOnly();
 
     private TimeSpan _whiteTimeLeft;
     private TimeSpan _blackTimeLeft;
-    private TimeSpan _increment;
-    private DateTime _lastTimeUpdate;
     private PlayerColor _currentPlayerColor;
     private PlayerColor? _playerWithDrawOffer;
     private Fen _currentFen;
@@ -35,12 +37,14 @@ public class Game : AggregateRoot<IDomainEvent>
         GameId = gameId;
         WhitePlayerId = whitePlayerId;
         BlackPlayerId = blackPlayerId;
-        _whiteTimeLeft = minutesLeftForPlayer;
-        _blackTimeLeft = minutesLeftForPlayer;
-        _increment = increment;
-        _lastTimeUpdate = DateTime.UtcNow;
-        _currentPlayerColor = PlayerColor.White;
         IsOver = false;
+        InitialTimeForOnePlayer = minutesLeftForPlayer;
+        Increment = increment;
+        LastTimeUpdate = DateTime.UtcNow;
+        
+        _whiteTimeLeft = InitialTimeForOnePlayer;
+        _blackTimeLeft = InitialTimeForOnePlayer;
+        _currentPlayerColor = PlayerColor.White;
         _positionsForThreefoldCount = new();
         _sanMovesHistory = new();
         _currentFen = new Fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
@@ -116,8 +120,7 @@ public class Game : AggregateRoot<IDomainEvent>
         var (result, reason) = isWhite
             ? (GameResult.BlackWon, GameResultReason.WhiteResigns)
             : (GameResult.WhiteWon, GameResultReason.BlackResigns);
-        AddDomainEvent(new GameResultUpdated(WhitePlayerId, BlackPlayerId, result, reason));
-        IsOver = true;
+        EndGameAndPublish(result, reason);
     }
 
     public void CheckTimeout()
@@ -138,8 +141,8 @@ public class Game : AggregateRoot<IDomainEvent>
 
     private void ReduceTime()
     {
-        var deltaTime = DateTime.UtcNow - _lastTimeUpdate;
-        _lastTimeUpdate = DateTime.UtcNow;
+        var deltaTime = DateTime.UtcNow - LastTimeUpdate;
+        LastTimeUpdate = DateTime.UtcNow;
         if (_currentPlayerColor is PlayerColor.White)
             _whiteTimeLeft -= deltaTime;
         else
@@ -220,7 +223,7 @@ public class Game : AggregateRoot<IDomainEvent>
 
     private void EndGameAndPublish(GameResult result, GameResultReason reason)
     {
-        AddDomainEvent(new GameResultUpdated(WhitePlayerId, BlackPlayerId, result, reason));
+        AddDomainEvent(new GameResultUpdated(GameId, WhitePlayerId, BlackPlayerId, result, reason));
         IsOver = true;
     }
     
@@ -254,9 +257,9 @@ public class Game : AggregateRoot<IDomainEvent>
     private void DoIncrement()
     {
         if (_currentPlayerColor is PlayerColor.White)
-            _whiteTimeLeft += _increment;
+            _whiteTimeLeft += Increment;
         else
-            _blackTimeLeft += _increment;
+            _blackTimeLeft += Increment;
     }
 
     private PlayerColor GetColorById(string playerId)

@@ -43,7 +43,6 @@ public class RedisGameRepository(
     public async Task SaveChangesAsync(Game game, CancellationToken cancellationToken = default)
     {
         var serializedGame = JsonSerializer.Serialize(game, GameSerializationOptions);
-        Console.WriteLine(serializedGame);
         await _database.StringSetAsync($"{GameKeyPrefix}:{game.GameId}", serializedGame);
 
         using var scope = serviceProvider.CreateScope();
@@ -74,10 +73,18 @@ public class RedisGameRepository(
                 jsonTypeInfo.Properties.Add(fieldInfo);
             }
 
-            var domainEventsProp = jsonTypeInfo.Properties
-                .FirstOrDefault(p => p.Name == nameof(AggregateRoot<IDomainEvent>.DomainEvents));
-            if (domainEventsProp is not null)
-                jsonTypeInfo.Properties.Remove(domainEventsProp);
+            foreach (var prop in typeof(Game).GetProperties(
+                         BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance))
+            {
+                var propInfo = jsonTypeInfo.Properties.FirstOrDefault(p => p.Name == prop.Name);
+                if (propInfo is null) continue;
+                propInfo.Set = prop.SetValue;
+            }
+
+            var propsToHide = jsonTypeInfo.Properties
+                .Where(p => p.Name is nameof(Game.DomainEvents) or nameof(Game.SanMovesHistory))
+                .ToList();
+            propsToHide.ForEach(p => jsonTypeInfo.Properties.Remove(p));
             jsonTypeInfo.CreateObject = () =>
             {
                 var game = (Game)RuntimeHelpers.GetUninitializedObject(typeof(Game));

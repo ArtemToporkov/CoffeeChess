@@ -2,7 +2,7 @@
 
 namespace CoffeeChess.Domain.Games.ValueObjects;
 
-public readonly partial struct SanMove
+public readonly partial record struct SanMove
 {
     private readonly string _value;
     private static readonly Regex SanRegex = RegexForSan();

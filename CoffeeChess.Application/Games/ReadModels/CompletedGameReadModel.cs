@@ -1,4 +1,5 @@
 ﻿using CoffeeChess.Domain.Games.Enums;
+using CoffeeChess.Domain.Games.ValueObjects;
 
 namespace CoffeeChess.Application.Games.ReadModels;
 
@@ -21,4 +22,6 @@ public class CompletedGameReadModel
     
     public GameResult GameResult { get; init; }
     public DateTime PlayedDate { get; init; }
+    
+    public List<SanMove> SanMovesHistory { get; init; }
 }

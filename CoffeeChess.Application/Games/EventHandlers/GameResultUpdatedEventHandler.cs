@@ -1,7 +1,11 @@
-﻿using CoffeeChess.Application.Games.Services.Interfaces;
+﻿using CoffeeChess.Application.Games.ReadModels;
+using CoffeeChess.Application.Games.Repositories.Interfaces;
+using CoffeeChess.Application.Games.Services.Interfaces;
 using CoffeeChess.Application.Shared.Exceptions;
+using CoffeeChess.Domain.Games.AggregatesRoots;
 using CoffeeChess.Domain.Games.Enums;
 using CoffeeChess.Domain.Games.Events;
+using CoffeeChess.Domain.Games.Repositories.Interfaces;
 using CoffeeChess.Domain.Players.AggregatesRoots;
 using CoffeeChess.Domain.Players.Exceptions;
 using CoffeeChess.Domain.Players.Repositories.Interfaces;
@@ -11,6 +15,8 @@ using MediatR;
 namespace CoffeeChess.Application.Games.EventHandlers;
 
 public class GameResultUpdatedEventHandler(
+    IGameRepository gameRepository,
+    ICompletedGameRepository completedGameRepository,
     IRatingService ratingService,
     IPlayerRepository playerRepository,
     IGameEventNotifierService notifier) : INotificationHandler<GameResultUpdated>
@@ -30,10 +36,44 @@ public class GameResultUpdatedEventHandler(
         await UpdateRatingAndSave(white.Id, newWhiteRating, cancellationToken);
         await UpdateRatingAndSave(black.Id, newBlackRating, cancellationToken);
 
+        var game = await gameRepository.GetByIdAsync(notification.GameId, cancellationToken) 
+                   ?? throw new NotFoundException(nameof(Game), notification.GameId);
+        await SaveCompletedGameAsync(
+            game, white, black, newWhiteRating, newBlackRating, notification.GameResult, cancellationToken);
+        
+
         var (whiteReason, blackReason) = GetMessageByGameResultReason(
             notification.GameResultReason, white.Name, black.Name);
         await notifier.NotifyGameResultUpdated(white, black, notification.GameResult,
             whiteReason, blackReason, cancellationToken);
+    }
+
+    private async Task SaveCompletedGameAsync(
+        Game game, Player white, Player black, int whiteNewRating, int blackNewRating, GameResult gameResult, 
+        CancellationToken cancellationToken = default)
+    {
+        var completedGame = new CompletedGameReadModel
+        {
+            GameId = game.GameId,
+            
+            WhitePlayerId = white.Id,
+            WhitePlayerName = white.Name,
+            WhitePlayerRating = white.Rating,
+            WhitePlayerNewRating = whiteNewRating,
+            
+            BlackPlayerId = black.Id,
+            BlackPlayerName = black.Name,
+            BlackPlayerRating = black.Rating,
+            BlackPlayerNewRating = blackNewRating,
+            
+            Minutes = (int)game.InitialTimeForOnePlayer.TotalMinutes,
+            Increment = (int)game.Increment.TotalSeconds,
+            GameResult = gameResult,
+            PlayedDate = game.LastTimeUpdate,
+            SanMovesHistory = game.SanMovesHistory.ToList()
+        };
+
+        await completedGameRepository.AddAsync(completedGame, cancellationToken);
     }
 
     private async Task UpdateRatingAndSave(string playerId, int newRating,

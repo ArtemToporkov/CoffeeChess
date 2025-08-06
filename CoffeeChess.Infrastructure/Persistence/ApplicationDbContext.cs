@@ -1,8 +1,11 @@
-﻿using CoffeeChess.Application.Games.ReadModels;
+﻿using System.Linq.Expressions;
+using CoffeeChess.Application.Games.ReadModels;
+using CoffeeChess.Domain.Games.ValueObjects;
 using CoffeeChess.Domain.Players.AggregatesRoots;
 using CoffeeChess.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace CoffeeChess.Infrastructure.Persistence;
 
@@ -29,6 +32,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
                 .WithOne()
                 .HasForeignKey<Player>(p => p.Id);
         });
+        
         builder.Entity<CompletedGameReadModel>(entity =>
         {
             entity.HasKey(g => g.GameId);
@@ -44,6 +48,16 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
                 .WithMany()
                 .HasForeignKey(g => g.BlackPlayerId)
                 .OnDelete(DeleteBehavior.Restrict);
+            entity.Property(g => g.SanMovesHistory)
+                .HasConversion(
+                    history => history.Select(move => move.ToString()).ToList(),
+                    stringHistory => stringHistory.Select(s => new SanMove(s)).ToList())
+                .Metadata.SetValueComparer(new ValueComparer<List<SanMove>>(
+                    (firstList, secondList) 
+                        => (firstList == null && secondList == null) 
+                           || (firstList != null && secondList != null && firstList.SequenceEqual(secondList)),
+                    list => list.Aggregate(0, (hash, move) => HashCode.Combine(hash, move.GetHashCode())),
+                    list => list.ToList()));
         });
     }
 }
