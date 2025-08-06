@@ -1,9 +1,9 @@
-﻿@using System.Security.Claims
-@model CoffeeChess.Application.Games.ReadModels.CompletedGameReadModel
-@{
-    var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-    var isWhite = Model.WhitePlayerId == userId;
-    ViewBag.Title = isWhite ? $"Review vs. {Model.BlackPlayerName}" : $"Review vs. {Model.WhitePlayerName}";
+﻿@{
+    ViewBag.Title = "Game Review";
 }
 
-@await Html.PartialAsync("_Review", Model);
+@await Html.PartialAsync("_Review");
+@section Scripts
+{
+    <script type="module" src="~/js/games-history/review.js"></script>
+}

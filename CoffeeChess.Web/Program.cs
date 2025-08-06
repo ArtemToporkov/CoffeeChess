@@ -44,7 +44,8 @@ builder.Services.AddIdentity<UserModel, IdentityRole>(options =>
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
 
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews()
+    .AddJsonOptions(opts => opts.JsonSerializerOptions.Converters.Add(new SanMoveConverter()));
 builder.Services.AddSignalR(cfg => cfg.EnableDetailedErrors = true);
 builder.Services.AddMediatR(cfg => cfg
     .RegisterServicesFromAssembly(typeof(DrawOfferDeclinedEventHandler).Assembly));
@@ -91,7 +92,7 @@ app.MapControllerRoute(
     .WithStaticAssets();
 app.MapControllerRoute(
         name: "game",
-        pattern: "{controller=GamesHistory}/{action=Review}/{gameId?}")
+        pattern: "{controller=GamesHistory}/{action=Review}/{gameId}")
     .WithStaticAssets();
 
 app.MapHub<GameHub>("/gameHub");

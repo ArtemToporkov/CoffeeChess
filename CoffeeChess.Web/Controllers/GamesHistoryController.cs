@@ -16,20 +16,25 @@ public class GamesHistoryController(IMediator mediator) : Controller
         return View("GamesHistory");
     }
 
-    public async Task<IActionResult> Review(string gameId, CancellationToken cancellationToken)
+    public IActionResult Review(string gameId, CancellationToken cancellationToken)
     {
-        // NOTE: for testing
-        gameId = "7ed025c3"; // TODO: remove
+        if (Request.Headers.XRequestedWith == "XMLHttpRequest")
+        {
+            return PartialView("_Review");
+        }
+
+        return View("Review");
+    }
+
+    [HttpGet("/GamesHistory/GetGame/{gameId}")]
+    public async Task <IActionResult> GetGame(string gameId, CancellationToken cancellationToken)
+    {
         try
         {
             var query = new GetCompletedGameQuery(gameId);
             var game = await mediator.Send(query, cancellationToken);
-            if (Request.Headers.XRequestedWith == "XMLHttpRequest")
-            {
-                return PartialView("_Review", game);
-            }
-
-            return View("Review", game);
+            ViewBag.Title = $"Review vs. {game.WhitePlayerName}";
+            return Json(game);
         }
         catch (Exception ex)
         {
