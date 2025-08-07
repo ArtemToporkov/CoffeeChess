@@ -67,8 +67,8 @@ export function updateGameResult(isWhite, result, reason) {
     $('#resultInfo')
         .text(reason)
         .addClass(fontButtonsColorClass);
-    $('.result-ratings-title').addClass(fontButtonsColorClass);
-    $('.result-rating').addClass(fontButtonsColorClass);
+    $('.result-info-title').addClass(fontButtonsColorClass);
+    $('.result-info').addClass(fontButtonsColorClass);
     $('.result-button').addClass(fontButtonsColorClass);
 }
 

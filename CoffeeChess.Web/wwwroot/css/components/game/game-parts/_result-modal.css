@@ -19,6 +19,10 @@
     animation: open 0.3s ease;
 }
 
+.result-panel.review {
+    height: 320px;
+}
+
 .result-panel.milk {
     background-color: var(--milk-coffee);
     border-radius: 50px;
@@ -112,38 +116,47 @@
 }
 
 .result-info.milk,
-.result-ratings-title.milk,
-.result-rating.milk {
+.result-info-title.milk,
+.result-info.milk {
     color: var(--milk-coffee);
 }
 
 .result-info.dark,
-.result-ratings-title.dark,
-.result-rating.dark {
+.result-info-title.dark,
+.result-info.dark {
     color: var(--dark-coffee);
 }
 
-.result-ratings {
+.result-info-sections {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.result-info-section {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 15px;
-    transform: translateY(-45%);
+    gap: 5px;
 }
 
-.result-ratings-title,
-.result-rating {
+.result-info-section.rating-section {
+    margin-bottom: 17px;
+}
+
+.result-info-title,
+.result-info {
     font-size: 15px;
     margin: 0;
     text-align: center;
 }
 
-.result-rating {
+.result-info {
     font-family: 'Montserrat', sans-serif;
 }
 
-.result-ratings-title {
+.result-info-title {
     font-family: 'Caprasimo', sans-serif;
 }
 

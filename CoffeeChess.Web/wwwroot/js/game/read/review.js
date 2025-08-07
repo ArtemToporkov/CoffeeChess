@@ -1,7 +1,8 @@
-﻿import { HistoryManager } from "../game/managers/HistoryManager.js";
-import { GameResult } from "../game/enums/GameResult.js";
-import { GameRole } from "./enums/GameRole.js"
-import { GameResultReason } from "./enums/GameResultReason.js";
+﻿import { HistoryManager } from "../managers/HistoryManager.js";
+import { GameResult } from "../enums/GameResult.js";
+import { GameRole } from "../enums/GameRole.js"
+import { GameResultReason } from "../enums/GameResultReason.js";
+import { playRatingsChangeAnimation } from "../ui.js";
 
 ($(document).ready(async () => {
     const pathParts = window.location.pathname.split('/');
@@ -23,7 +24,7 @@ import { GameResultReason } from "./enums/GameResultReason.js";
     }
     setDocumentTitle(gameRole, game);
     setUiForGame(gameRole, game);
-    $('#resultInfoButton').on('click', onResultInfoButtonPressed);
+    $('#resultInfoButton').on('click', () => onResultInfoButtonPressed(gameRole, game));
 }));
 
 function setDocumentTitle(gameRole, game) {
@@ -98,9 +99,13 @@ function getConfig() {
     };
 }
 
-function onResultInfoButtonPressed() {
+function onResultInfoButtonPressed(gameRole, game) {
     $('#modalOverlay').addClass('show');
     $('#resultPanel').css('display', 'flex');
+    const [oldRating, newRating] = gameRole === GameRole.White
+        ? [game.whitePlayerRating, game.whitePlayerNewRating]
+        : [game.blackPlayerRating, game.blackPlayerNewRating];
+    playRatingsChangeAnimation(oldRating, newRating);
 }
 
 function setResultInfo(gameRole, game) {
@@ -114,11 +119,11 @@ function setResultInfo(gameRole, game) {
     $('#resultInfo')
         .text(getGameResultReasonText(gameRole, game))
         .addClass(fontButtonsColorClass);
-    $('.result-ratings-title').addClass(fontButtonsColorClass);
-    $('.result-rating').addClass(fontButtonsColorClass);
+    $('.result-info-title').addClass(fontButtonsColorClass);
+    $('.result-info').addClass(fontButtonsColorClass);
     $('.result-button').addClass(fontButtonsColorClass);
     $('#timeControl').text(`${game.minutes}+${game.increment}`);
-    $('#playedAt').text(`${game.playedDate}`);
+    $('#playedAt').text(`${getDate(game)}`);
 }
 
 function getClassesForResultPanel(gameRole, game) {
@@ -174,4 +179,17 @@ function getGameResultReasonText(gameRole, game) {
     return game.gameResultReason === GameResultReason.OpponentTimeRanOut
         ? "your time is up."
         : "you resigned.";
+}
+
+function getDate(game) {
+    return new Date(game.playedDate)
+        .toLocaleString("ru-RU", {
+            day:    "2-digit",
+            month:  "2-digit",
+            year:   "numeric",
+            hour:   "2-digit",
+            minute: "2-digit",
+            hour12: false,
+            timeZone: "UTC"
+        });
 }

@@ -83,25 +83,27 @@
 
 <div id="modalOverlay" class="modal-overlay"></div>
 
-<div id="resultPanel" class="result-panel">
+<div id="resultPanel" class="result-panel review">
     <div class="result-detailed">
         <p id="resultTitle" class="result-title"></p>
         <p id="resultInfo" class="result-info"></p>
     </div>
-    <div class="result-ratings">
-        <p class="result-ratings-title">New rating:</p>
-        <div class="result-ratings-info">
-            <p id="oldRating" class="result-rating"></p>
-            <p id="ratingDelta" class="result-rating"></p>
-            <p id="newRating" class="result-rating"></p>
+    <div class="result-info-sections">
+        <div class="result-info-section rating-section">
+            <p class="result-info-title">New rating:</p>
+            <div class="result-ratings-info">
+                <p id="oldRating" class="result-info"></p>
+                <p id="ratingDelta" class="result-info"></p>
+                <p id="newRating" class="result-info"></p>
+            </div>
         </div>
-    </div>
-    <div class="result-info-section">
-        <p class="result-ratings-title">Time control:</p>
-        <p class="result-rating" id="timeControl"></p>
-    </div>
-    <div class="result-info-section">
-        <p class="result-ratings-title">Played at:</p>
-        <p class="result-rating" id="playedAt"></p>
+        <div class="result-info-section">
+            <p class="result-info-title">Time control:</p>
+            <p class="result-info" id="timeControl"></p>
+        </div>
+        <div class="result-info-section">
+            <p class="result-info-title">Played at:</p>
+            <p class="result-info" id="playedAt"></p>
+        </div>
     </div>
 </div>
