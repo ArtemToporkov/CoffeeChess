@@ -1,1 +1,107 @@
-﻿<p id="gameId"></p>
+﻿@using CoffeeChess.Infrastructure.Identity
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<UserModel> SignInManager
+@inject UserManager<UserModel> UserManager
+
+<div class="game-left-panel">
+    <div class="music-player-panel">
+
+    </div>
+    <div class="chat-panel">
+        <p class="chat-title">Chat</p>
+        <div id="chatMessages">
+            <div class="chat-message">
+                <span class="chat-message-sender">Coffee shop:</span>
+                <span class="chat-message-text">Game will start in 3... 2... 1... Play!</span>
+            </div>
+        </div>
+        <input type="text" id="chatInput" placeholder="Type something..."/>
+    </div>
+</div>
+<div class="game-middle-panel">
+    <div class="player-info">
+        <div class="player-avatar">
+            <img src="/img/empty-avatar-icon.png" alt="Avatar"/>
+        </div>
+        <div class="player-nick-and-rating">
+            <span class="player-nick" id="blackUsername">?</span>
+            <span class="player-rating" id="blackRating">?</span>
+        </div>
+        <div class="info-container">
+            <span class="info" id="blackTimeLeft">
+                04:54
+            </span>
+        </div>
+        <div class="info-container">
+            <span class="info" id="blackPoints">
+                ?
+            </span>
+        </div>
+    </div>
+    <div class="game-board-container">
+        <div id="reviewBoard"></div>
+    </div>
+    <div class="player-info">
+        <div class="player-avatar">
+            <img src="/img/empty-avatar-icon.png" alt="Avatar"/>
+        </div>
+        <div class="player-nick-and-rating">
+            <span class="player-nick" id="whiteUsername">?</span>
+            <span class="player-rating" id="whiteRating">?</span>
+        </div>
+        <div class="info-container">
+            <span class="info" id="whiteTimeLeft">
+                02:03
+            </span>
+        </div>
+        <div class="info-container">
+            <span class="info" id="whitePoints">
+                ?
+            </span>
+        </div>
+    </div>
+</div>
+
+<div class="game-right-panel">
+    <div class="moves-history">
+        <p class="history-title">Moves</p>
+        <div class="history" id="history">
+            <div class="history-subtitles">
+                <div class="history-subtitle-number">№.</div>
+                <div class="history-subtitle">White</div>
+                <div class="history-subtitle">Black</div>
+            </div>
+        </div>
+        <div class="resign-draw-info">
+            <div id="resignDrawButtonsContainer" class="resign-draw-buttons">
+                <button id="drawOfferButton" class="resign-draw-button">Result info</button>
+                <button id="resignButton" class="resign-draw-button">Share PGN</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="modalOverlay" class="modal-overlay"></div>
+
+<div id="resultPanel" class="result-panel">
+    <div class="result-detailed">
+        <p id="resultTitle" class="result-title"></p>
+        <p id="resultInfo" class="result-info"></p>
+    </div>
+    <div class="result-ratings">
+        <p class="result-ratings-title">New rating:</p>
+        <div class="result-ratings-info">
+            <p id="oldRating" class="result-rating"></p>
+            <p id="ratingDelta" class="result-rating"></p>
+            <p id="newRating" class="result-rating"></p>
+        </div>
+    </div>
+    <div class="result-info-section">
+        <p class="result-info-title">Time control:</p>
+        <p class="result-info" id="timeControl"></p>
+    </div>
+    <div class="result-info-section">
+        <p class="result-info-title">Played at:</p>
+        <p class="result-info" id="playedAt"></p>
+    </div>
+</div>

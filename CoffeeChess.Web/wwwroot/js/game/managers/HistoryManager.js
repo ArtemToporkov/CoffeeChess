@@ -2,10 +2,12 @@
 
 export class HistoryManager {
     currentPly;
+    #boardName;
     #movesHistory;
     #viewHistory;
     
-    constructor(viewHistoryCallback, fromFen="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq — 0 1") {
+    constructor(boardName, viewHistoryCallback, fromFen="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq — 0 1") {
+        this.#boardName = boardName;
         this.#bindArrowKeys();
         this.#viewHistory = viewHistoryCallback;
         this.currentPly = 0;
@@ -54,7 +56,7 @@ export class HistoryManager {
     }
     
     #moveToPlyAndHighlight(ply) {
-        $('#myBoard .piece-417db, body > img.piece-417db').stop(true, true);
+        $(`#${this.#boardName} .piece-417db, body > img.piece-417db`).stop(true, true);
         $('.history-selected').removeClass('history-selected');
         this.#viewHistory(this.#movesHistory[ply].fen);
         this.currentPly = ply;
