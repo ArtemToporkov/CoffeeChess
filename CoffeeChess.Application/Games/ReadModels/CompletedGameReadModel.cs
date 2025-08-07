@@ -21,6 +21,7 @@ public class CompletedGameReadModel
     public int Increment { get; init; }
     
     public GameResult GameResult { get; init; }
+    public GameResultReason GameResultReason { get; init; }
     public DateTime PlayedDate { get; init; }
     
     public List<SanMove> SanMovesHistory { get; init; }
