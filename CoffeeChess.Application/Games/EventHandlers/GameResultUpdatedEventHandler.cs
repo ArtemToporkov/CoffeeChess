@@ -42,7 +42,7 @@ public class GameResultUpdatedEventHandler(
             game, white, black, newWhiteRating, newBlackRating, notification.GameResult, cancellationToken);
         
 
-        var (whiteReason, blackReason) = GetMessageByGameResultReason(
+        var (whiteReason, blackReason) = GetMessageByGameResultReason(notification.GameResult,
             notification.GameResultReason, white.Name, black.Name);
         await notifier.NotifyGameResultUpdated(white, black, notification.GameResult,
             whiteReason, blackReason, cancellationToken);
@@ -85,20 +85,26 @@ public class GameResultUpdatedEventHandler(
         await playerRepository.SaveChangesAsync(player, cancellationToken);
     }
 
-    private static (string WhiteReason, string BlackReason) GetMessageByGameResultReason(
-        GameResultReason reason, string whiteName, string blackName)
-        => reason switch
+    private static (string WhiteReason, string BlackReason) GetMessageByGameResultReason(GameResult result,
+        GameResultReason reason, string whiteName, string blackName) 
+    {
+        return reason switch
         {
-            GameResultReason.WhiteResigns => ("you resigned.", $"{whiteName} resigned."),
-            GameResultReason.BlackResigns => ($"{blackName} resigned.", "you resigned."),
-            GameResultReason.WhiteTimeRanOut => ("your time is run up.", $"{whiteName}'s time is run up."),
-            GameResultReason.BlackTimeRanOut => ($"{blackName}'s time is run up.", "your time is run up."),
-            GameResultReason.WhiteCheckmates or
-                GameResultReason.BlackCheckmates => ("checkmate.", "checkmate."),
+            GameResultReason.OpponentResigned when result is GameResult.BlackWon 
+                => ("you resigned.", $"{whiteName} resigned."),
+            GameResultReason.OpponentResigned when result is GameResult.WhiteWon 
+                => ($"{blackName} resigned.", "you resigned."),
+            GameResultReason.OpponentTimeRanOut when result is GameResult.BlackWon
+                => ("your time is run up.", $"{whiteName}'s time is run up."),
+            GameResultReason.OpponentTimeRanOut when result is GameResult.WhiteWon
+                => ($"{blackName}'s time is run up.", "your time is run up."),
+            GameResultReason.Checkmate => ("checkmate.", "checkmate."),
             GameResultReason.Agreement => ("by agreement.", "by agreement."),
             GameResultReason.Stalemate => ("stalemate.", "stalemate."),
             GameResultReason.Threefold => ("by threefold.", "by threefold."),
             GameResultReason.FiftyMovesRule => ("by 50-moves rule.", "by 50-moves rule."),
-            _ => throw new ArgumentOutOfRangeException(nameof(reason), reason, "Unexpected game result reason.")
+            _ => throw new ArgumentException(
+                $"Invalid game result and its reason combination: {result.ToString()} + {reason.ToString()}")
         };
+    }
 }

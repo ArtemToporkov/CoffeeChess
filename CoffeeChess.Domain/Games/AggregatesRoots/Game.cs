@@ -117,10 +117,8 @@ public class Game : AggregateRoot<IDomainEvent>
     public void Resign(string playerId)
     {
         var isWhite = GetColorById(playerId) == PlayerColor.White;
-        var (result, reason) = isWhite
-            ? (GameResult.BlackWon, GameResultReason.WhiteResigns)
-            : (GameResult.WhiteWon, GameResultReason.BlackResigns);
-        EndGameAndPublish(result, reason);
+        var result = isWhite ? GameResult.BlackWon : GameResult.WhiteWon;
+        EndGameAndPublish(result, GameResultReason.OpponentResigned);
     }
 
     public void CheckTimeout()
@@ -153,11 +151,9 @@ public class Game : AggregateRoot<IDomainEvent>
     {
         if (moveResult.MoveResultType is not MoveResultType.Checkmate)
             return false;
-        
-        var (result, reason) = _currentPlayerColor == PlayerColor.White
-            ? (GameResult.WhiteWon, GameResultReason.WhiteCheckmates)
-            : (GameResult.BlackWon, GameResultReason.BlackCheckmates);
-        EndGameAndPublish(result, reason);
+
+        var result = _currentPlayerColor == PlayerColor.White ? GameResult.WhiteWon : GameResult.BlackWon;
+        EndGameAndPublish(result, GameResultReason.Checkmate);
         return true;
     }
     
@@ -188,7 +184,7 @@ public class Game : AggregateRoot<IDomainEvent>
             _whiteTimeLeft = TimeSpan.Zero;
             if (!string.IsNullOrEmpty(movingPlayerId))
                 AddDomainEvent(new MoveFailed(movingPlayerId, MoveFailedReason.TimeRanOut));
-            EndGameAndPublish(GameResult.BlackWon, GameResultReason.WhiteTimeRanOut);
+            EndGameAndPublish(GameResult.BlackWon, GameResultReason.OpponentTimeRanOut);
         }
         else
         {
@@ -197,7 +193,7 @@ public class Game : AggregateRoot<IDomainEvent>
             
             if (!string.IsNullOrEmpty(movingPlayerId))
                 AddDomainEvent(new MoveFailed(movingPlayerId, MoveFailedReason.TimeRanOut));
-            EndGameAndPublish(GameResult.WhiteWon, GameResultReason.BlackTimeRanOut);
+            EndGameAndPublish(GameResult.WhiteWon, GameResultReason.OpponentTimeRanOut);
             _blackTimeLeft = TimeSpan.Zero;
         }
         return true;

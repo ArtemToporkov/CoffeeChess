@@ -2,12 +2,9 @@
 
 public enum GameResultReason
 {
-    WhiteResigns,
-    BlackResigns,
-    WhiteTimeRanOut,
-    BlackTimeRanOut,
-    WhiteCheckmates,
-    BlackCheckmates,
+    OpponentResigned,
+    OpponentTimeRanOut,
+    Checkmate,
     Agreement,
     Stalemate,
     Threefold,

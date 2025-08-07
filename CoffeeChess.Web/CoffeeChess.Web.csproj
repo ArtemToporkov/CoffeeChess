@@ -55,6 +55,7 @@
       <_ContentIncludedByDefault Remove="wwwroot\lib\chess.js\chess.min.js" />
       <_ContentIncludedByDefault Remove="wwwroot\lib\chessboardjs\chessboard-1.0.0.css" />
       <_ContentIncludedByDefault Remove="wwwroot\lib\chessboardjs\chessboard-1.0.0.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\js\completed-games\review.js" />
     </ItemGroup>
 
     <ItemGroup>
