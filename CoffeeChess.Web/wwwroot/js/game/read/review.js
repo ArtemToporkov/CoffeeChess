@@ -2,7 +2,7 @@
 import { GameResult } from "../enums/GameResult.js";
 import { GameRole } from "../enums/GameRole.js"
 import { GameResultReason } from "../enums/GameResultReason.js";
-import { playRatingsChangeAnimation } from "../ui.js";
+import { closeResultPanel, playRatingsChangeAnimation } from "../ui.js";
 
 ($(document).ready(async () => {
     const pathParts = window.location.pathname.split('/');
@@ -25,6 +25,7 @@ import { playRatingsChangeAnimation } from "../ui.js";
     setDocumentTitle(gameRole, game);
     setUiForGame(gameRole, game);
     $('#resultInfoButton').on('click', () => onResultInfoButtonPressed(gameRole, game));
+    $('#closeButton').on('click', closeResultPanel);
 }));
 
 function setDocumentTitle(gameRole, game) {

@@ -21,7 +21,7 @@ export function loadUi(connection, gameManager, gameId) {
     
     bindEventsToResignButton(connection, gameId);
     bindEventsToDrawOfferButtons(connection, gameId);
-    bindEventsToAnalyzeButtons();
+    $('#analyzeButton').on('click', closeResultPanel);
 }
 
 export function receiveDrawOffer(connection, message) {
@@ -167,6 +167,15 @@ export function playRatingsChangeAnimation(oldRating, newRating) {
     }, delay * 4);
 }
 
+export function closeResultPanel() {
+    const $resultPanel = $('.result-panel');
+    $('#modalOverlay').removeClass('show');
+    $resultPanel.addClass('close').one('animationend', () => {
+        $resultPanel.removeClass('close');
+        $resultPanel.css('display', 'none');
+    });
+}
+
 function getResultTitle(isWhite, result) {
     if (result === GameResult.Draw)
         return 'Draw';
@@ -208,16 +217,5 @@ function bindEventsToDrawOfferButtons(connection, gameId) {
 
     $('#declineButton').on('click', () => {
         connection.invoke(GameHubMethods.PerformGameAction, gameId, GameActionType.DeclineDrawOffer);
-    });
-}
-
-function bindEventsToAnalyzeButtons() {
-    const $resultPanel = $('.result-panel');
-    $('#analyzeButton').on('click', () => {
-       $('#modalOverlay').removeClass('show');
-        $resultPanel.addClass('close').one('animationend', () => {
-           $resultPanel.removeClass('close');
-           $resultPanel.css('display', 'none');
-       });
     });
 }
