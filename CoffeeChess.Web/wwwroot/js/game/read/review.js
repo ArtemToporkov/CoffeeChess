@@ -22,6 +22,7 @@ import { closeResultPanel, playRatingsChangeAnimation } from "../ui.js";
     } else {
         gameRole = GameRole.Black;
     }
+    
     setDocumentTitle(gameRole, game);
     setUiForGame(gameRole, game);
     $('#resultInfoButton').on('click', () => onResultInfoButtonPressed(gameRole, game));
@@ -52,10 +53,13 @@ function setUiForGame(gameRole, game) {
         'reviewBoard', fen => board.position(fen)
     );
     
-    for (let el of game.sanMovesHistory) {
-        chess.move(el);
+    for (let sanMove of game.sanMovesHistory) {
+        const move = chess.move(sanMove);
+        if (move === null) {
+            console.error("Something went wrong while processing san moves history.");
+            break;
+        }
         const currentFen = chess.fen();
-        const move = { san: el };
         historyManager.update(move, currentFen);
     }
     
