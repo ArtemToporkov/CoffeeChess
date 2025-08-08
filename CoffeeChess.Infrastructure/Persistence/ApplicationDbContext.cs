@@ -1,8 +1,10 @@
 ﻿using System.Linq.Expressions;
+using System.Text.Json;
 using CoffeeChess.Application.Games.ReadModels;
 using CoffeeChess.Domain.Games.ValueObjects;
 using CoffeeChess.Domain.Players.AggregatesRoots;
 using CoffeeChess.Infrastructure.Identity;
+using CoffeeChess.Infrastructure.Serialization;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
@@ -48,16 +50,24 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
                 .WithMany()
                 .HasForeignKey(g => g.BlackPlayerId)
                 .OnDelete(DeleteBehavior.Restrict);
-            entity.Property(g => g.SanMovesHistory)
+            entity.Property(g => g.MovesHistory)
+                .HasColumnType("jsonb")
                 .HasConversion(
-                    history => history.Select(move => move.ToString()).ToList(),
-                    stringHistory => stringHistory.Select(s => new SanMove(s)).ToList())
-                .Metadata.SetValueComparer(new ValueComparer<List<SanMove>>(
-                    (firstList, secondList) 
-                        => (firstList == null && secondList == null) 
-                           || (firstList != null && secondList != null && firstList.SequenceEqual(secondList)),
-                    list => list.Aggregate(0, (hash, move) => HashCode.Combine(hash, move.GetHashCode())),
-                    list => list.ToList()));
+                    movesList => JsonSerializer.Serialize(movesList, new JsonSerializerOptions
+                    {
+                        Converters = { new SanConverter() }
+                    }),
+                    jsonMoves => JsonSerializer.Deserialize<List<MoveInfo>>(jsonMoves, new JsonSerializerOptions
+                    {
+                        Converters = { new SanConverter() }
+                    }) ?? new List<MoveInfo>())
+                .Metadata.SetValueComparer(new ValueComparer<List<MoveInfo>>(
+                    (f, s) => 
+                        ReferenceEquals(f, s) 
+                        || (f == null && s == null) 
+                        || (f != null && s != null && f.Count == s.Count && f.SequenceEqual(s)), 
+                    list => list.Aggregate(0, HashCode.Combine), 
+                    list => list));
         });
     }
 }

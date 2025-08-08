@@ -7,7 +7,7 @@ import { closeResultPanel, playRatingsChangeAnimation } from "../ui.js";
 ($(document).ready(async () => {
     const pathParts = window.location.pathname.split('/');
     // const gameId = pathParts[pathParts.length - 1];
-    const gameId = "7ed025c3";
+    const gameId = "65b79da8";
     console.log(gameId);
     const game = await $.ajax({
         url: `/GamesHistory/GetGame/${gameId}`,
@@ -53,8 +53,9 @@ function setUiForGame(gameRole, game) {
         'reviewBoard', fen => board.position(fen)
     );
     
-    for (let sanMove of game.sanMovesHistory) {
-        const move = chess.move(sanMove);
+    for (let moveInfo of game.movesHistory) {
+        const move = chess.move(moveInfo.san);
+        console.log(moveInfo.timeAfterMove)
         if (move === null) {
             console.error("Something went wrong while processing san moves history.");
             break;

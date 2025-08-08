@@ -22,7 +22,7 @@ public class ChessDotNetCoreMovesValidatorService : IChessMovesValidator
 
         var isCaptureOrPawnMove = game.LastMove!.CapturedPiece is not null ||
                                   game.LastMove!.Piece.GetFenCharacter() is 'p' or 'P';
-        var san = new SanMove(game.LastMove!.SAN);
+        var san = new San(game.LastMove!.SAN);
         var fenAfterMove = new Fen(game.GetFen());
         var moveResultType = MoveResultType.None;
         if (game.IsStalemated(Player.White) || game.IsStalemated(Player.Black))

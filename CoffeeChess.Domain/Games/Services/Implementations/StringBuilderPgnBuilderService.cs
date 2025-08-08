@@ -6,7 +6,7 @@ namespace CoffeeChess.Domain.Games.Services.Implementations;
 
 public class StringBuilderPgnBuilderService : IPgnBuilderService
 {
-    public string GetPgn(IReadOnlyCollection<SanMove> sanMovesHistory)
+    public string GetPgnWithMovesOnly(IReadOnlyCollection<San> sanMovesHistory)
     {
         var sb = new StringBuilder();
         var currentPly = 0;

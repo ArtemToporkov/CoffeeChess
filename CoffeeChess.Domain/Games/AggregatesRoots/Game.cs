@@ -19,7 +19,7 @@ public class Game : AggregateRoot<IDomainEvent>
     public TimeSpan InitialTimeForOnePlayer { get; init; }
     public TimeSpan Increment { get; init; }
     public DateTime LastTimeUpdate { get; private set; }
-    public IReadOnlyList<SanMove> SanMovesHistory => _sanMovesHistory.AsReadOnly();
+    public IReadOnlyList<MoveInfo> MovesHistory => _movesHistory.AsReadOnly();
 
     private TimeSpan _whiteTimeLeft;
     private TimeSpan _blackTimeLeft;
@@ -27,7 +27,7 @@ public class Game : AggregateRoot<IDomainEvent>
     private PlayerColor? _playerWithDrawOffer;
     private Fen _currentFen;
     private Dictionary<string, int> _positionsForThreefoldCount = null!;
-    private List<SanMove> _sanMovesHistory = null!;
+    private List<MoveInfo> _movesHistory = null!;
 
     public Game(
         string gameId,
@@ -46,7 +46,7 @@ public class Game : AggregateRoot<IDomainEvent>
         _blackTimeLeft = InitialTimeForOnePlayer;
         _currentPlayerColor = PlayerColor.White;
         _positionsForThreefoldCount = new();
-        _sanMovesHistory = new();
+        _movesHistory = new();
         _currentFen = new Fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
         AddDomainEvent(new GameStarted(
             GameId, WhitePlayerId, BlackPlayerId, (int)_whiteTimeLeft.TotalMilliseconds));
@@ -66,8 +66,8 @@ public class Game : AggregateRoot<IDomainEvent>
 
         if (CheckAndPublishTimeout(movingPlayerId: playerId)) return;
         
-        UpdateAndPublishAfterSuccessMove(moveResult);
         DoIncrement();
+        UpdateAndPublishAfterSuccessMove(moveResult);
 
         if (CheckAndPublishCheckmate(moveResult)) return;
         if (CheckAndPublishStalemate(moveResult)) return;
@@ -201,10 +201,11 @@ public class Game : AggregateRoot<IDomainEvent>
 
     private void UpdateAndPublishAfterSuccessMove(MoveResult moveResult)
     {
-        _sanMovesHistory.Add(moveResult.San!.Value);
+        var timeAfterMove = _currentPlayerColor == PlayerColor.White ? _whiteTimeLeft : _blackTimeLeft;
+        _movesHistory.Add(new(moveResult.San!.Value, timeAfterMove));
         _currentFen = moveResult.FenAfterMove!.Value;
         AddDomainEvent(new MoveMade(WhitePlayerId, BlackPlayerId,
-            _sanMovesHistory.AsReadOnly(), _whiteTimeLeft, _blackTimeLeft));
+            _movesHistory.AsReadOnly(), _whiteTimeLeft, _blackTimeLeft));
     }
     private void DeclineDrawOfferIfPending(string playerId)
     {

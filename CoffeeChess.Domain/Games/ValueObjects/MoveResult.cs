@@ -14,7 +14,7 @@ public readonly struct MoveResult
         nameof(MoveResultType))]
     public bool Valid { get; init; }
     
-    public SanMove? San { get; init; }
+    public San? San { get; init; }
     public Fen? FenAfterMove { get; init; }
     public bool? IsCaptureOrPawnMove { get; init; }
     public MoveResultType? MoveResultType { get; init; }

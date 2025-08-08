@@ -45,7 +45,7 @@ builder.Services.AddIdentity<UserModel, IdentityRole>(options =>
     .AddDefaultTokenProviders();
 
 builder.Services.AddControllersWithViews()
-    .AddJsonOptions(opts => opts.JsonSerializerOptions.Converters.Add(new SanMoveConverter()));
+    .AddJsonOptions(opts => opts.JsonSerializerOptions.Converters.Add(new SanConverter()));
 builder.Services.AddSignalR(cfg => cfg.EnableDetailedErrors = true);
 builder.Services.AddMediatR(cfg => cfg
     .RegisterServicesFromAssembly(typeof(DrawOfferDeclinedEventHandler).Assembly));

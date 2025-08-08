@@ -11,8 +11,9 @@ public class MoveMadeEventHandler(
 {
     public async Task Handle(MoveMade notification, CancellationToken cancellationToken)
     {
-        await notifier.NotifyMoveMade(notification.WhiteId, notification.BlackId,
-        pgnBuilder.GetPgn(notification.SanMovesHistory), notification.WhiteTimeLeft.TotalMilliseconds,
-        notification.BlackTimeLeft.TotalMilliseconds, cancellationToken);
+        var sanMoves = notification.MovesHistory.Select(m => m.San).ToList().AsReadOnly();
+        await notifier.NotifyMoveMade(notification.WhiteId, notification.BlackId, 
+            pgnBuilder.GetPgnWithMovesOnly(sanMoves), notification.WhiteTimeLeft.TotalMilliseconds, 
+            notification.BlackTimeLeft.TotalMilliseconds, cancellationToken);
     }
 }

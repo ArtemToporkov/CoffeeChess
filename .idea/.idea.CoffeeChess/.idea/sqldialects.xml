@@ -2,5 +2,6 @@
 <project version="4">
   <component name="SqlDialectMappings">
     <file url="file://$PROJECT_DIR$/CoffeeChess.Infrastructure/Persistence/Migrations/20250728095102_LinkPlayerToUserModel.cs" dialect="GenericSQL" />
+    <file url="file://$PROJECT_DIR$/CoffeeChess.Infrastructure/Persistence/Migrations/20250808163550_AddTimerInfoToMovesHistoryInCompletedGame.cs" dialect="PostgreSQL" />
   </component>
 </project>

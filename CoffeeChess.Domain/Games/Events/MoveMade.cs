@@ -6,6 +6,6 @@ namespace CoffeeChess.Domain.Games.Events;
 public record MoveMade(
     string WhiteId, 
     string BlackId, 
-    IReadOnlyCollection<SanMove> SanMovesHistory, 
+    IReadOnlyCollection<MoveInfo> MovesHistory, 
     TimeSpan WhiteTimeLeft, 
     TimeSpan BlackTimeLeft) : IDomainEvent;

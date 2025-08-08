@@ -70,7 +70,7 @@ public class GameResultUpdatedEventHandler(
             Increment = (int)game.Increment.TotalSeconds,
             GameResult = gameResult,
             PlayedDate = game.LastTimeUpdate,
-            SanMovesHistory = game.SanMovesHistory.ToList()
+            MovesHistory = game.MovesHistory.ToList()
         };
 
         await completedGameRepository.AddAsync(completedGame, cancellationToken);

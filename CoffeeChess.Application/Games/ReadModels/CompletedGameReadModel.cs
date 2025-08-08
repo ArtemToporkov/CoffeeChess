@@ -24,5 +24,5 @@ public class CompletedGameReadModel
     public GameResultReason GameResultReason { get; init; }
     public DateTime PlayedDate { get; init; }
     
-    public List<SanMove> SanMovesHistory { get; init; }
+    public List<MoveInfo> MovesHistory { get; init; }
 }

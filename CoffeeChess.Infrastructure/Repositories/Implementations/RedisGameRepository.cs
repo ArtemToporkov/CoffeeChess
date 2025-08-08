@@ -82,7 +82,7 @@ public class RedisGameRepository(
             }
 
             var propsToHide = jsonTypeInfo.Properties
-                .Where(p => p.Name is nameof(Game.DomainEvents) or nameof(Game.SanMovesHistory))
+                .Where(p => p.Name is nameof(Game.DomainEvents) or nameof(Game.MovesHistory))
                 .ToList();
             propsToHide.ForEach(p => jsonTypeInfo.Properties.Remove(p));
             jsonTypeInfo.CreateObject = () =>
@@ -98,7 +98,7 @@ public class RedisGameRepository(
         return new()
         {
             TypeInfoResolver = jsonTypeResolver,
-            Converters = { new FenConverter(), new SanMoveConverter() }
+            Converters = { new FenConverter(), new SanConverter() }
         };
     }
 }
