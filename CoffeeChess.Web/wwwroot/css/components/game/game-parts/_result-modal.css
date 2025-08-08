@@ -130,7 +130,7 @@
 .result-info-sections {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 13px;
 }
 
 .result-info-section {
@@ -141,8 +141,17 @@
     gap: 5px;
 }
 
+.result-info-section.review {
+    gap: 3px;
+}
+
 .result-info-section.rating-section {
+    transform: translateY(-27%);
     margin-bottom: 17px;
+}
+
+.result-info-section.rating-section.review {
+    transform: none;
 }
 
 .result-info-title,
