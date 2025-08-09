@@ -109,3 +109,7 @@
 .info-container.inactive > span {
     color: var(--milk-coffee-unselected);
 }
+
+.info-container.hide {
+    display: none;
+}

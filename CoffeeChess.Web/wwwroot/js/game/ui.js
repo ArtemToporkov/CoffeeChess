@@ -50,7 +50,7 @@ export function turnOffDrawResignInfo() {
     $('.resign-draw-info').css('display', 'none');
 }
 
-export function updateGameResult(isWhite, result, reason) {
+export function showResultModal(isWhite, result, reason) {
     const [panelColorClass, fontButtonsColorClass] 
         = (isWhite && result === GameResult.BlackWon) || (!isWhite && result === GameResult.WhiteWon)
         ? ['dark', 'milk'] 
@@ -184,6 +184,27 @@ export function setTimerHighlighting(toWhite) {
         : [$blackTimer, $whiteTimer];
     toSetActive.removeClass('inactive');
     toSetInactive.addClass('inactive');
+}
+
+export function setResultPoints(result) {
+    const $whitePoints = $('#whitePoints');
+    const $blackPoints = $('#blackPoints');
+    switch (result) {
+        case GameResult.WhiteWon:
+            $whitePoints.text('1');
+            $blackPoints.text('0');
+            break;
+        case GameResult.BlackWon:
+            $whitePoints.text('0');
+            $blackPoints.text('1');
+            break;
+        case GameResult.Draw:
+            $whitePoints.text('½');
+            $blackPoints.text('½');
+            break;
+    }
+    $whitePoints.parent().removeClass('hide');
+    $blackPoints.parent().removeClass('hide');
 }
 
 function getResultTitle(isWhite, result) {

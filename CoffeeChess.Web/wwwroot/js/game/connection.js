@@ -3,11 +3,12 @@ import { ChatManager } from "./managers/ChatManager.js";
 import { loadUi, 
     receiveDrawOffer, 
     turnButtonsBack, 
-    updateGameResult, 
+    showResultModal, 
     turnOffDrawResignInfo, 
     setDrawOfferInactive, 
     setDrawOfferActive, 
-    playRatingsChangeAnimation } from "./ui.js";
+    playRatingsChangeAnimation,
+    setResultPoints } from "./ui.js";
 import { GameActionType } from "./enums/GameActionType.js";
 import { GameHubEvents } from "./enums/GameHubEvents.js";
 
@@ -66,7 +67,8 @@ $(document).ready(() => {
     connection.on(GameHubEvents.GameResultUpdated, (result, reason) => {
         gameManager.endGame();
         turnOffDrawResignInfo();
-        updateGameResult(gameManager.isWhite, result, reason);
+        setResultPoints(result);
+        showResultModal(gameManager.isWhite, result, reason);
     });
     
     connection.on(GameHubEvents.PlayerRatingUpdated, (oldRating, newRating) => {
