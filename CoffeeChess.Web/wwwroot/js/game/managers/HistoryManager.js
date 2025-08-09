@@ -4,28 +4,45 @@ export class HistoryManager {
     currentPly;
     #boardName;
     #movesHistory;
-    #viewHistory;
+    #viewHistoryByBoard;
+    #viewHistoryTimerCallback;
     
-    constructor(boardName, viewHistoryCallback, fromFen="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq — 0 1") {
+    constructor(
+        boardName, 
+        viewHistoryBoardCallback, 
+        viewHistoryTimerCallback = null,
+        fromTime = null,
+        fromFen="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq — 0 1"
+    ) {
         this.#boardName = boardName;
         this.#bindArrowKeys();
-        this.#viewHistory = viewHistoryCallback;
+        this.#viewHistoryByBoard = viewHistoryBoardCallback;
         this.currentPly = 0;
-        this.#movesHistory = [{move: null, fen: fromFen}];
+        this.#movesHistory = [{move: null, fen: fromFen, timeAfterMove: fromTime}];
+        this.#viewHistoryTimerCallback = viewHistoryTimerCallback;
     }
     
     moveToLastMove() {
         this.currentPly = this.#movesHistory.length - 1;
-        this.#moveToPlyAndHighlight(this.currentPly);
+        const currentPly = this.currentPly;
+        this.#moveToPlyAndHighlight(currentPly);
+        if (this.#viewHistoryTimerCallback) {
+            this.#setTimersAfterMove(currentPly);
+        }
     }
     
-    update(move, fen) {
+    update(move, fen, timeAfterMove = null) {
         $('.history-selected').removeClass('history-selected');
-        this.#movesHistory.push({move: move, fen: fen});
+        this.#movesHistory.push({move: move, fen: fen, timeAfterMove: timeAfterMove});
         this.currentPly = this.#movesHistory.length - 1;
         
         const plyToMoveTo = this.currentPly;
-        const moveCallback = () => this.#moveToPlyAndHighlight(plyToMoveTo);
+        const viewHistoryCallback = () => {
+            this.#moveToPlyAndHighlight(plyToMoveTo);
+            if (this.#viewHistoryTimerCallback !== null) {
+                this.#setTimersAfterMove(plyToMoveTo);
+            }
+        };
         
         const $lastRow = this.#getLastRow();
         
@@ -35,7 +52,7 @@ export class HistoryManager {
                 .text(move.san)
                 .addClass('history-selected')
                 .css('cursor', 'pointer')
-                .on('click', moveCallback);
+                .on('click', viewHistoryCallback);
             return;
         }
         
@@ -43,7 +60,7 @@ export class HistoryManager {
         $row.children()
             .eq(1)
             .addClass('history-selected')
-            .on('click', moveCallback);
+            .on('click', viewHistoryCallback);
         $('#history').append($row);
         $row.addClass('show').one('animationend', () => $row.removeClass('show'));
     }
@@ -58,7 +75,7 @@ export class HistoryManager {
     #moveToPlyAndHighlight(ply) {
         $(`#${this.#boardName} .piece-417db, body > img.piece-417db`).stop(true, true);
         $('.history-selected').removeClass('history-selected');
-        this.#viewHistory(this.#movesHistory[ply].fen);
+        this.#viewHistoryByBoard(this.#movesHistory[ply].fen);
         this.currentPly = ply;
         unhighlightSquares();
         if (ply > 0) {
@@ -98,15 +115,35 @@ export class HistoryManager {
                     if (this.currentPly > 0) {
                         const ply = this.currentPly;
                         this.#moveToPlyAndHighlight(ply - 1);
+                        if (this.#viewHistoryTimerCallback !== null)
+                            this.#setTimersAfterMove(ply - 1);
                     }
                     break;
                 case 'ArrowRight':
                     if (this.currentPly < this.#movesHistory.length - 1) {
                         const ply = this.currentPly;
                         this.#moveToPlyAndHighlight(ply + 1);
+                        if (this.#viewHistoryTimerCallback !== null)
+                            this.#setTimersAfterMove(ply + 1);
                     }
                     break;
             }
         });
+    }
+    
+    #setTimersAfterMove(ply) {
+        if (ply === 0)
+        {
+            const time = this.#movesHistory[ply].timeAfterMove;
+            this.#viewHistoryTimerCallback(time, true);
+            this.#viewHistoryTimerCallback(time, false);
+            return;
+        }
+        const isWhiteMoved = ply % 2 !== 0;
+        const [whiteTime, blackTime] = isWhiteMoved
+            ? [this.#movesHistory[ply].timeAfterMove, this.#movesHistory[ply - 1].timeAfterMove]
+            : [this.#movesHistory[ply - 1].timeAfterMove, this.#movesHistory[ply].timeAfterMove];
+        this.#viewHistoryTimerCallback(whiteTime, true);
+        this.#viewHistoryTimerCallback(blackTime, false);
     }
 }

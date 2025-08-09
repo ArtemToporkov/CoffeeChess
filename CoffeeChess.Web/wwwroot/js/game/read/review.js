@@ -7,7 +7,7 @@ import { closeResultPanel, playRatingsChangeAnimation } from "../ui.js";
 ($(document).ready(async () => {
     const pathParts = window.location.pathname.split('/');
     // const gameId = pathParts[pathParts.length - 1];
-    const gameId = "65b79da8";
+    const gameId = "20e9dcff";
     console.log(gameId);
     const game = await $.ajax({
         url: `/GamesHistory/GetGame/${gameId}`,
@@ -50,24 +50,28 @@ function setUiForGame(gameRole, game) {
     const chess = new Chess();
     const board = new ChessBoard('reviewBoard', getConfig());
     const historyManager = new HistoryManager(
-        'reviewBoard', fen => board.position(fen)
+        'reviewBoard',
+            fen => board.position(fen), 
+        viewHistoryTimers,
+        getInitialTimeString(game)
     );
-    
-    for (let moveInfo of game.movesHistory) {
-        const move = chess.move(moveInfo.san);
-        console.log(moveInfo.timeAfterMove)
-        if (move === null) {
-            console.error("Something went wrong while processing san moves history.");
-            break;
-        }
-        const currentFen = chess.fen();
-        historyManager.update(move, currentFen);
-    }
-    
-    board.position(chess.fen());
+
     setNamesAndRatings(game);
     setResult(game);
     setResultInfo(gameRole, game);
+    setTimers(getInitialTimeString(game));
+    
+    for (let moveInfo of game.movesHistory) {
+        const move = chess.move(moveInfo.san);
+        if (move === null) {
+            console.error("Something went wrong while processing SAN moves history.");
+            break;
+        }
+        const timeAfterMove = getTimeAfterMoveString(moveInfo.timeAfterMove);
+        const currentFen = chess.fen();
+        historyManager.update(move, currentFen, timeAfterMove);
+        historyManager.moveToLastMove();
+    }
 }
 
 function setNamesAndRatings(game) {
@@ -129,8 +133,13 @@ function setResultInfo(gameRole, game) {
     $('.result-info').addClass(fontButtonsColorClass);
     $('.result-button').addClass(fontButtonsColorClass);
     $('#timeControl').text(`${game.minutes}+${game.increment}`);
-    $('#playedAt').text(`${getDate(game)}`);
+    $('#playedAt').text(`${getPlayedDate(game)}`);
 }
+
+function setTimers(time) {
+    $('#whiteTimeLeft, #blackTimeLeft').text(time);
+}
+
 
 function getClassesForResultPanel(gameRole, game) {
     return gameRole === GameRole.Spectator
@@ -175,8 +184,8 @@ function getGameResultReasonText(gameRole, game) {
 
     const loserName = game.gameResult === GameResult.WhiteWon ? game.blackPlayerName : game.whitePlayerName;
     if (gameRole === GameRole.Spectator 
-        || (gameRole === GameRolw.White && game.gameResult === GameResult.WhiteWon)
-        || (gameRole === GameRolw.Black && game.gameResult === GameResult.BlackWon)) {
+        || (gameRole === GameRole.White && game.gameResult === GameResult.WhiteWon)
+        || (gameRole === GameRole.Black && game.gameResult === GameResult.BlackWon)) {
         return game.gameResultReason === GameResultReason.OpponentTimeRanOut 
             ? `${loserName}'s time is up.`
             : `${loserName} resigned.`;
@@ -187,7 +196,7 @@ function getGameResultReasonText(gameRole, game) {
         : "you resigned.";
 }
 
-function getDate(game) {
+function getPlayedDate(game) {
     return new Date(game.playedDate)
         .toLocaleString("ru-RU", {
             day:    "2-digit",
@@ -198,4 +207,24 @@ function getDate(game) {
             hour12: false,
             timeZone: "UTC"
         });
+}
+
+function getInitialTimeString(game) {
+    let minutes = game.minutes;
+    if (minutes < 10)
+        minutes = `0${minutes}`;
+    return `${minutes}:00`;
+}
+
+function getTimeAfterMoveString(time) {
+    const timeParts = time.split(":");
+    return `${timeParts[1]}:${timeParts[2].split('.')[0]}`;
+}
+
+function viewHistoryTimers(time, isWhite) {
+    if (isWhite) {
+        $('#whiteTimeLeft').text(time ? time : "--:--");
+    } else {
+        $('#blackTimeLeft').text(time ? time : "--:--");
+    }
 }
