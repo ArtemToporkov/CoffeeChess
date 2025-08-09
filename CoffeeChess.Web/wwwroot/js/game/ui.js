@@ -203,8 +203,19 @@ export function setResultPoints(result) {
             $blackPoints.text('½');
             break;
     }
-    $whitePoints.parent().removeClass('hide');
-    $blackPoints.parent().removeClass('hide');
+    unhideResultPoints($whitePoints.parent(), $whitePoints.parent().parent());
+    unhideResultPoints($blackPoints.parent(), $blackPoints.parent().parent());
+}
+
+function unhideResultPoints($pointsContainer, $playerInfoContainer) {
+    const width = $playerInfoContainer.outerWidth(true);
+    $playerInfoContainer.width(width);
+    const widthWithPoints = width
+        + $pointsContainer.outerWidth(true) 
+        + parseInt($playerInfoContainer.css('gap'));
+    $playerInfoContainer.width(widthWithPoints).one('transitionend', () => {
+        $pointsContainer.removeClass('hide');
+    });
 }
 
 function getResultTitle(isWhite, result) {
@@ -223,6 +234,7 @@ function hidePromotionModal() {
 
 function bindEventsToResignButton(connection, gameId) {
     $('#resignButton').on('click', () => {
+        setResultPoints(GameResult.Draw);
         $('#resignDrawMessage').text('Are you sure?');
         $('#resignDrawButtonsContainer').css('display', 'none');
         $('#resignConfirmationContainer').css('display', 'flex');
