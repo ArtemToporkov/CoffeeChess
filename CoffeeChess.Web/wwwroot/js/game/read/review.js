@@ -2,7 +2,7 @@
 import { GameResult } from "../enums/GameResult.js";
 import { GameRole } from "../enums/GameRole.js"
 import { GameResultReason } from "../enums/GameResultReason.js";
-import { closeResultPanel, playRatingsChangeAnimation } from "../ui.js";
+import {closeResultPanel, playRatingsChangeAnimation, setTimerHighlighting} from "../ui.js";
 
 ($(document).ready(async () => {
     const pathParts = window.location.pathname.split('/');
@@ -221,10 +221,11 @@ function getTimeAfterMoveString(time) {
     return `${timeParts[1]}:${timeParts[2].split('.')[0]}`;
 }
 
-function viewHistoryTimers(time, isWhite) {
+function viewHistoryTimers(time, isWhite, isWhiteMoved) {
     if (isWhite) {
         $('#whiteTimeLeft').text(time ? time : "--:--");
     } else {
         $('#blackTimeLeft').text(time ? time : "--:--");
     }
+    setTimerHighlighting(!isWhiteMoved);
 }

@@ -42,6 +42,10 @@
     height: 30px;
 }
 
+.player-avatar.inactive {
+    border: 4px solid var(--milk-coffee-unselected);
+}
+
 .player-avatar img {
     width: 100%;
     height: 100%;
@@ -96,4 +100,12 @@
 .info {
     font-family: 'Caprasimo', sans-serif;
     color: var(--milk-coffee);
+}
+
+.info-container.inactive {
+    border: 4px solid var(--milk-coffee-unselected);
+}
+
+.info-container.inactive > span {
+    color: var(--milk-coffee-unselected);
 }

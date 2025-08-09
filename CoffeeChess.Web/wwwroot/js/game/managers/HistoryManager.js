@@ -1,4 +1,4 @@
-﻿import { highlightSquares, unhighlightSquares } from "../ui.js";
+﻿import { highlightSquares, unhighlightSquares, setTimerHighlighting } from "../ui.js";
 
 export class HistoryManager {
     currentPly;
@@ -143,7 +143,7 @@ export class HistoryManager {
         const [whiteTime, blackTime] = isWhiteMoved
             ? [this.#movesHistory[ply].timeAfterMove, this.#movesHistory[ply - 1].timeAfterMove]
             : [this.#movesHistory[ply - 1].timeAfterMove, this.#movesHistory[ply].timeAfterMove];
-        this.#viewHistoryTimerCallback(whiteTime, true);
-        this.#viewHistoryTimerCallback(blackTime, false);
+        this.#viewHistoryTimerCallback(whiteTime, true, isWhiteMoved);
+        this.#viewHistoryTimerCallback(blackTime, false, isWhiteMoved);
     }
 }

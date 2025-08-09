@@ -176,6 +176,16 @@ export function closeResultPanel() {
     });
 }
 
+export function setTimerHighlighting(toWhite) {
+    const $whiteTimer = $('#whiteTimeLeft').parent();
+    const $blackTimer = $('#blackTimeLeft').parent();
+    const [toSetActive, toSetInactive] = toWhite
+        ? [$whiteTimer, $blackTimer]
+        : [$blackTimer, $whiteTimer];
+    toSetActive.removeClass('inactive');
+    toSetInactive.addClass('inactive');
+}
+
 function getResultTitle(isWhite, result) {
     if (result === GameResult.Draw)
         return 'Draw';
