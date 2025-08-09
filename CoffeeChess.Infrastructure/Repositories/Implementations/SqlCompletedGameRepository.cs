@@ -1,6 +1,5 @@
 ﻿using CoffeeChess.Application.Games.ReadModels;
 using CoffeeChess.Application.Games.Repositories.Interfaces;
-using CoffeeChess.Application.Shared.Abstractions;
 using CoffeeChess.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
@@ -25,19 +24,17 @@ public class SqlCompletedGameRepository(ApplicationDbContext dbContext) : ICompl
             .Where(g => g.WhitePlayerId == playerId || g.BlackPlayerId == playerId)
             .CountAsync(cancellationToken: cancellationToken);
 
-    public async Task<PagedResult<CompletedGameReadModel>> GetCompletedGamesForPlayerAsync(
+    public async Task<IReadOnlyList<CompletedGameReadModel>> GetCompletedGamesForPlayerAsync(
         string playerId, int pageNumber, int pageSize, CancellationToken cancellationToken = default)
     {
         var playersGame = dbContext.CompletedGames
             .Where(g => g.WhitePlayerId == playerId || g.BlackPlayerId == playerId)
             .OrderByDescending(g => g.PlayedDate);
         var toSkip = (pageNumber - 1) * pageSize;
-        var items = await playersGame.Skip(toSkip).Take(pageSize).ToListAsync(cancellationToken);
-        return new PagedResult<CompletedGameReadModel>
-        {
-            Items = items.AsReadOnly(),
-            Page = pageNumber,
-            PageSize = pageSize
-        };
+        var items = await playersGame
+            .Skip(toSkip)
+            .Take(pageSize)
+            .ToListAsync(cancellationToken);
+        return items.AsReadOnly();
     }
 }

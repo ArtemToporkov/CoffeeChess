@@ -1,10 +1,14 @@
-﻿using CoffeeChess.Application.Games.Queries;
+﻿using System.Security.Authentication;
+using System.Security.Claims;
+using CoffeeChess.Application.Games.Queries;
+using CoffeeChess.Application.Games.Repositories.Interfaces;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CoffeeChess.Web.Controllers;
 
-public class GamesHistoryController(IMediator mediator) : Controller
+public class GamesHistoryController(
+    IMediator mediator) : Controller
 {
     public IActionResult GamesHistory()
     {
@@ -41,4 +45,26 @@ public class GamesHistoryController(IMediator mediator) : Controller
             return NotFound($"Game with ID {gameId} not found.");
         }
     }
+
+    [HttpGet("/GamesHistory/GetCount")]
+    public async Task<ActionResult<int>> GetCompletedGamesCountForPlayer(CancellationToken cancellationToken)
+    {
+        var userId = GetUserIdOrThrow();
+        var query = new GetCompletedGamesCountQuery(userId);
+        var count = await mediator.Send(query, cancellationToken);
+        return Ok(count);
+    }
+
+    [HttpGet("/GamesHistory/GetGames")]
+    public async Task<IActionResult> GetGames(int pageNumber, int pageSize, CancellationToken cancellationToken)
+    {
+        var userId = GetUserIdOrThrow();
+        var query = new GetCompletedGamesPageQuery(userId, pageNumber, pageSize);
+        var games = await mediator.Send(query, cancellationToken);
+        return Json(games);
+
+    }
+    
+    private string GetUserIdOrThrow() => User.FindFirstValue(ClaimTypes.NameIdentifier) 
+                                         ?? throw new AuthenticationException("User not authenticated.");
 }
