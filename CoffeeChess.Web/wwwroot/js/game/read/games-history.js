@@ -1,4 +1,6 @@
-﻿$(document).ready(async () => {
+﻿import { GameResult } from "../enums/GameResult.js";
+
+$(document).ready(async () => {
     const pageSize = 10;
     
     const gamesCount = await $.ajax({
@@ -7,9 +9,21 @@
         dataType: 'json'
     });
     console.log(gamesCount);
-    
+
+    const username = $('#username').text();
+    if (!username) {
+        console.error("You are not authenticated.");
+        return;
+    }
+    $('#gamesHistory').empty();
     const games = await getGames(1, pageSize);
-    console.log(games);
+    for (const game of games) {
+        const $gameEl = buildGameElement(username, game);
+        $('#gamesHistory').append($gameEl);
+        $gameEl.on('click', e => {
+            window.location.assign(`/GamesHistory/Review/${game.gameId}`);
+        });
+    }
 });
 
 async function getGames(pageNumber, pageSize) {
@@ -23,4 +37,107 @@ async function getGames(pageNumber, pageSize) {
         dataType: 'json'
     });
     return games;
+}
+
+function buildGameElement(username, game) {
+    const isWhite = getIsWhite(username, game);
+    
+    const winOrDraw = game.gameResult === GameResult.Draw 
+        || (isWhite && game.gameResult === GameResult.WhiteWon)
+        || (!isWhite && game.gameResult === GameResult.BlackWon);
+    
+    return $('<div>')
+        .addClass('game-info-container')
+        .addClass(winOrDraw ? 'win-or-draw' : 'lose')
+        .append(getNamesContainer(game))
+        .append(getResultRatingChangeContainer(game))
+        .append($('<span>').addClass('games-history-date').text(getPlayedDate(game.playedDate)))
+        .append($('<span>').addClass('games-history-time-control').text(`${game.minutes}+${game.increment}`));
+}
+
+function getNamesContainer(game) {
+    return $('<div>')
+        .addClass('names-container')
+        .append(
+            $('<div>')
+                .addClass('name-rating-container')
+                .append(
+                    $('<span>').addClass('name').text(game.blackPlayerName)
+                )
+                .append(
+                    $('<span>').addClass('rating').text(game.blackPlayerRating)
+                )
+        )
+        .append(
+            $('<div>')
+                .addClass('name-rating-container')
+                .append(
+                    $('<span>').addClass('name').text(game.whitePlayerName)
+                )
+                .append(
+                    $('<span>').addClass('rating').text(game.whitePlayerRating)
+                )
+        );
+}
+
+function getResultRatingChangeContainer(game) {
+    const whitePlayerRatingDelta = getPlayerRatingDelta(game.whitePlayerRating, game.whitePlayerNewRating);
+    const blackPlayerRatingDelta = getPlayerRatingDelta(game.blackPlayerRating, game.blackPlayerNewRating);
+    const [whitePoints, blackPoints] = getWhiteAndBlackPoints(game.gameResult);
+    return $('<div>')
+        .addClass('result-rating-change-container')
+        .append(
+            $('<div>')
+                .addClass('rating-change-container')
+                .append($('<span>').text(blackPlayerRatingDelta))
+                .append($('<span>').text(whitePlayerRatingDelta))
+        )
+        .append(
+            $('<div>')
+                .addClass('result-container')
+                .append($('<span>').text(blackPoints))
+                .append($('<span>').text(whitePoints))
+        )
+}
+
+function getPlayedDate(playedDate) {
+    return new Date(playedDate)
+        .toLocaleString("ru-RU", {
+            day:    "2-digit",
+            month:  "2-digit",
+            year:   "numeric",
+            hour12: false,
+            timeZone: "UTC"
+        });
+}
+
+function getPlayerRatingDelta(oldRating, newRating) {
+    const delta = newRating - oldRating;
+    if (delta > 0)
+        return `+${delta}`;
+    return delta;
+}
+
+function getWhiteAndBlackPoints(gameResult) {
+    switch (gameResult) {
+        case GameResult.Draw:
+            return ['½', '½']
+        case GameResult.WhiteWon:
+            return ['1', '0']
+        case GameResult.BlackWon:
+            return ['0', '1']
+        default:
+            console.error(`Unexpected game result: ${gameResult}`);
+            return [NaN, NaN];
+    }
+}
+
+function getIsWhite(username, game) {
+    if (username !== game.whitePlayerName && username !== game.blackPlayerName)
+        console.error(
+            `Something went wrong with getting 
+            color you playd as: non of the game 
+            ${game.gameId} names matches with your username.`
+        );
+    return username === game.whitePlayerName;
 }
