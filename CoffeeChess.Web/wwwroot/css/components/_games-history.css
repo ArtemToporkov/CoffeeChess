@@ -203,6 +203,7 @@
             -4px 4px 0 var(--dark-coffee);
     
     text-decoration: none;
+    cursor: pointer;
     
     width: 40px;
     height: 30px;
@@ -214,6 +215,10 @@
 .pagination-button.current {
     transform: translate(-4px, 4px);
     box-shadow: none;
+}
+
+.pagination-button.current {
+    cursor: default;
 }
 
 .ellipsis {

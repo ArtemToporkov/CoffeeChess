@@ -8,16 +8,42 @@ $(document).ready(async () => {
         method: 'GET',
         dataType: 'json'
     });
-    console.log(gamesCount);
-
+    
     const username = $('#username').text();
     if (!username) {
         console.error("You are not authenticated.");
         return;
     }
+    buildPaginationPanel(username, pageSize, gamesCount);
+    await getGamesAndAppendToHistory(username, 1, pageSize);
+});
+
+function buildPaginationPanel(username, pageSize, totalCount) {
+    const $paginationPanel = $('#paginationPanel');
+    $paginationPanel.empty();
+    const pagesCount = Math.ceil(totalCount / pageSize);
+    for (let i = 0; i < pagesCount; i++) {
+        const $button = buildPaginationButton(i + 1, i === 0);
+        $paginationPanel.append($button);
+        $button.on('click', async e => {
+            $('.pagination-button').removeClass('current');
+            $button.addClass('current');
+            await getGamesAndAppendToHistory(username, i + 1, pageSize);
+        })
+    }
+}
+
+function buildPaginationButton(pageNumber, isCurrent) {
+    return $('<a>')
+        .addClass('pagination-button')
+        .addClass(isCurrent ? 'current' : '')
+        .text(pageNumber);
+}
+
+async function getGamesAndAppendToHistory(username, pageNumber, pageSize) {
     const $gamesHistory = $('#gamesHistory');
     $gamesHistory.empty();
-    const games = await getGames(1, pageSize);
+    const games = await getGames(pageNumber, pageSize);
     for (const game of games) {
         const $gameEl = buildGameElement(username, game);
         $gamesHistory.append($gameEl);
@@ -26,7 +52,7 @@ $(document).ready(async () => {
         });
     }
     $gamesHistory.scrollTop = $gamesHistory.scrollHeight;
-});
+}
 
 async function getGames(pageNumber, pageSize) {
     const games =  await $.ajax({
