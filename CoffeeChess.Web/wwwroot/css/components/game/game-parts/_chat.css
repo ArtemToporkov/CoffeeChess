@@ -38,28 +38,6 @@
     overflow-y: auto;
 }
 
-#chatMessages::-webkit-scrollbar,
-.history::-webkit-scrollbar {
-    width: 10px;
-}
-
-#chatMessages::-webkit-scrollbar-thumb,
-.history::-webkit-scrollbar-thumb {
-    background-color: var(--milk-coffee);
-    border-radius: 6px;
-}
-
-#chatMessages::-webkit-scrollbar-thumb:hover,
-.history::-webkit-scrollbar-thumb:hover {
-    background-color: rgba(255, 230, 212, 0.6);
-}
-
-#chatMessages::-webkit-scrollbar-track,
-.history::-webkit-scrollbar-track {
-    background-color: var(--milk-coffee-unselected);
-    border-radius: 6px;
-}
-
 .chat-message-sender {
     font-family: 'Caprasimo', sans-serif;
     color: var(--milk-coffee);

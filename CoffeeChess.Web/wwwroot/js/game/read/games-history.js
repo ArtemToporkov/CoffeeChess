@@ -15,15 +15,17 @@ $(document).ready(async () => {
         console.error("You are not authenticated.");
         return;
     }
-    $('#gamesHistory').empty();
+    const $gamesHistory = $('#gamesHistory');
+    $gamesHistory.empty();
     const games = await getGames(1, pageSize);
     for (const game of games) {
         const $gameEl = buildGameElement(username, game);
-        $('#gamesHistory').append($gameEl);
+        $gamesHistory.append($gameEl);
         $gameEl.on('click', e => {
             window.location.assign(`/GamesHistory/Review/${game.gameId}`);
         });
     }
+    $gamesHistory.scrollTop = $gamesHistory.scrollHeight;
 });
 
 async function getGames(pageNumber, pageSize) {
@@ -42,13 +44,18 @@ async function getGames(pageNumber, pageSize) {
 function buildGameElement(username, game) {
     const isWhite = getIsWhite(username, game);
     
-    const winOrDraw = game.gameResult === GameResult.Draw 
-        || (isWhite && game.gameResult === GameResult.WhiteWon)
-        || (!isWhite && game.gameResult === GameResult.BlackWon);
+    let colorOfResult;
+    if (game.gameResult === GameResult.Draw)
+        colorOfResult = 'draw';
+    else
+        colorOfResult = (isWhite && game.gameResult === GameResult.WhiteWon)
+            || (!isWhite && game.gameResult === GameResult.BlackWon) 
+            ? 'win'
+            : 'lose';
     
     return $('<div>')
         .addClass('game-info-container')
-        .addClass(winOrDraw ? 'win-or-draw' : 'lose')
+        .addClass(colorOfResult)
         .append(getNamesContainer(game))
         .append(getResultRatingChangeContainer(game))
         .append($('<span>').addClass('games-history-date').text(getPlayedDate(game.playedDate)))
