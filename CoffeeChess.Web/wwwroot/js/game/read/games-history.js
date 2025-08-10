@@ -2,6 +2,7 @@
 
 $(document).ready(async () => {
     const pageSize = 10;
+    const maxPaginationButtons = 7;
     
     const gamesCount = await $.ajax({
         url: '/GamesHistory/GetCount',
@@ -14,22 +15,29 @@ $(document).ready(async () => {
         console.error("You are not authenticated.");
         return;
     }
-    buildPaginationPanel(username, pageSize, gamesCount);
+    const pagesCount = Math.ceil(gamesCount / pageSize);
+    fillPaginationPanel(username, 1, pageSize, pagesCount, maxPaginationButtons);
     await getGamesAndAppendToHistory(username, 1, pageSize);
 });
 
-function buildPaginationPanel(username, pageSize, totalCount) {
+function fillPaginationPanel(username, current, pageSize, total, maxPaginationButtons) {
     const $paginationPanel = $('#paginationPanel');
     $paginationPanel.empty();
-    const pagesCount = Math.ceil(totalCount / pageSize);
-    for (let i = 0; i < pagesCount; i++) {
-        const $button = buildPaginationButton(i + 1, i === 0);
+    const pageNumbers = getPageNumbersForPagination(current, total, maxPaginationButtons);
+    console.log(pageNumbers)
+    for (let pageNumber of pageNumbers) {
+        if (pageNumber === '...') {
+            const $ellipsis = $('<span>').addClass('ellipsis').text('...');
+            $paginationPanel.append($ellipsis);
+            continue;
+        }
+        const $button = buildPaginationButton(pageNumber, pageNumber === current);
         $paginationPanel.append($button);
-        $button.on('click', async e => {
-            $('.pagination-button').removeClass('current');
-            $button.addClass('current');
-            await getGamesAndAppendToHistory(username, i + 1, pageSize);
-        })
+        if (pageNumber !== current)
+            $button.on('click', async e => {
+                await getGamesAndAppendToHistory(username, pageNumber, pageSize);
+                fillPaginationPanel(username, pageNumber, pageSize, total, maxPaginationButtons);
+            });
     }
 }
 
@@ -173,4 +181,33 @@ function getIsWhite(username, game) {
             ${game.gameId} names matches with your username.`
         );
     return username === game.whitePlayerName;
+}
+
+function getPageNumbersForPagination(current, totalPages, maxButtons) {
+    if (totalPages <= maxButtons) 
+        return Array.from({ length: totalPages }, (_, i) => i + 1);
+
+    const innerCount = maxButtons - 2;
+    let start = current - Math.floor(innerCount / 2);
+    let end = start + innerCount - 1;
+
+    if (start < 2) {
+        start = 2;
+        end = start + innerCount - 1;
+    }
+    if (end > totalPages - 1) {
+        end = totalPages - 1;
+        start = end - innerCount + 1;
+    }
+
+    const result = [1];
+    if (start > 2) 
+        result.push('...');
+    for (let i = start; i <= end; i++) 
+        result.push(i);
+    if (end < totalPages - 1) 
+        result.push('...');
+    result.push(totalPages);
+
+    return result;
 }
