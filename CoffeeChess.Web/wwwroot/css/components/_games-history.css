@@ -78,10 +78,15 @@
     border-radius: 30px;
     cursor: pointer;
     
-    transition: transform 0.3s ease;
+    transition: transform 0.5s ease, opacity 0.5s ease;
 }
 
 .game-info-container:hover {
+    transform: translateX(1%);
+}
+
+.game-info-container.hide {
+    opacity: 0;
     transform: translateX(1%);
 }
 

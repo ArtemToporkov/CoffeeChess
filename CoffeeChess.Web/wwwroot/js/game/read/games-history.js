@@ -53,13 +53,18 @@ async function getGamesAndAppendToHistory(username, pageNumber, pageSize) {
     $gamesHistory.empty();
     const games = await getGames(pageNumber, pageSize);
     for (const game of games) {
-        const $gameEl = buildGameElement(username, game);
+        const $gameEl = buildGameElement(username, game).addClass('hide');
         $gamesHistory.append($gameEl);
         $gameEl.on('click', e => {
             window.location.assign(`/GamesHistory/Review/${game.gameId}`);
         });
     }
-    $gamesHistory.scrollTop = $gamesHistory.scrollHeight;
+    const delay = 100;
+    $gamesHistory.find('.game-info-container').each((i, gameInfo) => {
+        setTimeout(() => {
+            $(gameInfo).removeClass('hide');
+        }, (i + 1) * delay);
+    });
 }
 
 async function getGames(pageNumber, pageSize) {
