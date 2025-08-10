@@ -54,6 +54,11 @@
     width: 100%;
     border-radius: 30px;
     cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.game-info-container:hover {
+    transform: translateX(1%);
 }
 
 .game-info-container.win-or-draw {

@@ -7,14 +7,14 @@
 @import "components/_games-history.css";
 
 :root {
-    --milk-coffee: #FFE6D4;
-    --dark-coffee: #2B1100;
+    --milk-coffee: #ffd6ba;
+    --dark-coffee: #2b1100;
     --milk-coffee-unselected: #aa917f;
     --dark-coffee-unselected: #806655;
-    --milk-coffee-chess-square: rgb(255, 230, 212);
+    --milk-coffee-chess-square: rgb(255, 214, 186);
     --dark-coffee-chess-square: rgb(171, 129, 99);
-    --milk-coffee-chess-square-highlighted: #f1cfb7;
-    --dark-coffee-chess-square-highlighted: #dab8a0;
+    --milk-coffee-chess-square-highlighted: #e1b799;
+    --dark-coffee-chess-square-highlighted: #d1a281;
 }
 
 html, 
@@ -24,7 +24,6 @@ body {
 }
 
 body {
-    background-image: url('../img/background.png');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -33,6 +32,15 @@ body {
     overscroll-behavior-x: none;
 }
 
+.background-video {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    object-fit: cover;
+}
 
 .montserrat {
     font-family: 'Montserrat', sans-serif;
