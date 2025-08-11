@@ -5,6 +5,7 @@
 @import "components/game/_game-creation.css";
 @import "components/game/_game-waiting.css";
 @import "components/_games-history.css";
+@import "components/_music-player.css";
 @import "components/shared/_scrollable.css";
 
 :root {

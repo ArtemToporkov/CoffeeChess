@@ -1,4 +1,28 @@
-﻿<div class="welcome-panel" data-animation-order="0">
+﻿<div class="music-player-panel">
+    <div class="song-info">
+        <img class="song-cover" src="~/tracks/Proleter-U-Can-Get-It/Proleter-U-Can-Get-It.jpg" alt="cover"/>
+        <div class="song-title-and-visualizer-container">
+            <div class="song-title">
+                <span class="author">Proleter</span>
+                <span class="song">U Can Get It</span>
+            </div>
+            <img class="visualizer" src="~/img/visualizer.png" alt="visualizer"/>
+        </div>
+    </div>
+    <div class="song-controls-container">
+        <div class="song-control previous">
+            <img src="~/img/song-next.png" alt="previous"/>
+        </div>
+        <div class="song-control pause">
+            <img src="~/img/song-pause.png" alt="pause"/>
+        </div>
+        <div class="song-control next">
+            <img src="~/img/song-next.png" alt="next"/>
+        </div>
+    </div>
+    <img class="volume-slider" src="~/img/song-volume-slider.png" alt="slider"/>
+</div>
+<div class="welcome-panel" data-animation-order="0">
     <h1 class="welcome-title">Welcome!</h1>
     <p class="welcome-text">
         It's a Coffee-Chess® — a chess
@@ -6,7 +30,7 @@
         cute place where you can play
         chess and relax...
     </p>
-    @if (User.Identity.IsAuthenticated)
+    @if (User.Identity is not null && User.Identity.IsAuthenticated)
     {
         <div class="welcome-buttons-container">
             <a asp-controller="Game" asp-action="GameCreation" class="welcome-button ajax-nav-link" 
