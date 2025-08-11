@@ -35,6 +35,6 @@ public readonly partial record struct Fen
     [GeneratedRegex("""
                     ^(?:[PNBRQKpnbrqk1-8]{1,8}(?:\/[PNBRQKpnbrqk1-8]{1,8}){7})\s(?:[wb])\s(?:-
                     |[KQkq]{1,4})\s(?:-|[a-h][36])\s(\d+)\s([1-9]\d*)$
-                    """)]
+                    """, RegexOptions.IgnorePatternWhitespace)]
     private static partial Regex RegexForFen();
 }
