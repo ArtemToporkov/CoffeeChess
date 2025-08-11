@@ -6,9 +6,7 @@ import {closeResultPanel, playRatingsChangeAnimation, setTimerHighlighting} from
 
 ($(document).ready(async () => {
     const pathParts = window.location.pathname.split('/');
-    // const gameId = pathParts[pathParts.length - 1];
-    const gameId = "20e9dcff";
-    console.log(gameId);
+    const gameId = pathParts[pathParts.length - 1];
     const game = await $.ajax({
         url: `/GamesHistory/GetGame/${gameId}`,
         dataType: 'json'
