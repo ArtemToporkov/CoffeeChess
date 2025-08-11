@@ -39,12 +39,12 @@
 }
 
 .song-title-and-visualizer-container,
-.song-title {
+.song-title-container {
     display: flex;
     flex-direction: column;
 }
 
-.song-title {
+.song-title-container {
     padding-left: 5px;
 }
 
