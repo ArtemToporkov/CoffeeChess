@@ -64,7 +64,7 @@ $(document).ready(() => {
        // TODO: tell client that performing game action is impossible 
     });
     
-    connection.on(GameHubEvents.GameResultUpdated, (result, reason) => {
+    connection.on(GameHubEvents.GameEnded, (result, reason) => {
         gameManager.endGame();
         turnOffDrawResignInfo();
         setResultPoints(result);
