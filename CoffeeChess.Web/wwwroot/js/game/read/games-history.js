@@ -55,16 +55,20 @@ function buildPaginationButton(pageNumber, isCurrent) {
 }
 
 async function getGamesAndAppendToHistory(username, pageNumber, pageSize) {
-    const $gamesHistory = $('#gamesHistory');
-    $gamesHistory.empty();
     const games = await getGames(pageNumber, pageSize);
+    const gamesElements = [];
     for (const game of games) {
         const $gameEl = buildGameElement(username, game).addClass('hide');
-        $gamesHistory.append($gameEl);
+        gamesElements.push($gameEl);
         $gameEl.on('click', e => {
             window.location.assign(`/GamesHistory/Review/${game.gameId}`);
         });
     }
+
+    const $gamesHistory = $('#gamesHistory');
+    $gamesHistory.empty();
+    gamesElements.forEach($gameEl => $gamesHistory.append($gameEl));
+    
     const delay = 100;
     $gamesHistory.find('.game-info-container').each((i, gameInfo) => {
         setTimeout(() => {

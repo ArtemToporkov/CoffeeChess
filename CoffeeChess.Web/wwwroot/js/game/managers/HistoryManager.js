@@ -109,9 +109,9 @@ export class HistoryManager {
     
     #bindArrowKeys() {
         $(document).on('keydown', e => {
-            e.preventDefault();
             switch (e.key) {
                 case 'ArrowLeft':
+                    e.preventDefault();
                     if (this.currentPly > 0) {
                         const ply = this.currentPly;
                         this.#moveToPlyAndHighlight(ply - 1);
@@ -120,6 +120,7 @@ export class HistoryManager {
                     }
                     break;
                 case 'ArrowRight':
+                    e.preventDefault();
                     if (this.currentPly < this.#movesHistory.length - 1) {
                         const ply = this.currentPly;
                         this.#moveToPlyAndHighlight(ply + 1);

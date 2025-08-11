@@ -28,8 +28,9 @@
         @if (User.Identity.IsAuthenticated)
         {
             <div class="nav-right">
-                <a asp-controller="Home" asp-action="Index" id="username" class="nav-link">@User.Identity.Name</a>
-                <a asp-controller="Home" asp-action="Index" class="nav-avatar">
+                <a asp-controller="GamesHistory" asp-action="GamesHistory" id="username" 
+                   class="nav-link">@User.Identity.Name</a>
+                <a asp-controller="GamesHistory" asp-action="GamesHistory" class="nav-avatar">
                     <img src="/img/empty-avatar-icon.png"/>
                 </a>
             </div>
