@@ -220,7 +220,7 @@ public class Game : AggregateRoot<IDomainEvent>
 
     private void EndGameAndPublish(GameResult result, GameResultReason reason)
     {
-        AddDomainEvent(new GameResultUpdated(GameId, WhitePlayerId, BlackPlayerId, result, reason));
+        AddDomainEvent(new GameEnded(GameId, WhitePlayerId, BlackPlayerId, result, reason));
         IsOver = true;
     }
     

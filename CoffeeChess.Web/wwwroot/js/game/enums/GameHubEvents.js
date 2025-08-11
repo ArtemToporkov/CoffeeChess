@@ -5,6 +5,6 @@
     MoveFailed: "MoveFailed",
     PerformingGameActionFailed: "PerformingGameActionFailed",
     GameActionPerformed: "GameActionPerformed",
-    GameResultUpdated: "GameResultUpdated",
+    GameEnded: "GameEnded",
     PlayerRatingUpdated: "PlayerRatingUpdated"
 });

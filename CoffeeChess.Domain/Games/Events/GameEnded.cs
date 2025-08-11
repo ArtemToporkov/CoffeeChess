@@ -3,7 +3,7 @@ using CoffeeChess.Domain.Shared.Interfaces;
 
 namespace CoffeeChess.Domain.Games.Events;
 
-public record GameResultUpdated(
+public record GameEnded(
     string GameId,
     string WhiteId, 
     string BlackId, 

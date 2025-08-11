@@ -10,7 +10,7 @@ public interface IGameEventNotifierService
 
     public Task NotifyMoveFailed(string moverId, string reason, CancellationToken cancellationToken = default);
 
-    public Task NotifyGameResultUpdated(Player whitePlayer, Player blackPlayer, 
+    public Task NotifyGameEnded(Player whitePlayer, Player blackPlayer, 
         GameResult gameResult, string whiteReason, string blackReason, CancellationToken cancellationToken = default);
 
     public Task NotifyDrawOfferSent(string message, string senderId, string receiverId, 

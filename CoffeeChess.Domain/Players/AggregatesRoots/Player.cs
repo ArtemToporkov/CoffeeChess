@@ -24,8 +24,10 @@ public class Player : AggregateRoot<IDomainEvent>
     {
         if (newRating < 0)
             throw new InvalidRatingException($"Rating \"{newRating}\" should be greater than 0.");
-        
-        AddDomainEvent(new PlayerRatingChanged(Id, Rating, newRating));
+
+        var oldRating = Rating;
+        Rating = newRating;
+        AddDomainEvent(new PlayerRatingChanged(Id, oldRating, newRating));
     }
 
     [EditorBrowsable(EditorBrowsableState.Never)]

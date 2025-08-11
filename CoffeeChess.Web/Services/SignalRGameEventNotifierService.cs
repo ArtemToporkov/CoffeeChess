@@ -25,11 +25,11 @@ public class SignalRGameEventNotifierService(IPlayerRepository playerRepository,
         await hubContext.Clients.User(moverId).MoveFailed(reason, cancellationToken);
     }
 
-    public async Task NotifyGameResultUpdated(Player white, Player black, GameResult gameResult,
+    public async Task NotifyGameEnded(Player white, Player black, GameResult gameResult,
         string whiteReason, string blackReason, CancellationToken cancellationToken = default)
     {
-        await hubContext.Clients.User(white.Id).GameResultUpdated(gameResult, whiteReason, cancellationToken);
-        await hubContext.Clients.User(black.Id).GameResultUpdated(gameResult, blackReason, cancellationToken);
+        await hubContext.Clients.User(white.Id).GameEnded(gameResult, whiteReason, cancellationToken);
+        await hubContext.Clients.User(black.Id).GameEnded(gameResult, blackReason, cancellationToken);
     }
 
     public async Task NotifyDrawOfferSent(string message, string senderId, string receiverId, 
@@ -71,5 +71,8 @@ public class SignalRGameEventNotifierService(IPlayerRepository playerRepository,
         await hubContext.Clients.User(blackPlayerId).GameStarted(
             gameId, false, whiteInfo, blackInfo,
             totalMillisecondsForOnePlayerLeft, cancellationToken);
+        await hubContext.Clients.Users(whitePlayerId, blackPlayerId)
+            .ChatMessageReceived(
+                "CoffeeChess", "You have 10 seconds to make a move.", cancellationToken);
     }
 }

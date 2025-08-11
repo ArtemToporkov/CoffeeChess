@@ -14,14 +14,14 @@ using MediatR;
 
 namespace CoffeeChess.Application.Games.EventHandlers;
 
-public class GameResultUpdatedEventHandler(
+public class GameEndedEventHandler(
     IGameRepository gameRepository,
     ICompletedGameRepository completedGameRepository,
     IRatingService ratingService,
     IPlayerRepository playerRepository,
-    IGameEventNotifierService notifier) : INotificationHandler<GameResultUpdated>
+    IGameEventNotifierService notifier) : INotificationHandler<GameEnded>
 {
-    public async Task Handle(GameResultUpdated notification, CancellationToken cancellationToken)
+    public async Task Handle(GameEnded notification, CancellationToken cancellationToken)
     {
         var white = await playerRepository.GetByIdAsync(notification.WhiteId, cancellationToken) 
                     ?? throw new NotFoundException(nameof(Player), notification.WhiteId);
@@ -44,7 +44,7 @@ public class GameResultUpdatedEventHandler(
 
         var (whiteReason, blackReason) = GetMessageByGameResultReason(notification.GameResult,
             notification.GameResultReason, white.Name, black.Name);
-        await notifier.NotifyGameResultUpdated(white, black, notification.GameResult,
+        await notifier.NotifyGameEnded(white, black, notification.GameResult,
             whiteReason, blackReason, cancellationToken);
     }
 

@@ -234,7 +234,6 @@ function hidePromotionModal() {
 
 function bindEventsToResignButton(connection, gameId) {
     $('#resignButton').on('click', () => {
-        setResultPoints(GameResult.Draw);
         $('#resignDrawMessage').text('Are you sure?');
         $('#resignDrawButtonsContainer').css('display', 'none');
         $('#resignConfirmationContainer').css('display', 'flex');

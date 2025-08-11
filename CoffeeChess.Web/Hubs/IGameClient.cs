@@ -21,7 +21,7 @@ public interface IGameClient
 
     public Task GameActionPerformed(GameActionPayloadModel payload, CancellationToken cancellationToken = default);
 
-    public Task GameResultUpdated(GameResult gameResult, string? message,
+    public Task GameEnded(GameResult gameResult, string? message,
         CancellationToken cancellationToken = default);
 
     public Task PlayerRatingUpdated(int oldRating, int newRating, CancellationToken cancellationToken = default);
