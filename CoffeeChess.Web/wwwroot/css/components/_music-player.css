@@ -23,17 +23,22 @@
 }
 
 .song-info {
+    width: 100%;
     display: flex;
     flex-direction: row;
     gap: 15px;
 }
 
 .song-cover {
-    width: 35%;
+    min-width: 101px;
+    min-height: 101px;
+    width: 101px;
+    height: 101px;
     border-radius: 30px;
 }
 
 .song-title-and-visualizer-container {
+    width: 100%;
     padding: 10px 0;
     justify-content: space-between;
 }
@@ -44,10 +49,6 @@
     flex-direction: column;
 }
 
-.song-title-container {
-    padding-left: 5px;
-}
-
 .author {
     font-family: Caprasimo, sans-serif;
     font-size: 23px;
@@ -56,12 +57,11 @@
 
 .song {
     font-family: Montserrat, sans-serif;
-    font-size: 17px;
+    font-size: 15px;
     color: var(--dark-coffee);
 }
 
 .visualizer {
-    width: 100%;
 }
 
 .song-controls-container {
