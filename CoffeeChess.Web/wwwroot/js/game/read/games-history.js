@@ -3,6 +3,12 @@
 $(document).ready(async () => {
     const pageSize = 10;
     const maxPaginationButtons = 7;
+
+    const username = $('#username').text();
+    if (!username) {
+        $('#errorMessage').text("You are not authenticated.");
+        return;
+    }
     
     const gamesCount = await $.ajax({
         url: '/GamesHistory/GetCount',
@@ -10,11 +16,11 @@ $(document).ready(async () => {
         dataType: 'json'
     });
     
-    const username = $('#username').text();
-    if (!username) {
-        console.error("You are not authenticated.");
+    if (gamesCount === 0) {
+        $('#errorMessage').text("You haven't played any games yet.");
         return;
     }
+    
     const pagesCount = Math.ceil(gamesCount / pageSize);
     fillPaginationPanel(username, 1, pageSize, pagesCount, maxPaginationButtons);
     await getGamesAndAppendToHistory(username, 1, pageSize);

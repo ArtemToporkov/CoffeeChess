@@ -33,6 +33,12 @@
     margin: 0;
 }
 
+.games-history-panel .error-message {
+    font-family: Montserrat, sans-serif;
+    font-size: 15px;
+    color: var(--dark-coffee-unselected);
+}
+
 .games-history {
     width: 100%;
     display: flex;
@@ -70,6 +76,7 @@
     justify-content: space-between;
 
     border: 7px solid var(--dark-coffee);
+    outline-offset: -10px;
     box-sizing: border-box;
     padding: 7px 15px;
     
@@ -92,18 +99,15 @@
 
 .game-info-container.win {
     outline: 4px solid var(--win-color);
-    outline-offset: -10px;
 }
 
 .game-info-container.draw {
     outline: 4px solid var(--draw-color);
-    outline-offset: -10px;
 }
 
 
 .game-info-container.lose {
     outline: 4px solid var(--lose-color);
-    outline-offset: -10px;
 }
 
 .names-container {
@@ -131,7 +135,7 @@
 .rating {
     font-family: Montserrat, sans-serif;
     font-size: 15px;
-    color: var(--dark-coffee-unselected)
+    color: var(--dark-coffee-unselected);
 }
 
 .result-rating-change-container {
