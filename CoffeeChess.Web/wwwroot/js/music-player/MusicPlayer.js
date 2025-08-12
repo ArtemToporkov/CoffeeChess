@@ -1,7 +1,18 @@
 ﻿import { Visualizer } from "./Visualizer.js";
 
 export class MusicPlayer {
-    #currentSongIdx;
+    #currentSongIdxValue = 0;
+
+    get #currentSongIdx() {
+        return this.#currentSongIdxValue;
+    }
+    set #currentSongIdx(idx) {
+        let normalizedIdx = idx % this.#playlist.length;
+        if (normalizedIdx < 0)
+            normalizedIdx += this.#playlist.length;
+        this.#currentSongIdxValue = normalizedIdx;
+    }
+    
     #musicPlayer;
     #playlist;
     #$author;
@@ -17,10 +28,10 @@ export class MusicPlayer {
     #visualizer;
     
     constructor(playlist) {
+        this.#playlist = playlist;
         this.#currentSongIdx = 0;
         this.#musicPlayer = $('#musicPlayer')[0];
         this.#musicPlayer.crossOrigin = "anonymous";
-        this.#playlist = playlist;
         this.#$author = $('#songAuthor');
         this.#$title = $('#songTitle');
         this.#$cover = $('#songCover');
@@ -93,13 +104,27 @@ export class MusicPlayer {
     }
 
     #loadSong(songIdx) {
-        const track = this.#playlist[songIdx];
-        this.#$author.text(track.author);
-        this.#$title.text(track.title);
-        this.#$cover.attr("src", track.coverSrc);
+        this.#currentSongIdx = songIdx;
+        const track = this.#playlist[this.#currentSongIdx];
+        this.#loadSongInfo(track.coverSrc, track.author, track.title);
         this.#musicPlayer.src = track.audioSrc;
         this.#musicPlayer.play();
-        this.#currentSongIdx = songIdx;
+    }
+    
+    #loadSongInfo(coverSrc, author, title) {
+        const delay = 100;
+        const toChange = [
+            {$el: this.#$cover, changeFunc: () => this.#$cover.attr('src', coverSrc)},
+            {$el: this.#$author, changeFunc: () => this.#$author.text(author)}, 
+            {$el: this.#$title, changeFunc: () => this.#$title.text(title)}
+        ]
+        toChange.forEach((change, i) => setTimeout(() => {
+            change.$el.addClass('hide')
+                .on('transitionend', () => {
+                    change.changeFunc();
+                    change.$el.removeClass('hide');
+                })
+        }, i * delay));
     }
 
     #setupAudioContext() {
