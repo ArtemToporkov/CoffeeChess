@@ -1,4 +1,9 @@
-﻿.milk-scrollable::-webkit-scrollbar {
+﻿.milk-scrollable,
+.dark-scrollable {
+    overflow-y: auto;
+}
+
+.milk-scrollable::-webkit-scrollbar {
     width: 10px;
 }
 

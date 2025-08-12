@@ -35,6 +35,7 @@ export class MusicPlayer {
         this.#$author = $('#songAuthor');
         this.#$title = $('#songTitle');
         this.#$cover = $('#songCover');
+        this.#fillSongsList();
         
         const canvas = this.#createCanvas();
         const canvasContext = canvas.getContext('2d');
@@ -45,6 +46,7 @@ export class MusicPlayer {
         this.#setPauseEvents();
         this.#setNextPreviousEvents(true);
         this.#setNextPreviousEvents(false);
+        this.#setExtendButton();
     }
 
     #setPauseEvents() {
@@ -109,6 +111,7 @@ export class MusicPlayer {
         this.#loadSongInfo(track.coverSrc, track.author, track.title);
         this.#musicPlayer.src = track.audioSrc;
         this.#musicPlayer.play();
+        this.#selectSong(songIdx);
     }
     
     #loadSongInfo(coverSrc, author, title) {
@@ -149,5 +152,42 @@ export class MusicPlayer {
         canvas.classList.add('visualizer');
         $container.append(canvas);
         return canvas;
+    }
+    
+    #setExtendButton() {
+        const $button = $('#extendButton');
+        $button.on('pointerdown', e => {
+            if ($button.hasClass('pressed')) {
+                $('.music-player-panel').removeClass('extended');
+                $button.removeClass('pressed');
+            }
+            else {
+                $('.music-player-panel').addClass('extended');
+                $button.addClass('pressed');
+            }
+        });
+    }
+    
+    #fillSongsList() {
+        const $songsList = $('#songsList');
+        this.#playlist.forEach((song, i) => {
+            const $songInfo = $('<div>')
+                .addClass('list-song-info')
+                .append($('<span>').addClass('list-song-author').text(song.author))
+                .append($('<span>').addClass('list-song-title').text(song.title));
+            $songsList.append($songInfo);
+            $songInfo.on('pointerdown', () => {
+                this.#loadSong(i);
+            });
+        });
+    }
+    
+    #selectSong(idx) {
+        const $songsList = $('#songsList');
+        const $songInfo = $songsList.children().eq(idx);
+        if ($songInfo.hasClass('song-selected'))
+            return;
+        $('.song-selected').removeClass('song-selected');
+        $songInfo.addClass('song-selected');
     }
 }
