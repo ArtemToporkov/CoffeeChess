@@ -67,7 +67,7 @@
 .song-controls-container {
     display: flex;
     flex-direction: row;
-    gap: 15px;
+    gap: 35px;
     align-items: center;
     justify-content: center;
 }
@@ -76,23 +76,48 @@
     display: flex;
     justify-content: center;
     align-items: center;
+    padding: 0;
+    background: none;
+    border: none;
+    cursor: pointer;
 }
 
 .song-control > img {
     width: 100%;
+    height: 100%;
+}
+
+.song-control.pause {
+    width: 22px;
+    height: 24px;
+    transition: transform 0.2s ease;
+}
+
+.song-control.pause.pressed {
+    transform: scale(1.2);
+}
+
+.song-control.next > img,
+.song-control.previous > img {
+    transition: transform 0.2s ease;
+}
+
+.song-control.next > img.pressed {
+    transform: translateX(50%);
 }
 
 .song-control.previous {
     transform: scale(-1);
 }
 
-.song-control.pause {
-    width: 15%;
+.song-control.previous > img.pressed {
+    transform: translateX(50%);
 }
 
 .song-control.previous,
 .song-control.next {
-    width: 13%;
+    width: 15px;
+    aspect-ratio: 1 / 1;
 }
 
 .volume-slider {

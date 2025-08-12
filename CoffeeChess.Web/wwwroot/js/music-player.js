@@ -6,6 +6,9 @@
     const $cover = $('#songCover');
     
     loadTrack(currentSongIdx);
+    setPauseEvent();
+    setNextPreviousEvent(true);
+    setNextPreviousEvent(false);
     
     let canvas;
     createCanvas();
@@ -27,6 +30,43 @@
         $musicPlayer.attr("src", track.audioSrc);
         $musicPlayer[0].play();
         $cover.attr("src", track.coverSrc);
+    }
+    
+    function setPauseEvent() {
+        const $button = $('#pauseButton');
+        const $img = $button.find('img').first();
+        $button.on('pointerdown', e => {
+            if ($img.hasClass('pause')) {
+                $img.removeClass('pause').addClass('play');
+                $img.attr('src', '/img/song-control-triangle.png');
+            } else if ($img.hasClass('play')) {
+                $img.removeClass('play').addClass('pause');
+                $img.attr('src', '/img/song-control-pause.png');
+            } else {
+                throw Error("Can't define eather song is paused or not.");
+            }
+            $button.addClass('pressed').on('transitionend', 
+                () => $button.removeClass('pressed')
+            );
+        });
+    }
+
+    function setNextPreviousEvent(isPrevious) {
+        const $button = isPrevious ? $('#previousButton') : $('#nextButton');
+        const children = $button.children('img').get().map(child => $(child));
+        const childrenCount = children.length;
+        const delay = 100;
+        $button.on('pointerdown', e => {
+            for (let i = 0; i < childrenCount; i++) {
+                const $child = children[i];
+                setTimeout(() => {
+                    $child.addClass('pressed')
+                }, i * delay);
+            }
+        });
+        children[childrenCount - 1].on('transitionend', () => {
+            children.forEach($child => $child.removeClass('pressed'))
+        });
     }
 
     function updateAudioContext() {
