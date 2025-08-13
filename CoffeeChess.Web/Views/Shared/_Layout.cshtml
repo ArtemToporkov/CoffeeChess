@@ -17,7 +17,8 @@
 <header class="app-header">
     <nav class="main-nav">
         <div class="nav-left">
-            <a asp-controller="Game" asp-action="GameCreation" class="nav-link">Play</a>
+            <a class="ajax-nav-link nav-link" data-url="@Url.Action("GameCreation", "Game")" 
+               asp-controller="Game" asp-action="GameCreation">Play</a>
             <a asp-controller="Settings" asp-action="Index" class="nav-link">Settings</a>
         </div>
         <div class="nav-logo">
