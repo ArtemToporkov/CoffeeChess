@@ -41,12 +41,42 @@ export class MusicPlayer {
         const canvasContext = canvas.getContext('2d');
         this.#setupAudioContext();
         this.#visualizer = new Visualizer(this.#audioAnalyzer, canvas, canvasContext);
-        this.#loadSong(0);
 
         this.#setPauseEvents();
         this.#setNextPreviousEvents(true);
         this.#setNextPreviousEvents(false);
         this.#setExtendButton();
+    }
+    
+    async start() {
+        await this.#loadSong(0);
+    }
+
+    async #loadSong(songIdx) {
+        this.#currentSongIdx = songIdx;
+        this.#selectSong(this.#currentSongIdx);
+        const song = this.#playlist[this.#currentSongIdx];
+
+        const songResponse = await $.ajax({
+            url: `Songs/Audio/${song.songId}`,
+            type: 'GET',
+            xhrFields: {
+                responseType: 'blob'
+            }
+        });
+        const coverResponse = await $.ajax({
+            url: `Songs/Cover/${song.songId}`,
+            type: 'GET',
+            xhrFields: {
+                responseType: 'blob'
+            }
+        });
+        const songUrl = URL.createObjectURL(songResponse);
+        const coverUrl = URL.createObjectURL(coverResponse);
+
+        this.#loadSongInfo(coverUrl, song.author, song.title);
+        this.#musicPlayer.src = songUrl;
+        this.#musicPlayer.play();
     }
 
     #setPauseEvents() {
@@ -85,33 +115,24 @@ export class MusicPlayer {
         const children = $button.children('img').get().map(child => $(child));
         const childrenCount = children.length;
         const delay = 100;
-        $button.on('pointerdown', e => {
-            this.#loadSong(
-                forPrevious 
-                    ? (this.#currentSongIdx - 1) % this.#playlist.length
-                    : (this.#currentSongIdx + 1) % this.#playlist.length
-            )
-            if (this.#isPaused)
-                this.#play();
+        children[childrenCount - 1].on('transitionend', () => {
+            children.forEach($child => $child.removeClass('pressed'))
+        });
+        $button.on('pointerdown', async e => {
             for (let i = 0; i < childrenCount; i++) {
                 const $child = children[i];
                 setTimeout(() => {
                     $child.addClass('pressed')
                 }, i * delay);
             }
+            await this.#loadSong(
+                forPrevious 
+                    ? (this.#currentSongIdx - 1) % this.#playlist.length
+                    : (this.#currentSongIdx + 1) % this.#playlist.length
+            )
+            if (this.#isPaused)
+                this.#play();
         });
-        children[childrenCount - 1].on('transitionend', () => {
-            children.forEach($child => $child.removeClass('pressed'))
-        });
-    }
-
-    #loadSong(songIdx) {
-        this.#currentSongIdx = songIdx;
-        const track = this.#playlist[this.#currentSongIdx];
-        this.#loadSongInfo(track.coverSrc, track.author, track.title);
-        this.#musicPlayer.src = track.audioSrc;
-        this.#musicPlayer.play();
-        this.#selectSong(songIdx);
     }
     
     #loadSongInfo(coverSrc, author, title) {
@@ -170,14 +191,15 @@ export class MusicPlayer {
     
     #fillSongsList() {
         const $songsList = $('#songsList');
+        console.log(this.#playlist)
         this.#playlist.forEach((song, i) => {
             const $songInfo = $('<div>')
                 .addClass('list-song-info')
                 .append($('<span>').addClass('list-song-author').text(song.author))
                 .append($('<span>').addClass('list-song-title').text(song.title));
             $songsList.append($songInfo);
-            $songInfo.on('pointerdown', () => {
-                this.#loadSong(i);
+            $songInfo.on('pointerdown', async () => {
+                await this.#loadSong(i);
             });
         });
     }
