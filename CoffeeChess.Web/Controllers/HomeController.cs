@@ -9,7 +9,12 @@ public class HomeController : Controller
 {
     public IActionResult Index()
     {
-        return View();
+        if (Request.Headers.XRequestedWith == "XMLHttpRequest")
+        {
+            return PartialView("_Index");
+        }
+
+        return View("Index");
     }
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
