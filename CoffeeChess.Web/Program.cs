@@ -5,6 +5,8 @@ using CoffeeChess.Application.Games.Services.Interfaces;
 using CoffeeChess.Application.Matchmaking.Services.Implementations;
 using CoffeeChess.Application.Matchmaking.Services.Interfaces;
 using CoffeeChess.Application.Players.Services.Interfaces;
+using CoffeeChess.Application.Songs.Repositories.Interfaces;
+using CoffeeChess.Application.Songs.Sevices;
 using CoffeeChess.Domain.Chats.Repositories.Interfaces;
 using CoffeeChess.Domain.Games.Repositories.Interfaces;
 using CoffeeChess.Domain.Games.Services.Implementations;
@@ -57,12 +59,14 @@ builder.Services.AddScoped<IPgnBuilderService, StringBuilderPgnBuilderService>()
 builder.Services.AddScoped<IGameEventNotifierService, SignalRGameEventNotifierService>();
 builder.Services.AddScoped<IPlayerEventNotifierService, SignalRPlayerEventNotifierService>();
 builder.Services.AddScoped<IChatEventNotifierService, SignalRChatEventNotifierService>();
+builder.Services.AddScoped<IMediaProviderService, WwwRootMediaProviderService>();
 
 builder.Services.AddSingleton<IChallengeRepository, RedisChallengeRepository>();
 builder.Services.AddSingleton<IChatRepository, RedisChatRepository>();
 builder.Services.AddSingleton<IGameRepository, RedisGameRepository>();
 builder.Services.AddScoped<IPlayerRepository, SqlPlayerRepository>();
 builder.Services.AddScoped<ICompletedGameRepository, SqlCompletedGameRepository>();
+builder.Services.AddScoped<ISongRepository, SqlSongRepository>();
 
 builder.Services.AddHostedService<GameTimeoutCheckerService>();
 

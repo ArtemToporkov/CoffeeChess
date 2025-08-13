@@ -6,7 +6,7 @@ public interface ICompletedGameRepository
 {
     public Task AddAsync(CompletedGameReadModel game, CancellationToken cancellationToken = default);
     
-    public Task<CompletedGameReadModel?> GetCompletedGameByIdAsync(string gameId, 
+    public Task<CompletedGameReadModel?> GetByIdAsync(string gameId, 
         CancellationToken cancellationToken = default);
 
     public Task<int> GetCompletedGamesCountForPlayerAsync(string playerId, 

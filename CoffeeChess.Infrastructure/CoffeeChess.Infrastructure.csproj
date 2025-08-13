@@ -17,4 +17,23 @@
       <ProjectReference Include="..\CoffeeChess.Domain\CoffeeChess.Domain.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Content Update="Media\Songs\Proleter-April-Showers\Proleter-April-Showers.mp3">
+        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </Content>
+      <Content Update="Media\Songs\Proleter-April-Showers\Proleter-April-Showers.jpg">
+        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </Content>
+      <Content Update="Media\Songs\Proleter-U-Can-Get-It\Proleter-U-Can-Get-It.mp3">
+        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </Content>
+      <Content Update="Media\Songs\Proleter-U-Can-Get-It\Proleter-U-Can-Get-It.jpg">
+        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </Content>
+    </ItemGroup>
+
 </Project>

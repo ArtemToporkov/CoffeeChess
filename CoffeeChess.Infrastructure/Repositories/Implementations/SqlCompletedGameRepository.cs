@@ -13,7 +13,7 @@ public class SqlCompletedGameRepository(ApplicationDbContext dbContext) : ICompl
         await dbContext.SaveChangesAsync(cancellationToken);
     }
         
-    public async Task<CompletedGameReadModel?> GetCompletedGameByIdAsync(string gameId, 
+    public async Task<CompletedGameReadModel?> GetByIdAsync(string gameId, 
         CancellationToken cancellationToken = default)
         => await dbContext.CompletedGames.FirstOrDefaultAsync(g => g.GameId == gameId,
             cancellationToken);

@@ -10,7 +10,7 @@ public class GetCompletedGameQueryHandler(
 {
     public async Task<CompletedGameReadModel> Handle(GetCompletedGameQuery request, CancellationToken cancellationToken)
     {
-        var completedGame = await completedGameRepository.GetCompletedGameByIdAsync(request.GameId, cancellationToken)
+        var completedGame = await completedGameRepository.GetByIdAsync(request.GameId, cancellationToken)
                             ?? throw new NotFoundException(nameof(CompletedGameReadModel), request.GameId);
         
         return completedGame;

@@ -77,4 +77,11 @@
       <ProjectReference Include="..\CoffeeChess.Infrastructure\CoffeeChess.Infrastructure.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <None Include="wwwroot\songs\Proleter-April-Showers\Proleter-April-Showers.jpg" />
+      <None Include="wwwroot\songs\Proleter-April-Showers\Proleter-April-Showers.mp3" />
+      <None Include="wwwroot\songs\Proleter-U-Can-Get-It\Proleter-U-Can-Get-It.jpg" />
+      <None Include="wwwroot\songs\Proleter-U-Can-Get-It\Proleter-U-Can-Get-It.mp3" />
+    </ItemGroup>
+
 </Project>

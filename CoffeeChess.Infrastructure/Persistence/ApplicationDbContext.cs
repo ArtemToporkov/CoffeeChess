@@ -1,6 +1,7 @@
 ﻿using System.Linq.Expressions;
 using System.Text.Json;
 using CoffeeChess.Application.Games.ReadModels;
+using CoffeeChess.Application.Songs.ReadModels;
 using CoffeeChess.Domain.Games.ValueObjects;
 using CoffeeChess.Domain.Players.AggregatesRoots;
 using CoffeeChess.Infrastructure.Identity;
@@ -16,6 +17,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 {
     public DbSet<Player> Players { get; set; }
     public DbSet<CompletedGameReadModel> CompletedGames { get; set; }
+    public DbSet<SongReadModel> Songs { get; set; }
     
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -68,6 +70,14 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
                         || (f != null && s != null && f.Count == s.Count && f.SequenceEqual(s)), 
                     list => list.Aggregate(0, HashCode.Combine), 
                     list => list));
+        });
+        builder.Entity<SongReadModel>(entity =>
+        {
+            entity.HasKey(e => e.SongId);
+            entity.Property(e => e.Author).IsRequired();
+            entity.Property(e => e.Title).IsRequired();
+            entity.Property(e => e.AudioUrl).IsRequired();
+            entity.Property(e => e.CoverUrl).IsRequired();
         });
     }
 }
