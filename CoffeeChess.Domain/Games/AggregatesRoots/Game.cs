@@ -52,13 +52,13 @@ public class Game : AggregateRoot<IDomainEvent>
             GameId, WhitePlayerId, BlackPlayerId, (int)_whiteTimeLeft.TotalMilliseconds));
     }
 
-    public void ApplyMove(IChessMovesValidator chessMovesValidator, 
+    public void ApplyMove(IChessMovesValidatorService chessMovesValidatorService, 
         string playerId, ChessSquare from, ChessSquare to, Promotion? promotion)
     {
         if (IsOver) throw new InvalidGameOperationException("Game is over.");
         if (CheckAndPublishNotYourTurn(playerId)) return;
 
-        var moveResult = chessMovesValidator.ApplyMove(_currentFen, _currentPlayerColor, from, to, promotion);
+        var moveResult = chessMovesValidatorService.ApplyMove(_currentFen, _currentPlayerColor, from, to, promotion);
         if (CheckAndPublishInvalidMove(playerId, moveResult)) return;
         
         DeclineDrawOfferIfPending(playerId);

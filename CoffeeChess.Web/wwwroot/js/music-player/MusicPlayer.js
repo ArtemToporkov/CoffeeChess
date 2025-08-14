@@ -1,7 +1,7 @@
 ﻿import { Visualizer } from "./Visualizer.js";
 
 export class MusicPlayer {
-    #currentSongIdxValue = 0;
+    #currentSongIdxValue;
 
     get #currentSongIdx() {
         return this.#currentSongIdxValue;
@@ -29,7 +29,6 @@ export class MusicPlayer {
     
     constructor(playlist) {
         this.#playlist = playlist;
-        this.#currentSongIdx = 0;
         this.#musicPlayer = $('#musicPlayer')[0];
         this.#musicPlayer.crossOrigin = "anonymous";
         this.#$author = $('#songAuthor');
@@ -53,19 +52,21 @@ export class MusicPlayer {
     }
 
     async #loadSong(songIdx) {
+        if (this.#currentSongIdx === songIdx)
+            return;
         this.#currentSongIdx = songIdx;
         this.#selectSong(this.#currentSongIdx);
         const song = this.#playlist[this.#currentSongIdx];
 
         const songResponse = await $.ajax({
-            url: `Songs/Audio/${song.songId}`,
+            url: `/Songs/Audio/${song.songId}`,
             type: 'GET',
             xhrFields: {
                 responseType: 'blob'
             }
         });
         const coverResponse = await $.ajax({
-            url: `Songs/Cover/${song.songId}`,
+            url: `/Songs/Cover/${song.songId}`,
             type: 'GET',
             xhrFields: {
                 responseType: 'blob'
@@ -207,8 +208,6 @@ export class MusicPlayer {
     #selectSong(idx) {
         const $songsList = $('#songsList');
         const $songInfo = $songsList.children().eq(idx);
-        if ($songInfo.hasClass('song-selected'))
-            return;
         $('.song-selected').removeClass('song-selected');
         $songInfo.addClass('song-selected');
     }

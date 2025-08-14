@@ -10,14 +10,14 @@ namespace CoffeeChess.Application.Games.Commands;
 
 public class MakeMoveCommandHandler(
     IGameRepository gameRepository, 
-    IChessMovesValidator chessMovesValidator) : IRequestHandler<MakeMoveCommand>
+    IChessMovesValidatorService chessMovesValidatorService) : IRequestHandler<MakeMoveCommand>
 {
     public async Task Handle(MakeMoveCommand request, CancellationToken cancellationToken)
     {
         var game = await gameRepository.GetByIdAsync(request.GameId, cancellationToken) 
                    ?? throw new NotFoundException(nameof(Game), request.GameId);
 
-        game.ApplyMove(chessMovesValidator,
+        game.ApplyMove(chessMovesValidatorService,
             request.PlayerId,
             new ChessSquare(request.From),
             new ChessSquare(request.To),
@@ -35,6 +35,6 @@ public class MakeMoveCommandHandler(
             'q' => Promotion.Queen,
             null => null,
             _ => throw new ArgumentException(
-                $"Argument {nameof(promotion)} is not a valid promotion: should be ether b, n, r or q.")
+                $"Argument {nameof(promotion)} is not a valid promotion: should be either b, n, r or q.")
         };
 }

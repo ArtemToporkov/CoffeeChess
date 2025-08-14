@@ -5,7 +5,7 @@ using CoffeeChess.Domain.Games.ValueObjects;
 
 namespace CoffeeChess.Infrastructure.Services.Implementations;
 
-public class ChessDotNetCoreMovesValidatorService : IChessMovesValidator
+public class ChessDotNetCoreMovesValidatorService : IChessMovesValidatorService
 {
     public MoveResult ApplyMove(Fen currentFen, PlayerColor playerColor, ChessSquare from, 
         ChessSquare to, Promotion? promotion)

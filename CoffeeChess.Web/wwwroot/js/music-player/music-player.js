@@ -2,7 +2,7 @@
 
 $(document).ready(async () => {
     const playlist = await $.ajax({
-       url: "Songs/All",
+       url: "/Songs/All",
        type: "GET",
        dataType: "json" 
     });
