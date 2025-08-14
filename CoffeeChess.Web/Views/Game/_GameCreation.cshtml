@@ -1,20 +1,20 @@
 ﻿<div class="game-creation-panel">
     <p class="game-creation-title">Fast start</p>
     <div class="game-creation-row">
-        <a class="game-creation-time-control" asp-controller="Game" asp-action="CreateGame" 
-           asp-route-minutes="1" asp-route-increment="1">1|1</a>
-        <a class="game-creation-time-control" asp-controller="Game" asp-action="CreateGame" 
-           asp-route-minutes="3" asp-route-increment="2">3|2</a>
-        <a class="game-creation-time-control" asp-controller="Game" asp-action="CreateGame" 
-           asp-route-minutes="5" asp-route-increment="5">5|5</a>
+       <a class="ajax-nav-link game-creation-time-control"
+          asp-controller="Game" asp-action="CreateGame" asp-route-minutes="1" asp-route-increment="1">1|1</a>
+       <a class="ajax-nav-link game-creation-time-control"
+          asp-controller="Game" asp-action="CreateGame" asp-route-minutes="3" asp-route-increment="2">3|2</a>
+       <a class="ajax-nav-link game-creation-time-control"
+          asp-controller="Game" asp-action="CreateGame" asp-route-minutes="5" asp-route-increment="5">5|5</a>
     </div>
     <div class="game-creation-row">
-        <a class="game-creation-time-control" asp-controller="Game" asp-action="CreateGame" 
-           asp-route-minutes="10" asp-route-increment="5">10|5</a>
-        <a class="game-creation-time-control" asp-controller="Game" asp-action="CreateGame" 
-           asp-route-minutes="15" asp-route-increment="10">15|10</a>
-        <a class="game-creation-time-control" asp-controller="Game" asp-action="CreateGame" 
-           asp-route-minutes="30" asp-route-increment="15">30|15</a>
+       <a class="ajax-nav-link game-creation-time-control"
+          asp-controller="Game" asp-action="CreateGame" asp-route-minutes="10" asp-route-increment="5">10|5</a>
+       <a class="ajax-nav-link game-creation-time-control"
+          asp-controller="Game" asp-action="CreateGame" asp-route-minutes="15" asp-route-increment="10">15|10</a>
+       <a class="ajax-nav-link game-creation-time-control"
+          asp-controller="Game" asp-action="CreateGame" asp-route-minutes="30" asp-route-increment="15">30|15</a>
     </div>
-    <a class="extended" asp-action="GameCreationExtended" asp-controller="Game">Extended settings</a>
+    <a class="ajax-nav-link extended" asp-action="GameCreationExtended" asp-controller="Game">Extended settings</a>
 </div>

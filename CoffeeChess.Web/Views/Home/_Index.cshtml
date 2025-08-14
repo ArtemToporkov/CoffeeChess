@@ -41,17 +41,15 @@
     @if (User.Identity is not null && User.Identity.IsAuthenticated)
     {
         <div class="welcome-buttons-container">
-            <a asp-controller="Game" asp-action="GameCreation" class="welcome-button ajax-nav-link" 
-               data-url="@Url.Action("GameCreation", "Game")">Play</a>
+            <a class="ajax-nav-link welcome-button"
+               asp-controller="Game" asp-action="GameCreation">Play</a>
         </div>
     }
     else
     {
         <div class="welcome-buttons-container">
-            <a asp-controller="Account" asp-action="Login" class="welcome-button ajax-nav-link" 
-               data-url="@Url.Action("Login", "Account")">Log in</a>
-            <a asp-controller="Account" asp-action="Register" class="welcome-button ajax-nav-link" 
-               data-url="@Url.Action("Register", "Account")">Sign up</a>
+            <a class="ajax-nav-link welcome-button" asp-controller="Account" asp-action="Login">Log in</a>
+            <a class="welcome-button ajax-nav-link" asp-controller="Account" asp-action="Register">Sign up</a>
         </div>
     }
 </div>

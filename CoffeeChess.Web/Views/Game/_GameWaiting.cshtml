@@ -1,5 +1,6 @@
 ﻿@model CoffeeChess.Web.Models.ViewModels.GameSettingsViewModel
 
+<div data-page-module="game-waiting"></div>
 <div id="gameSettings" data-game-settings='@Json.Serialize(Model)'></div>
 
 <div class="waiting-panel">
@@ -19,5 +20,5 @@
             <span class="condition">@Model.MinRating — @(Model.MaxRating == int.MaxValue ? "Any" : Model.MaxRating)</span>
         </div>
     </div>
-    <a asp-controller="Game" asp-action="GameCreation" class="cancel-button">Cancel</a>
+    <a class="ajax-nav-link cancel-button" asp-controller="Game" asp-action="GameCreation">Cancel</a>
 </div>

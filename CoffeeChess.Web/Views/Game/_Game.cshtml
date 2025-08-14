@@ -1,12 +1,5 @@
-﻿@using CoffeeChess.Infrastructure.Identity
-@using Microsoft.AspNetCore.Identity
-@inject SignInManager<UserModel> SignInManager
-@inject UserManager<UserModel> UserManager
-
+﻿<div data-page-module="game-play"></div>
 <div class="game-left-panel">
-    <div class="music-player-panel">
-
-    </div>
     <div class="chat-panel">
         <p class="chat-title">Chat</p>
         <div id="chatMessages" class="milk-scrollable">
@@ -123,18 +116,9 @@
         <button id="analyzeButton" class="result-button">
             Review
         </button>
-        <a id="goToMainMenuButton" class="result-button" asp-controller="Game"  asp-action="GameCreation">
+        <a id="goToMainMenuButton" class="ajax-nav-link result-button" 
+           asp-controller="Game"  asp-action="GameCreation">
             Menu
         </a>
     </div>
 </div>
-
-@if (SignInManager.IsSignedIn(User))
-{
-    <div id="currentUserData" data-username="@UserManager.GetUserName(User)" style="display: none;"></div>
-}
-else
-{
-    <div id="currentUserData" data-username="You" style="display: none;"></div>
-    <!-- Имя для гостя -->
-}

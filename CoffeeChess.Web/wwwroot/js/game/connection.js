@@ -12,8 +12,15 @@ import { loadUi,
 import { GameActionType } from "./enums/GameActionType.js";
 import { GameHubEvents } from "./enums/GameHubEvents.js";
 
-$(document).ready(() => {
-    const connection = new signalR.HubConnectionBuilder()
+let connection;
+let gameManager;
+let chatManager;
+
+const init = async () => {
+    await loadScript("/lib/chess.js/chess.min.js");
+    await loadScript("/lib/chessboardjs/chessboard-1.0.0.js");
+    
+    connection = new signalR.HubConnectionBuilder()
         .withUrl("/gameHub")
         .configureLogging(signalR.LogLevel.Information)
         .build();
@@ -21,13 +28,13 @@ $(document).ready(() => {
     const pathParts = window.location.pathname.split('/');
     const gameId = pathParts[pathParts.length - 1];
     
-    const gameManager = new GameManager(
+    gameManager = new GameManager(
         connection, 
         gameId, 
         localStorage.getItem('isWhite') === "true",
         localStorage.getItem('totalMillisecondsLeft')
     );
-    const chatManager = new ChatManager(connection, gameId);
+    chatManager = new ChatManager(connection, gameId);
     loadUi(connection, gameManager, gameId);
     
     connection.on(GameHubEvents.MoveMade, (pgn, newWhiteMillisecondsLeft, newBlackMillisecondsLeft) => {
@@ -76,4 +83,13 @@ $(document).ready(() => {
     });
     
     connection.start();
-});
+};
+
+const destroy = () => {
+    connection.stop();
+    connection = null;
+    gameManager = null;
+    chatManager = null;
+}
+
+export default { init, destroy };

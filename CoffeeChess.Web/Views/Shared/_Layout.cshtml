@@ -17,30 +17,30 @@
 <header class="app-header">
     <nav class="main-nav">
         <div class="nav-left">
-            <a class="ajax-nav-link nav-link" data-url="@Url.Action("GameCreation", "Game")" 
-               asp-controller="Game" asp-action="GameCreation">Play</a>
+            <a class="ajax-nav-link nav-link" asp-controller="Game" asp-action="GameCreation">Play</a>
             <a asp-controller="Settings" asp-action="Index" class="nav-link">Settings</a>
         </div>
         <div class="nav-logo">
-            <a asp-controller="Home" asp-action="Index">
+            <a class="ajax-nav-link" asp-controller="Home" asp-action="Index">
                 <img src="~/img/coffee-cup.png" alt="Coffee Chess Logo"/>
             </a>
         </div>
-        @if (User.Identity.IsAuthenticated)
+        @if (User.Identity is not null && User.Identity.IsAuthenticated)
         {
             <div class="nav-right">
-                <a asp-controller="GamesHistory" asp-action="GamesHistory" id="username" 
-                   class="nav-link">@User.Identity.Name</a>
-                <a asp-controller="GamesHistory" asp-action="GamesHistory" class="nav-avatar">
-                    <img src="/img/empty-avatar-icon.png"/>
+                <a id="username" class="ajax-nav-link nav-link"
+                   asp-controller="GamesHistory" asp-action="GamesHistory">@User.Identity.Name</a>
+                <a class="ajax-nav-link nav-avatar"
+                   asp-controller="GamesHistory" asp-action="GamesHistory">
+                    <img src="/img/empty-avatar-icon.png" alt="avatar"/>
                 </a>
             </div>
         }
         else
         {
             <div class="nav-right">
-                <a asp-controller="Account" asp-action="Login" class="nav-link">Log in</a>
-                <a asp-controller="Account" asp-action="Register" class="nav-link">Sign up</a>
+                <a class="ajax-nav-link nav-link" asp-controller="Account" asp-action="Login">Log in</a>
+                <a class="ajax-nav-link nav-link" asp-controller="Account" asp-action="Register">Sign up</a>
             </div>
         }
     </nav>

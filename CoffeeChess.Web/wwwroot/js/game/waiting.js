@@ -2,22 +2,24 @@
 import { GameHubMethods } from "./enums/GameHubMethods.js";
 import { animateSearching } from "./ui.js";
 
-$(async () => {
+let connection;
+
+const init = async () => {
     await document.fonts.ready;
     animateSearching();
     
-    const connection = new signalR.HubConnectionBuilder()
+    connection = new signalR.HubConnectionBuilder()
         .withUrl("/gameHub")
         .configureLogging(signalR.LogLevel.Information)
         .build();
     
-    connection.on(GameHubEvents.GameStarted, (gameId, isWhite, whitePlayerInfo,
+    connection.on(GameHubEvents.GameStarted, async (gameId, isWhite, whitePlayerInfo,
                                               blackPlayerInfo, totalMillisecondsLeft) => {
         localStorage.setItem("totalMillisecondsLeft", totalMillisecondsLeft);
         localStorage.setItem("isWhite", isWhite);
         localStorage.setItem("whitePlayerInfo", JSON.stringify(whitePlayerInfo));
         localStorage.setItem("blackPlayerInfo", JSON.stringify(blackPlayerInfo));
-        window.location.href = `/Game/Play/${gameId}`;
+        await loadContent(`/Game/Play/${gameId}`);
     });
 
     const gameSettings = $("#gameSettings").data('gameSettings');
@@ -29,4 +31,12 @@ $(async () => {
     } catch (err) {
         console.error(err.toString());
     }
-});
+};
+
+const destroy = () => {
+    connection.stop();
+    connection = null;
+};
+
+export default { init, destroy };
+

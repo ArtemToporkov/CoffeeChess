@@ -1,6 +1,6 @@
 ﻿import { GameResult } from "../enums/GameResult.js";
 
-$(document).ready(async () => {
+const init = async () => {
     const pageSize = 10;
     const maxPaginationButtons = 7;
 
@@ -24,13 +24,12 @@ $(document).ready(async () => {
     const pagesCount = Math.ceil(gamesCount / pageSize);
     fillPaginationPanel(username, 1, pageSize, pagesCount, maxPaginationButtons);
     await getGamesAndAppendToHistory(username, 1, pageSize);
-});
+};
 
 function fillPaginationPanel(username, current, pageSize, total, maxPaginationButtons) {
     const $paginationPanel = $('#paginationPanel');
     $paginationPanel.empty();
     const pageNumbers = getPageNumbersForPagination(current, total, maxPaginationButtons);
-    console.log(pageNumbers)
     for (let pageNumber of pageNumbers) {
         if (pageNumber === '...') {
             const $ellipsis = $('<span>').addClass('ellipsis').text('...');
@@ -60,8 +59,8 @@ async function getGamesAndAppendToHistory(username, pageNumber, pageSize) {
     for (const game of games) {
         const $gameEl = buildGameElement(username, game).addClass('hide');
         gamesElements.push($gameEl);
-        $gameEl.on('click', e => {
-            window.location.assign(`/GamesHistory/Review/${game.gameId}`);
+        $gameEl.on('click', async e => {
+            await loadContent(`/GamesHistory/Review/${game.gameId}`);
         });
     }
 
@@ -226,3 +225,9 @@ function getPageNumbersForPagination(current, totalPages, maxButtons) {
 
     return result;
 }
+
+const destroy = () => {
+    
+}
+
+export default { init, destroy };

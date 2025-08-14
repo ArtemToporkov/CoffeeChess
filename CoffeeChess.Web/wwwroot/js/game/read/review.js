@@ -2,9 +2,16 @@
 import { GameResult } from "../enums/GameResult.js";
 import { GameRole } from "../enums/GameRole.js"
 import { GameResultReason } from "../enums/GameResultReason.js";
-import {closeResultPanel, playRatingsChangeAnimation, setTimerHighlighting} from "../ui.js";
+import { closeResultPanel, playRatingsChangeAnimation, setTimerHighlighting } from "../ui.js";
 
-($(document).ready(async () => {
+let chess;
+let board;
+let historyManager;
+
+const init = async () => {
+    await loadScript("/lib/chess.js/chess.min.js");
+    await loadScript("/lib/chessboardjs/chessboard-1.0.0.js");
+    
     const pathParts = window.location.pathname.split('/');
     const gameId = pathParts[pathParts.length - 1];
     const game = await $.ajax({
@@ -25,7 +32,7 @@ import {closeResultPanel, playRatingsChangeAnimation, setTimerHighlighting} from
     setUiForGame(gameRole, game);
     $('#resultInfoButton').on('click', () => onResultInfoButtonPressed(gameRole, game));
     $('#closeButton').on('click', closeResultPanel);
-}));
+};
 
 function setDocumentTitle(gameRole, game) {
     switch (gameRole) {
@@ -45,9 +52,9 @@ function setDocumentTitle(gameRole, game) {
 }
 
 function setUiForGame(gameRole, game) {
-    const chess = new Chess();
-    const board = new ChessBoard('reviewBoard', getConfig());
-    const historyManager = new HistoryManager(
+    chess = new Chess();
+    board = new ChessBoard('reviewBoard', getConfig());
+    historyManager = new HistoryManager(
         'reviewBoard',
             fen => board.position(fen), 
         viewHistoryTimers,
@@ -227,3 +234,11 @@ function viewHistoryTimers(time, isWhite, isWhiteMoved) {
     }
     setTimerHighlighting(!isWhiteMoved);
 }
+
+const destroy = () => {
+    chess = null;
+    board = null;
+    historyManager = null;
+}
+
+export default { init, destroy };

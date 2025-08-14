@@ -33,15 +33,17 @@
         <div class="form-section">
             <p class="extended-subtitle">Rating range</p>
             <div class="form-values">
-                <input type="number" min="0" max="4000" placeholder="0" onchange="validateRating(this)" class="form-input" id="minRating"/>
+                <input type="number" min="0" max="4000" placeholder="0" 
+                       onchange="validateRating(this)" class="form-input" id="minRating"/>
                 <p class="separator">—</p>
-                <input type="number" min="0" max="4000" placeholder="any" onchange="validateRating(this)" class="form-input" id="maxRating"/>
+                <input type="number" min="0" max="4000" placeholder="any" 
+                       onchange="validateRating(this)" class="form-input" id="maxRating"/>
             </div>
         </div>
         
         <button type="submit" class="play-button">Play</button>
     </form>
-    <a class="fast-start" asp-action="GameCreation" asp-controller="Game">Fast start</a>
+    <a class="ajax-nav-link fast-start" asp-action="GameCreation" asp-controller="Game">Fast start</a>
 </div>
 <script>
 function validateTime(input) {
