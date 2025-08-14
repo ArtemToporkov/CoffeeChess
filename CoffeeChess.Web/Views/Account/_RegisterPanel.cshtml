@@ -1,6 +1,6 @@
 ﻿@model CoffeeChess.Web.Models.ViewModels.RegisterViewModel
 
-<div class="register-panel" data-animation-order="0">
+<div class="register-panel hideable" data-animation-order="1">
     <h1 class="register-title">Registration</h1>
     <form asp-action="Register" asp-route-returnurl="@ViewBag.ReturnUrl" method="post" id="registerForm">
         @Html.AntiForgeryToken() 

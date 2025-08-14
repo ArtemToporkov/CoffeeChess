@@ -4,7 +4,7 @@
 @inject UserManager<UserModel> UserManager
 
 <div data-page-module="game-review"></div>
-<div class="game-left-panel">
+<div class="game-left-panel hideable" data-animation-order="1">
     <div class="spacer-for-music-player"></div>
     <div class="chat-panel">
         <p class="chat-title">Chat</p>
@@ -16,7 +16,7 @@
         </div>
     </div>
 </div>
-<div class="game-middle-panel">
+<div class="game-middle-panel hideable" data-animation-order="2">
     <div class="player-info">
         <div class="player-avatar">
             <img src="/img/empty-avatar-icon.png" alt="Avatar"/>
@@ -60,7 +60,7 @@
     </div>
 </div>
 
-<div class="game-right-panel">
+<div class="game-right-panel hideable" data-animation-order="3">
     <div class="moves-history">
         <p class="history-title">Moves</p>
         <div class="history milk-scrollable" id="history">

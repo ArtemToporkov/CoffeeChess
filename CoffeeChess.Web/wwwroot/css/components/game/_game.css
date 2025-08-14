@@ -62,8 +62,8 @@ body:has(.music-player-panel:not(.hide).extended) .spacer-for-music-player {
 .game-right-panel {
     position: absolute;
     top: 54.5%;
-    right: calc((50% - 570px / 2) / 2);
-    transform: translate(50%, -50%);
+    left: calc(100% - (50% - 570px / 2) / 2);
+    transform: translate(-50%, -50%);
 
     display: flex;
     flex-direction: column;

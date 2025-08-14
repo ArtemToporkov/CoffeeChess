@@ -32,16 +32,22 @@ const pageModules = {
 
 let currentPageModule;
 
-async function loadContent(url, shouldPushToHistory = true) {
+async function loadContent(url, shouldPushToHistory = true, delay = 100) {
     const $mainContainer = $('main[role="main"]');
     try {
         const data = await $.get(url);
+        await hideEverythingHideable(delay);
+        
         if (currentPageModule && currentPageModule.destroy) {
             currentPageModule.destroy();
             currentPageModule = null;
         }
-
-        $mainContainer.html(data);
+        
+        const $parsed = $(data);
+        $parsed.filter('.hideable').add($parsed.find('.hideable')).each((i, el) => $(el).addClass('hide'));
+        $mainContainer.html($parsed);
+        requestAnimationFrame(async () => await unhideEverythingHideable(delay));
+        
         if (shouldPushToHistory)
             history.pushState({path: url}, '', url);
 
@@ -55,6 +61,38 @@ async function loadContent(url, shouldPushToHistory = true) {
     } catch (e) {
         throw new Error(`Could not load content: ${e}`);
     }
+}
+
+async function hideEverythingHideable(delay) {
+    let transitionDuration = 700;
+    let toWaitOverall = 0;
+    $('.hideable').each((i, el) => {
+        const $el = $(el);
+        const order = parseInt($el.data('animation-order')) || 1;
+        const toWaitToBeginTransition = (order - 1) * delay;
+        setTimeout(() => {
+            $el.addClass('hide');
+        }, toWaitToBeginTransition);
+        if (toWaitToBeginTransition > toWaitOverall)
+            toWaitOverall = toWaitToBeginTransition;
+    });
+    await new Promise(resolve => setTimeout(resolve, toWaitOverall + transitionDuration));
+}
+
+async function unhideEverythingHideable(delay) {
+    let transitionDuration = 1000;
+    let toWaitOverall = 0;
+    $('.hideable').each((i, el) => {
+        const $el = $(el);
+        const order = parseInt($el.data('animation-order')) || 1;
+        const toWaitToBeginTransition = (order - 1) * delay;
+        setTimeout(() => {
+            $el.removeClass('hide');
+        }, toWaitToBeginTransition);
+        if (toWaitToBeginTransition > toWaitOverall)
+            toWaitOverall = toWaitToBeginTransition;
+    });
+    await new Promise(resolve => setTimeout(resolve, toWaitOverall + transitionDuration));
 }
 
 function loadScript(src) {
