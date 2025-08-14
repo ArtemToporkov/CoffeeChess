@@ -45,6 +45,16 @@
         }
     </nav>
 </header>
+
+<video autoplay muted loop class="background-video">
+    <source src="~/img/background.mp4" type="video/mp4">
+</video>
+<audio id="musicPlayer"></audio>
+
+<main role="main" class="pb-3">
+    @RenderBody()
+</main>
+
 <div class="music-player-panel">
     <div class="music-player-info">
         <button id="hideButton" class="hide-button"></button>
@@ -78,14 +88,6 @@
         
     </div>
 </div>
-<video autoplay muted loop class="background-video">
-    <source src="~/img/background.mp4" type="video/mp4">
-</video>
-<audio id="musicPlayer"></audio>
-
-<main role="main" class="pb-3">
-    @RenderBody()
-</main>
 
 <script src="~/lib/jquery/dist/jquery.min.js"></script>
 <script type="module" src="~/js/music-player/music-player.js"></script>
