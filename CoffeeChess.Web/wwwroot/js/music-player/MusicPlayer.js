@@ -45,6 +45,7 @@ export class MusicPlayer {
         this.#setNextPreviousEvents(true);
         this.#setNextPreviousEvents(false);
         this.#setExtendButton();
+        this.#setHideButton();
     }
     
     async start() {
@@ -187,6 +188,14 @@ export class MusicPlayer {
                 $('.music-player-panel').addClass('extended');
                 $button.addClass('pressed');
             }
+        });
+    }
+    
+    #setHideButton() {
+        const $panel = $('.music-player-panel');
+        const $button = $('#hideButton');
+        $button.on('pointerdown', e => {
+            $panel.toggleClass('hide');
         });
     }
     

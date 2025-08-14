@@ -25,11 +25,35 @@
             0 0 0 8px var(--dark-coffee),
             0 0 0 12px var(--milk-coffee);
     
-    transition: height 0.6s cubic-bezier(0.65, 0, 0.36, 1);
+    transition: height 0.6s cubic-bezier(0.65, 0, 0.36, 1), 
+                transform 0.6s cubic-bezier(0.65, 0, 0.36, 1),
+                left 0.6s cubic-bezier(0.65, 0, 0.36, 1);
+}
+
+.music-player-panel.hide {
+    transform: translateX(-100%);
+    left: 20px;
 }
 
 .music-player-panel.extended {
-    height: 570px;
+    height: 550px;
+}
+
+.hide-button {
+    position: absolute;
+    width: 25px;
+    height: 100%;
+    left: 0;
+    top: 0;
+}
+
+.music-player-panel.extended .hide-button {
+    display: none;
+}
+
+.music-player-panel.hide .hide-button {
+    left: unset;
+    right: 0;
 }
 
 .music-player-info {
@@ -102,6 +126,7 @@
     justify-content: center;
 }
 
+.hide-button,
 .song-control,
 .extend-button {
     display: flex;
