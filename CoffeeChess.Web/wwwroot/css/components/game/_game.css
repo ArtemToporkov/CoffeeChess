@@ -30,7 +30,7 @@ body:has(.music-player-panel.hide) .spacer-for-music-player {
 }
 
 body:has(.music-player-panel:not(.hide).extended) .spacer-for-music-player {
-    height: 450px;
+    height: 380px;
 }
 
 .spacer-for-music-player {
@@ -82,6 +82,7 @@ body:has(.music-player-panel:not(.hide).extended) .spacer-for-music-player {
     height: 100%;
     position: absolute;
     pointer-events: none;
+    z-index: 3;
 
     transition: backdrop-filter 0.3s ease;
 }
