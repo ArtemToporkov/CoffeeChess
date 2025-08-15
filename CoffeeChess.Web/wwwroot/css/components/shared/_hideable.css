@@ -1,11 +1,9 @@
 ﻿.hideable {
-    transition: top 0.7s ease, 
-                bottom 0.7s ease, 
+    transition: top 0.7s ease,
                 transform 0.7s ease;
 }
 
 .hideable.hide {
-    top: -10px;
-    bottom: unset;
-    transform: translate(-50%, -100%);
+    top: 110%;
+    transform: translate(-50%, 0);
 }
