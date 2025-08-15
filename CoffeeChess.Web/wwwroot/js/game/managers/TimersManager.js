@@ -12,7 +12,7 @@
         this.updateTimers();
     }
     
-    destroy() {
+    async destroy() {
         this.stop();
     }
     

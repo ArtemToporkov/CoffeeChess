@@ -1,6 +1,7 @@
 ﻿import { GameHubEvents } from "./enums/GameHubEvents.js";
 import { GameHubMethods } from "./enums/GameHubMethods.js";
 import { animateSearching } from "./ui.js";
+import { ajaxNavigator } from "../site.js"
 
 let connection;
 
@@ -19,7 +20,7 @@ const init = async () => {
         localStorage.setItem("isWhite", isWhite);
         localStorage.setItem("whitePlayerInfo", JSON.stringify(whitePlayerInfo));
         localStorage.setItem("blackPlayerInfo", JSON.stringify(blackPlayerInfo));
-        await loadContent(`/Game/Play/${gameId}`);
+        await ajaxNavigator.loadContent(`/Game/Play/${gameId}`);
     });
 
     const gameSettings = $("#gameSettings").data('gameSettings');
@@ -33,8 +34,8 @@ const init = async () => {
     }
 };
 
-const destroy = () => {
-    connection.stop();
+const destroy = async () => {
+    await connection.stop();
     connection = null;
 };
 

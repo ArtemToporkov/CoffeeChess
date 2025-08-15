@@ -27,7 +27,7 @@ export class ChatManager {
         });
     }
     
-    destroy() {
+    async destroy() {
         this.#chatInput.off(this.eventNamespace);
     }
 

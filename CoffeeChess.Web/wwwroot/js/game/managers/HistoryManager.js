@@ -24,7 +24,7 @@ export class HistoryManager {
         this.#viewHistoryTimerCallback = viewHistoryTimerCallback;
     }
     
-    destroy() {
+    async destroy() {
         $(document).off(this.#eventNamespace);
     }
     

@@ -1,4 +1,5 @@
 ﻿import { GameResult } from "../enums/GameResult.js";
+import { ajaxNavigator } from "../../site.js";
 
 const init = async () => {
     const pageSize = 10;
@@ -60,7 +61,7 @@ async function getGamesAndAppendToHistory(username, pageNumber, pageSize) {
         const $gameEl = buildGameElement(username, game).addClass('hide');
         gamesElements.push($gameEl);
         $gameEl.on('click', async e => {
-            await loadContent(`/GamesHistory/Review/${game.gameId}`);
+            await ajaxNavigator.loadContent(`/GamesHistory/Review/${game.gameId}`);
         });
     }
 
@@ -227,7 +228,7 @@ function getPageNumbersForPagination(current, totalPages, maxButtons) {
     return result;
 }
 
-const destroy = () => {
+const destroy = async () => {
     
 }
 

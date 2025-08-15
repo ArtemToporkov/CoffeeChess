@@ -33,9 +33,9 @@ export class GameManager {
         this.#isGameOver = false;
     }
     
-    destroy() {
-        this.#historyManager.destroy();
-        this.#timersManager.destroy();
+    async destroy() {
+        await this.#historyManager.destroy();
+        await this.#timersManager.destroy();
     }
     
     updateGameState(pgn, newWhiteMillisecondsLeft, newBlackMillisecondsLeft) {

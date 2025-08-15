@@ -3,14 +3,15 @@ import { GameResult } from "../enums/GameResult.js";
 import { GameRole } from "../enums/GameRole.js"
 import { GameResultReason } from "../enums/GameResultReason.js";
 import { closeResultPanel, playRatingsChangeAnimation, setTimerHighlighting } from "../ui.js";
+import { ajaxNavigator } from "../../site.js";
 
 let chess;
 let board;
 let historyManager;
 
 const init = async () => {
-    await loadScript("/lib/chess.js/chess.min.js");
-    await loadScript("/lib/chessboardjs/chessboard-1.0.0.js");
+    await ajaxNavigator.loadScript("/lib/chess.js/chess.min.js");
+    await ajaxNavigator.loadScript("/lib/chessboardjs/chessboard-1.0.0.js");
     
     const pathParts = window.location.pathname.split('/');
     const gameId = pathParts[pathParts.length - 1];
@@ -235,7 +236,7 @@ function viewHistoryTimers(time, isWhite, isWhiteMoved) {
     setTimerHighlighting(!isWhiteMoved);
 }
 
-const destroy = () => {
+const destroy = async () => {
     chess = null;
     board = null;
     historyManager.destroy();

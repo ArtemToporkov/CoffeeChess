@@ -11,14 +11,15 @@ import { loadUi,
     setResultPoints } from "./ui.js";
 import { GameActionType } from "./enums/GameActionType.js";
 import { GameHubEvents } from "./enums/GameHubEvents.js";
+import { ajaxNavigator } from "../site.js";
 
 let connection;
 let gameManager;
 let chatManager;
 
 const init = async () => {
-    await loadScript("/lib/chess.js/chess.min.js");
-    await loadScript("/lib/chessboardjs/chessboard-1.0.0.js");
+    await ajaxNavigator.loadScript("/lib/chess.js/chess.min.js");
+    await ajaxNavigator.loadScript("/lib/chessboardjs/chessboard-1.0.0.js");
     
     connection = new signalR.HubConnectionBuilder()
         .withUrl("/gameHub")
@@ -85,8 +86,8 @@ const init = async () => {
     connection.start();
 };
 
-const destroy = () => {
-    connection.stop();
+const destroy = async () => {
+    await connection.stop();
     connection = null;
     gameManager.destroy();
     gameManager = null;
