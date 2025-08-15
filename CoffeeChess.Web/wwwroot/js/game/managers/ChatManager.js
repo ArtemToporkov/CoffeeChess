@@ -6,14 +6,16 @@ export class ChatManager {
     #gameId;
     #chatInput;
     #chatMessages;
+    eventNamespace;
     
     constructor(connection, gameId) {
         this.#connection = connection;
         this.#gameId = gameId;
         this.#chatInput = $('#chatInput');
         this.#chatMessages = $('#chatMessages');
+        this.eventNamespace = `.chatInput_${gameId}`;
 
-        this.#chatInput.on('keypress', e => {
+        this.#chatInput.on(`keypress${this.eventNamespace}`, e => {
             if (e.key === 'Enter') {
                 e.preventDefault();
                 const messageText = this.#chatInput.val().trim();
@@ -23,7 +25,10 @@ export class ChatManager {
                 }
             }
         });
-        
+    }
+    
+    destroy() {
+        this.#chatInput.off(this.eventNamespace);
     }
 
     addMessageToChat(sender, text) {

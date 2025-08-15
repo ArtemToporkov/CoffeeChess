@@ -6,6 +6,7 @@ export class HistoryManager {
     #movesHistory;
     #viewHistoryByBoard;
     #viewHistoryTimerCallback;
+    #eventNamespace;
     
     constructor(
         boardName, 
@@ -15,11 +16,16 @@ export class HistoryManager {
         fromFen="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq — 0 1"
     ) {
         this.#boardName = boardName;
+        this.#eventNamespace = `.historyNavigation_${boardName}`;
         this.#bindArrowKeys();
         this.#viewHistoryByBoard = viewHistoryBoardCallback;
         this.currentPly = 0;
         this.#movesHistory = [{move: null, fen: fromFen, timeAfterMove: fromTime}];
         this.#viewHistoryTimerCallback = viewHistoryTimerCallback;
+    }
+    
+    destroy() {
+        $(document).off(this.#eventNamespace);
     }
     
     moveToLastMove() {
@@ -108,7 +114,7 @@ export class HistoryManager {
     }
     
     #bindArrowKeys() {
-        $(document).on('keydown', e => {
+        $(document).on(`keydown${this.#eventNamespace}`, e => {
             switch (e.key) {
                 case 'ArrowLeft':
                     e.preventDefault();

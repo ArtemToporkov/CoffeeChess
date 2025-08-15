@@ -12,6 +12,10 @@
         this.updateTimers();
     }
     
+    destroy() {
+        this.stop();
+    }
+    
     start() {
         this.#timer = setInterval(() => {
             if (this.#isWhiteTurn) {

@@ -238,6 +238,7 @@ function viewHistoryTimers(time, isWhite, isWhiteMoved) {
 const destroy = () => {
     chess = null;
     board = null;
+    historyManager.destroy();
     historyManager = null;
 }
 

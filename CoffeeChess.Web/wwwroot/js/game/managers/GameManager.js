@@ -33,6 +33,11 @@ export class GameManager {
         this.#isGameOver = false;
     }
     
+    destroy() {
+        this.#historyManager.destroy();
+        this.#timersManager.destroy();
+    }
+    
     updateGameState(pgn, newWhiteMillisecondsLeft, newBlackMillisecondsLeft) {
         this.#game.load_pgn(pgn);
 

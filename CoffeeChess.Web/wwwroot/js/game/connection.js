@@ -88,7 +88,9 @@ const init = async () => {
 const destroy = () => {
     connection.stop();
     connection = null;
+    gameManager.destroy();
     gameManager = null;
+    chatManager.destroy();
     chatManager = null;
 }
 

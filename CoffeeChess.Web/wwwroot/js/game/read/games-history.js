@@ -67,6 +67,7 @@ async function getGamesAndAppendToHistory(username, pageNumber, pageSize) {
     const $gamesHistory = $('#gamesHistory');
     $gamesHistory.empty();
     gamesElements.forEach($gameEl => $gamesHistory.append($gameEl));
+    $gamesHistory.scrollTop(0);
     
     const delay = 100;
     $gamesHistory.find('.game-info-container').each((i, gameInfo) => {
