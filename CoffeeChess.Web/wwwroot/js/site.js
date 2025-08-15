@@ -1,7 +1,9 @@
 ﻿$(document).ready(function () {
-    const initialPageModule = $('main[role="main"]').children().first().data('page-module');
-    if (initialPageModule) {
-        pageModules[initialPageModule]().then(module => {
+    const initialPageModuleSrc = $('main[role="main"]').children().first().data('page-module-src');
+    if (initialPageModuleSrc) {
+        import(initialPageModuleSrc).then(module => {
+            if (!module)
+                return;
             currentPageModule = module.default;
             if (currentPageModule && currentPageModule.init)
                 currentPageModule.init();
@@ -28,13 +30,6 @@
     history.replaceState({ path: window.location.pathname }, '', window.location.pathname);
 });
 
-const pageModules = {
-    "game-waiting": () => import('/js/game/waiting.js'),
-    "game-play": () => import('/js/game/connection.js'),
-    "game-review": () => import('/js/game/read/review.js'),
-    "games-history": () => import('/js/game/read/games-history.js')
-}
-
 let currentPageModule;
 
 async function loadContent(url, shouldPushToHistory = true, delay = 100) {
@@ -56,9 +51,9 @@ async function loadContent(url, shouldPushToHistory = true, delay = 100) {
         if (shouldPushToHistory)
             history.pushState({path: url}, '', url);
 
-        const moduleName = $mainContainer.children().first().data('page-module');
-        if (moduleName) {
-            currentPageModule = (await pageModules[moduleName]()).default;
+        const moduleSrc = $mainContainer.children().first().data('page-module-src');
+        if (moduleSrc) {
+            currentPageModule = (await import(moduleSrc)).default;
             if (currentPageModule && currentPageModule.init) {
                 currentPageModule.init();
             }
