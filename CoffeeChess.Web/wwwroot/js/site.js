@@ -11,6 +11,11 @@
     $(document).on('click', '.ajax-nav-link', async e => {
         e.preventDefault();
         const url = $(e.currentTarget).prop('href');
+        
+        const parsedUrl = new URL(url, window.location.origin);
+        if (parsedUrl.pathname === window.location.pathname)
+            return;
+        
         await loadContent(url);
     });
 
