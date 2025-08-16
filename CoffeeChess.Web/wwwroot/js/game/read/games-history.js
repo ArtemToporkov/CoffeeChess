@@ -23,36 +23,12 @@ const init = async () => {
     }
     
     const pagesCount = Math.ceil(gamesCount / pageSize);
-    fillPaginationPanel(username, 1, pageSize, pagesCount, maxPaginationButtons);
+    if (pagesCount > 1) {
+        buildPaginationPanel(pagesCount, maxPaginationButtons);
+        bindPaginationButtonsEvents(username, pagesCount, pageSize, maxPaginationButtons);
+    }
     await getGamesAndAppendToHistory(username, 1, pageSize);
 };
-
-function fillPaginationPanel(username, current, pageSize, total, maxPaginationButtons) {
-    const $paginationPanel = $('#paginationPanel');
-    $paginationPanel.empty();
-    const pageNumbers = getPageNumbersForPagination(current, total, maxPaginationButtons);
-    for (let pageNumber of pageNumbers) {
-        if (pageNumber === '...') {
-            const $ellipsis = $('<span>').addClass('ellipsis').text('...');
-            $paginationPanel.append($ellipsis);
-            continue;
-        }
-        const $button = buildPaginationButton(pageNumber, pageNumber === current);
-        $paginationPanel.append($button);
-        if (pageNumber !== current)
-            $button.on('click', async e => {
-                await getGamesAndAppendToHistory(username, pageNumber, pageSize);
-                fillPaginationPanel(username, pageNumber, pageSize, total, maxPaginationButtons);
-            });
-    }
-}
-
-function buildPaginationButton(pageNumber, isCurrent) {
-    return $('<a>')
-        .addClass('pagination-button')
-        .addClass(isCurrent ? 'current' : '')
-        .text(pageNumber);
-}
 
 async function getGamesAndAppendToHistory(username, pageNumber, pageSize) {
     const games = await getGames(pageNumber, pageSize);
@@ -199,33 +175,97 @@ function getIsWhite(username, game) {
     return username === game.whitePlayerName;
 }
 
-function getPageNumbersForPagination(current, totalPages, maxButtons) {
-    if (totalPages <= maxButtons) 
-        return Array.from({ length: totalPages }, (_, i) => i + 1);
+function buildPaginationPanel(totalPages, maxButtons) {
+    const innerPagesInfo = getBetweenPageNumbersForPagination(1, totalPages, maxButtons - 2);
+    setEllipsis(0, innerPagesInfo.leftEllipsis);
+    setEllipsis(1, innerPagesInfo.rightEllipsis);
+    const $between = $('#innerPaginationButtons');
+    for (const pageNumber of innerPagesInfo.pageNumbers) {
+        $between.append($('<a>').addClass('pagination-button').text(pageNumber));
+    }
+    $('#paginationPanel').append($('<a>').addClass('pagination-button').text(totalPages));
+}
 
-    const innerCount = maxButtons - 2;
-    let start = current - Math.floor(innerCount / 2);
-    let end = start + innerCount - 1;
+function reconstructPaginationButtons(toBeCurrentPageNumber, totalPages, maxButtons) {
+    const innerPagesInfo = getBetweenPageNumbersForPagination(toBeCurrentPageNumber, totalPages, maxButtons - 2);
+    setEllipsis(0, innerPagesInfo.leftEllipsis);
+    setEllipsis(1, innerPagesInfo.rightEllipsis);
+    const $between = $('#innerPaginationButtons');
+    $between.children().each((i, el) => {
+        const $el = $(el);
+        const pageNumber = innerPagesInfo.pageNumbers[i];
+        $el.text(innerPagesInfo.pageNumbers[i]);
+        $el.toggleClass('current', pageNumber === toBeCurrentPageNumber)
+    });
+    const panelChildren = $('#paginationPanel').children();
+    panelChildren.eq(0).toggleClass('current', 1 === toBeCurrentPageNumber);
+    panelChildren.eq(panelChildren.length - 1).toggleClass('current', totalPages === toBeCurrentPageNumber);
+}
+
+function bindPaginationButtonsEvents(username, totalPages, pageSize, maxButtons) {
+    const $panel = $('#paginationPanel');
+    const panelChildren = $panel.children();
+    const toBind = [panelChildren.eq(0)]
+    $('#innerPaginationButtons').children().each((i, el) => toBind.push($(el)));
+    const $last = panelChildren.eq(panelChildren.length - 1);
+    if ($last.hasClass('pagination-button'))
+        toBind.push($last);
+    
+    toBind.forEach($el => {
+        $el.off('click').on('click', async () => {
+            const pageNumber = parseInt($el.text());
+            reconstructPaginationButtons(pageNumber, totalPages, maxButtons);
+            await getGamesAndAppendToHistory(username, pageNumber, pageSize);
+        })
+    })
+}
+
+function setEllipsis(ellipsisNumber, shouldSet) {
+    const $panel = $('#paginationPanel');
+    const $ellipsis = $panel.find('.ellipsis').eq(ellipsisNumber);
+    $ellipsis.text(shouldSet ? '…' : '');
+    $ellipsis.toggleClass('hide', !shouldSet);
+}
+
+function getBetweenPageNumbersForPagination(current, totalPages, maxInnerCount) {
+    if (totalPages - 2 <= maxInnerCount) {
+        const result = [];
+        for (let i = 2; i <= totalPages - 1; i++) {
+            result.push(i);
+        }
+        return {
+            leftEllipsis: false,
+            rightEllipsis: false,
+            pageNumbers: result
+        };
+    }
+
+    let start = current - Math.floor(maxInnerCount / 2);
+    let end = start + maxInnerCount - 1;
 
     if (start < 2) {
         start = 2;
-        end = start + innerCount - 1;
+        end = start + maxInnerCount - 1;
     }
     if (end > totalPages - 1) {
         end = totalPages - 1;
-        start = end - innerCount + 1;
+        start = end - maxInnerCount + 1;
     }
-
-    const result = [1];
+    let leftEllipsis = false
+    const result = [];
     if (start > 2) 
-        result.push('...');
+        leftEllipsis = true;
     for (let i = start; i <= end; i++) 
         result.push(i);
+    let rightEllipsis = false;
     if (end < totalPages - 1) 
-        result.push('...');
-    result.push(totalPages);
+        rightEllipsis = true;
 
-    return result;
+    return {
+        leftEllipsis: leftEllipsis,
+        rightEllipsis: rightEllipsis,
+        pageNumbers: result
+    };
 }
 
 const destroy = async () => {

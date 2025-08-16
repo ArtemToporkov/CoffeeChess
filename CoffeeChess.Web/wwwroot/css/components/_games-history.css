@@ -193,6 +193,12 @@
     align-items: center;
     justify-content: center;
     width: 100%;
+    gap: 5px;
+}
+
+.pagination-between-first-last {
+    display: flex;
+    flex-direction: row;
     gap: 10px;
 }
 
@@ -236,4 +242,11 @@
     font-size: 14px;
     color: var(--dark-coffee);
     transform: translateX(-2px);
+    width: 13px;
+    transition: width 0.3s ease, opacity 0.3s ease;
+}
+
+.ellipsis.hide {
+    opacity: 0;
+    width: 0;
 }
