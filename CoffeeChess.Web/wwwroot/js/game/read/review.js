@@ -2,7 +2,7 @@
 import { GameResult } from "../enums/GameResult.js";
 import { GameRole } from "../enums/GameRole.js"
 import { GameResultReason } from "../enums/GameResultReason.js";
-import { closeResultPanel, playRatingsChangeAnimation, setTimerHighlighting } from "../ui.js";
+import { closePanel, showShareModal, playRatingsChangeAnimation, setTimerHighlighting } from "../ui.js";
 import { ajaxNavigator } from "../../site.js";
 
 let chess;
@@ -32,7 +32,8 @@ const init = async () => {
     setDocumentTitle(gameRole, game);
     setUiForGame(gameRole, game);
     $('#resultInfoButton').on('click', () => onResultInfoButtonPressed(gameRole, game));
-    $('#closeButton').on('click', closeResultPanel);
+    $('#closeButton').on('click', () => closePanel($('#resultPanel')));
+    $('#closeShareButton').on('click', () => closePanel($('#sharePanel')));
 };
 
 function setDocumentTitle(gameRole, game) {
@@ -57,7 +58,7 @@ function setUiForGame(gameRole, game) {
     board = new ChessBoard('reviewBoard', getConfig());
     historyManager = new HistoryManager(
         'reviewBoard',
-            fen => board.position(fen), 
+        fen => board.position(fen),
         viewHistoryTimers,
         getInitialTimeString(game)
     );
@@ -66,7 +67,7 @@ function setUiForGame(gameRole, game) {
     setResult(game);
     setResultInfo(gameRole, game);
     setTimers(getInitialTimeString(game));
-    
+
     for (let moveInfo of game.movesHistory) {
         const move = chess.move(moveInfo.san);
         if (move === null) {
@@ -78,6 +79,8 @@ function setUiForGame(gameRole, game) {
         historyManager.update(move, currentFen, timeAfterMove);
         historyManager.moveToLastMove();
     }
+
+    $('#shareButton').on('click', () => showShareModal(getPgn(game), chess.fen()))
 }
 
 function setNamesAndRatings(game) {
@@ -135,9 +138,9 @@ function setResultInfo(gameRole, game) {
     $('#resultInfo')
         .text(getGameResultReasonText(gameRole, game))
         .addClass(fontButtonsColorClass);
-    $('.result-info-title').addClass(fontButtonsColorClass);
+    $('.modal-section-title').addClass(fontButtonsColorClass);
     $('.result-info').addClass(fontButtonsColorClass);
-    $('.result-button').addClass(fontButtonsColorClass);
+    $('.modal-button').addClass(fontButtonsColorClass);
     $('#timeControl').text(`${game.minutes}+${game.increment}`);
     $('#playedAt').text(`${getPlayedDate(game)}`);
 }
@@ -234,6 +237,18 @@ function viewHistoryTimers(time, isWhite, isWhiteMoved) {
         $('#blackTimeLeft').text(time ? time : "--:--");
     }
     setTimerHighlighting(!isWhiteMoved);
+}
+
+function getPgn(game) {
+    const result = [];
+    let currentPly = 0;
+    for (const moveInfo of game.movesHistory) {
+        currentPly += 1;
+        result.push(currentPly % 2 !== 0 
+            ? `${Math.ceil(currentPly / 2)}. ${moveInfo.san}`
+            : ` ${moveInfo.san}\n`)
+    }
+    return result.join('');
 }
 
 const destroy = async () => {

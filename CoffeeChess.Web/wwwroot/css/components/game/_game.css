@@ -3,7 +3,7 @@
 @import "game-parts/_board-and-info.css";
 @import "game-parts/_moves-history.css";
 @import "game-parts/_draw-resignation.css";
-@import "game-parts/_result-modal.css";
+@import "game-parts/_modals.css";
 
 .game-left-panel {
     position: absolute;

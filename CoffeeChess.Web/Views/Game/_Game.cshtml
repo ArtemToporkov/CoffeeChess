@@ -100,24 +100,24 @@
     </div>
 </div>
 
-<div id="resultPanel" class="result-panel">
+<div id="resultPanel" class="modal-panel">
     <div class="result-detailed">
-        <p id="resultTitle" class="result-title"></p>
+        <p id="resultTitle" class="modal-title"></p>
         <p id="resultInfo" class="result-info"></p>
     </div>
-    <div class="result-info-section rating-section">
-        <p class="result-info-title">New rating:</p>
+    <div class="modal-section rating-section">
+        <p class="modal-section-title">New rating:</p>
         <div class="result-ratings-info">
             <p id="oldRating" class="result-info"></p>
             <p id="ratingDelta" class="result-info"></p>
             <p id="newRating" class="result-info"></p>
         </div>
     </div>
-    <div class="result-buttons">
-        <button id="analyzeButton" class="result-button">
+    <div class="modal-buttons">
+        <button id="analyzeButton" class="modal-button">
             Review
         </button>
-        <a id="goToMainMenuButton" class="ajax-nav-link result-button" 
+        <a id="goToMainMenuButton" class="ajax-nav-link modal-button" 
            asp-controller="Game"  asp-action="GameCreation">
             Menu
         </a>

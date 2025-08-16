@@ -1,9 +1,4 @@
-﻿@using CoffeeChess.Infrastructure.Identity
-@using Microsoft.AspNetCore.Identity
-@inject SignInManager<UserModel> SignInManager
-@inject UserManager<UserModel> UserManager
-
-<div data-page-module-src="/js/game/read/review.js"></div>
+﻿<div data-page-module-src="/js/game/read/review.js"></div>
 <div class="game-left-panel hideable" data-animation-order="1">
     <div class="spacer-for-music-player"></div>
     <div class="chat-panel">
@@ -81,31 +76,52 @@
 
 <div id="modalOverlay" class="modal-overlay"></div>
 
-<div id="resultPanel" class="result-panel review">
+<div id="sharePanel" class="modal-panel share">
+    <span class="modal-title dark">Share</span>
+    <div class="modal-sections">
+        <div class="modal-section dark">
+            <p class="modal-section-title dark dark-scrollable">PGN:</p>
+            <div class="modal-text-wrapper dark">
+                <textarea id="pgnToShare" class="modal-text milk milk-scrollable" readonly></textarea>
+            </div>
+        </div>
+        <div class="modal-section">
+            <p class="modal-section-title dark">FEN:</p>
+            <input type="text" id="fenToShare" class="modal-text-line milk" readonly/>
+        </div>
+    </div>
+    <div class="modal-buttons">
+        <button id="closeShareButton" class="modal-button dark">
+            Close
+        </button>
+    </div>
+</div>
+
+<div id="resultPanel" class="modal-panel review">
     <div class="result-detailed">
-        <p id="resultTitle" class="result-title"></p>
+        <p id="resultTitle" class="modal-title"></p>
         <p id="resultInfo" class="result-info"></p>
     </div>
-    <div class="result-info-sections">
-        <div class="result-info-section rating-section review">
-            <p class="result-info-title">New rating:</p>
+    <div class="modal-sections">
+        <div class="modal-section rating-section review">
+            <p class="modal-section-title">New rating:</p>
             <div class="result-ratings-info">
                 <p id="oldRating" class="result-info"></p>
                 <p id="ratingDelta" class="result-info"></p>
                 <p id="newRating" class="result-info"></p>
             </div>
         </div>
-        <div class="result-info-section review">
-            <p class="result-info-title">Time control:</p>
+        <div class="modal-section review">
+            <p class="modal-section-title">Time control:</p>
             <p class="result-info" id="timeControl"></p>
         </div>
-        <div class="result-info-section review">
-            <p class="result-info-title">Played at:</p>
+        <div class="modal-section review">
+            <p class="modal-section-title">Played at:</p>
             <p class="result-info" id="playedAt"></p>
         </div>
     </div>
-    <div class="result-buttons">
-        <button id="closeButton" class="result-button">
+    <div class="modal-buttons">
+        <button id="closeButton" class="modal-button">
             Close
         </button>
     </div>

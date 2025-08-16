@@ -21,7 +21,7 @@ export function loadUi(connection, gameManager, gameId) {
     
     bindEventsToResignButton(connection, gameId);
     bindEventsToDrawOfferButtons(connection, gameId);
-    $('#analyzeButton').on('click', closeResultPanel);
+    $('#analyzeButton').on('click', closePanel);
 }
 
 export function receiveDrawOffer(connection, message) {
@@ -50,6 +50,15 @@ export function turnOffDrawResignInfo() {
     $('.resign-draw-info').css('display', 'none');
 }
 
+export function showShareModal(pgn, fen) {
+    $('#pgnToShare').val(pgn);
+    $('#fenToShare').val(fen);
+    $('#modalOverlay').addClass('show');
+    $('#sharePanel')
+        .css('display', 'flex')
+        .addClass('milk');
+}
+
 export function showResultModal(isWhite, result, reason) {
     const [panelColorClass, fontButtonsColorClass] 
         = (isWhite && result === GameResult.BlackWon) || (!isWhite && result === GameResult.WhiteWon)
@@ -67,9 +76,9 @@ export function showResultModal(isWhite, result, reason) {
     $('#resultInfo')
         .text(reason)
         .addClass(fontButtonsColorClass);
-    $('.result-info-title').addClass(fontButtonsColorClass);
+    $('.modal-section-title').addClass(fontButtonsColorClass);
     $('.result-info').addClass(fontButtonsColorClass);
-    $('.result-button').addClass(fontButtonsColorClass);
+    $('.modal-button').addClass(fontButtonsColorClass);
 }
 
 export function highlightSquares(from, to) {
@@ -167,12 +176,11 @@ export function playRatingsChangeAnimation(oldRating, newRating) {
     }, delay * 4);
 }
 
-export function closeResultPanel() {
-    const $resultPanel = $('.result-panel');
+export function closePanel($panel) {
     $('#modalOverlay').removeClass('show');
-    $resultPanel.addClass('close').one('animationend', () => {
-        $resultPanel.removeClass('close');
-        $resultPanel.css('display', 'none');
+    $panel.addClass('close').one('animationend', () => {
+        $panel.removeClass('close');
+        $panel.css('display', 'none');
     });
 }
 

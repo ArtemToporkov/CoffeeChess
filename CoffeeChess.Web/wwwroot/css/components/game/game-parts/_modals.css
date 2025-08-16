@@ -1,4 +1,4 @@
-﻿.result-panel {
+﻿.modal-panel {
     display: none;
 
     flex-direction: column;
@@ -20,11 +20,16 @@
     animation: open 0.3s ease;
 }
 
-.result-panel.review {
+.modal-panel.share,
+.modal-panel.review {
     height: 400px;
 }
 
-.result-panel.milk {
+.modal-panel.share {
+    padding: 10px 30px;
+}
+
+.modal-panel.milk {
     background-color: var(--milk-coffee);
     border-radius: 50px;
     box-shadow:
@@ -34,7 +39,7 @@
     animation: open 0.3s ease;
 }
 
-.result-panel.dark {
+.modal-panel.dark {
     background-color: var(--dark-coffee);
     border-radius: 50px;
     box-shadow:
@@ -61,7 +66,7 @@
     }
 }
 
-.result-panel.close {
+.modal-panel.close {
     animation: close 0.3s ease;
 }
 
@@ -90,24 +95,82 @@
     gap: 5px;
 }
 
-.result-title {
+.modal-title {
     font-family: 'Caprasimo', sans-serif;
     font-size: 35px;
     margin: 0;
 }
 
-.result-title.milk {
+.modal-title.milk {
     color: var(--milk-coffee);
     text-shadow:
             -4px 4px 0 var(--dark-coffee),
             -5px 5px 0 var(--milk-coffee);
 }
 
-.result-title.dark {
+.modal-title.dark {
     color: var(--dark-coffee);
     text-shadow:
             -2px 2px 0 var(--milk-coffee),
             -4px 4px 0 var(--dark-coffee);
+}
+
+.modal-text-wrapper {
+    border-radius: 25px;
+    padding: 15px;
+    box-sizing: border-box;
+    width: 100%;
+    height: fit-content;
+}
+
+.modal-text-wrapper.dark {
+    background-color: var(--dark-coffee);
+}
+
+.modal-text-wrapper.milk {
+    background-color: var(--milk-coffee);
+}
+
+.modal-text,
+.modal-text-line {
+    font-family: Montserrat, sans-serif;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.modal-text-line {
+    display: flex;
+    flex-direction: row;
+    border-radius: 25px;
+    
+    overflow-x: hidden;
+    overflow-y: hidden;
+    height: 35px;
+    padding: 0 15px;
+}
+
+.modal-text {
+    resize: none;
+    overflow-x: hidden;
+    overflow-y: auto;
+    height: 150px;
+    padding: 5px;
+}
+
+.modal-text.dark,
+.modal-text-line.dark {
+    outline: none;
+    color: var(--dark-coffee);
+    border: 5px solid var(--dark-coffee);
+    background-color: var(--milk-coffee);
+}
+
+.modal-text.milk,
+.modal-text-line.milk {
+    outline: none;
+    border: none;
+    color: var(--milk-coffee);
+    background-color: var(--dark-coffee);
 }
 
 .result-info {
@@ -117,45 +180,47 @@
 }
 
 .result-info.milk,
-.result-info-title.milk,
+.modal-section-title.milk,
 .result-info.milk {
     color: var(--milk-coffee);
 }
 
 .result-info.dark,
-.result-info-title.dark,
+.modal-section-title.dark,
 .result-info.dark {
     color: var(--dark-coffee);
 }
 
-.result-info-sections {
+.modal-sections {
     display: flex;
     flex-direction: column;
     gap: 13px;
+    width: 100%;
 }
 
-.result-info-section {
+.modal-section {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    width: 100%;
     gap: 5px;
 }
 
-.result-info-section.review {
+.modal-section.review {
     gap: 3px;
 }
 
-.result-info-section.rating-section {
+.modal-section.rating-section {
     transform: translateY(-27%);
     margin-bottom: 17px;
 }
 
-.result-info-section.rating-section.review {
+.modal-section.rating-section.review {
     transform: none;
 }
 
-.result-info-title,
+.modal-section-title,
 .result-info {
     font-size: 15px;
     margin: 0;
@@ -166,7 +231,7 @@
     font-family: 'Montserrat', sans-serif;
 }
 
-.result-info-title {
+.modal-section-title {
     font-family: 'Caprasimo', sans-serif;
 }
 
@@ -237,7 +302,7 @@
     top: 100%
 }
 
-.result-buttons {
+.modal-buttons {
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -245,7 +310,7 @@
     gap: 10px;
 }
 
-.result-button {
+.modal-button {
     border: none;
     border-radius: 100px;
     width: 100px;
@@ -264,7 +329,7 @@
     transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.result-button.milk {
+.modal-button.milk {
     background-color: var(--milk-coffee);
     color: var(--dark-coffee);
 
@@ -273,14 +338,14 @@
             -3px 3px 0 var(--milk-coffee);
 }
 
-.result-button.milk:active {
+.modal-button.milk:active {
     transform: translate(-3px, 3px);
     box-shadow:
             0 0 0 var(--dark-coffee),
             0 0 0 var(--milk-coffee);
 }
 
-.result-button.dark {
+.modal-button.dark {
     background-color: var(--dark-coffee);
     color: var(--milk-coffee);
 
@@ -289,7 +354,7 @@
             -3px 3px 0 var(--dark-coffee);
 }
 
-.result-button.dark:active {
+.modal-button.dark:active {
     transform: translate(-3px, 3px);
     box-shadow:
             0 0 0 var(--milk-coffee),
