@@ -201,7 +201,6 @@ export class MusicPlayer {
     
     #fillSongsList() {
         const $songsList = $('#songsList');
-        console.log(this.#playlist)
         this.#playlist.forEach((song, i) => {
             const $songInfo = $('<div>')
                 .addClass('list-song-info')

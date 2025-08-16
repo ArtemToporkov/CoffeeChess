@@ -34,6 +34,7 @@ body {
     background-attachment: fixed;
     overscroll-behavior-y: none;
     overscroll-behavior-x: none;
+    background-color: var(--dark-coffee);
 }
 
 .background-video {
