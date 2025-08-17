@@ -48,7 +48,11 @@ builder.Services.AddIdentity<UserModel, IdentityRole>(options =>
     .AddDefaultTokenProviders();
 
 builder.Services.AddControllersWithViews()
-    .AddJsonOptions(opts => opts.JsonSerializerOptions.Converters.Add(new SanConverter()));
+    .AddJsonOptions(opts =>
+    {
+        opts.JsonSerializerOptions.Converters.Add(new SanConverter());
+        opts.JsonSerializerOptions.Converters.Add(new ChatMessageConverter());
+    });
 builder.Services.AddSignalR(cfg => cfg.EnableDetailedErrors = true);
 builder.Services.AddMediatR(cfg => cfg
     .RegisterServicesFromAssembly(typeof(DrawOfferDeclinedEventHandler).Assembly));

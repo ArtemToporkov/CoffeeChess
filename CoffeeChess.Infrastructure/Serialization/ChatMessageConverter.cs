@@ -42,7 +42,7 @@ public class ChatMessageConverter : JsonConverter<ChatMessage>
 
     private static JsonElement GetPropertyElementOrThrow(JsonElement root, string propertyName)
     {
-        if (root.TryGetProperty(propertyName, out var property))
+        if (!root.TryGetProperty(propertyName, out var property))
             throw new JsonException($"Property \"{propertyName}\" not found");
         return property;
     }

@@ -1,7 +1,6 @@
 ﻿using System.Security.Authentication;
 using System.Security.Claims;
 using CoffeeChess.Application.Games.Queries;
-using CoffeeChess.Application.Games.Repositories.Interfaces;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -42,7 +41,7 @@ public class GamesHistoryController(
         }
         catch (Exception ex)
         {
-            return NotFound($"Game with ID {gameId} not found.");
+            return NotFound($"Something went wrong while receiving completed game: {ex.Message}");
         }
     }
 

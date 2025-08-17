@@ -19,6 +19,7 @@ const init = async () => {
         url: `/GamesHistory/GetGame/${gameId}`,
         dataType: 'json'
     });
+    
     const username = $('#username').text();
     let gameRole;
     if (!username) {
@@ -29,6 +30,7 @@ const init = async () => {
         gameRole = GameRole.Black;
     }
     
+    await setChatHistory(gameRole, game.gameId);
     setDocumentTitle(gameRole, game);
     setUiForGame(gameRole, game);
     $('#resultInfoButton').on('click', () => onResultInfoButtonPressed(gameRole, game));
@@ -81,6 +83,33 @@ function setUiForGame(gameRole, game) {
     }
 
     $('#shareButton').on('click', () => showShareModal(getPgn(game), chess.fen()))
+}
+
+async function setChatHistory(gameRole, gameId) {
+    // TODO: check on the server
+    if (gameRole === GameRole.Spectator)
+        return;
+    const chatHistory = await $.ajax({
+        url: `/Chats/${gameId}`,
+        dataType: 'json'
+    });
+    const $chatMessages = $('#chatMessages');
+    for (const message of chatHistory.messages) {
+        const messageDiv = $('<div>', {
+            class: 'chat-message',
+        }).append(
+            $('<span>', {
+                class: 'chat-message-sender',
+                text: `${message.username || '?'}:`
+            }),
+            $('<span>', {
+                class: 'chat-message-text',
+                text: ` ${message.message || '?'}`
+            })
+        );
+        $chatMessages.append(messageDiv);
+    }
+    $chatMessages.scrollTop(0);
 }
 
 function setNamesAndRatings(game) {
