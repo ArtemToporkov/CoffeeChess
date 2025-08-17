@@ -241,14 +241,45 @@ function viewHistoryTimers(time, isWhite, isWhiteMoved) {
 
 function getPgn(game) {
     const result = [];
+    result.push(`[Date "${getPlayedDate(game) || '??.??.???? ??:??'}"]\n`);
+    result.push(`[White "${game.whitePlayerName || '?'}"]\n`);
+    result.push(`[Black "${game.blackPlayerName || '?'}"]\n`);
+    result.push(`[Result "${getGameResultString(game.gameResult) || '?'}"]\n`);
+    result.push(`[GameId "${game.gameId}"]\n`);
+    result.push(`[WhiteElo "${game.whitePlayerRating || '?'}"]\n`);
+    result.push(`[BlackElo "${game.blackPlayerRating || '?'}"]\n`);
+    result.push(`[TimeControl "${getTimeControl(game) || '?'}"]\n`)
     let currentPly = 0;
     for (const moveInfo of game.movesHistory) {
         currentPly += 1;
         result.push(currentPly % 2 !== 0 
             ? `${Math.ceil(currentPly / 2)}. ${moveInfo.san}`
-            : ` ${moveInfo.san}\n`)
+            : ` ${moveInfo.san} `)
     }
     return result.join('');
+}
+
+function getTimeControl(game) {
+    const minutesInSeconds = parseInt(game.minutes) * 60;
+    if (!minutesInSeconds)
+        return undefined;
+    const increment = parseInt(game.increment);
+    if (!increment)
+        return undefined;
+    return `${minutesInSeconds}+${increment}`;
+}
+
+function getGameResultString(result) {
+    switch (result) {
+        case GameResult.Draw:
+            return "1/2-1/2";
+        case GameResult.WhiteWon:
+            return "1-0"
+        case GameResult.BlackWon:
+            return "0-1";
+        default:
+            return undefined;
+    }
 }
 
 const destroy = async () => {
