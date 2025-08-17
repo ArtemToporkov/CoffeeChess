@@ -1,3 +1,4 @@
+using CoffeeChess.Application.Chats.Repositories.Interfaces;
 using CoffeeChess.Application.Chats.Services.Interfaces;
 using CoffeeChess.Application.Games.EventHandlers;
 using CoffeeChess.Application.Games.Repositories.Interfaces;
@@ -66,6 +67,7 @@ builder.Services.AddSingleton<IChatRepository, RedisChatRepository>();
 builder.Services.AddSingleton<IGameRepository, RedisGameRepository>();
 builder.Services.AddScoped<IPlayerRepository, SqlPlayerRepository>();
 builder.Services.AddScoped<ICompletedGameRepository, SqlCompletedGameRepository>();
+builder.Services.AddScoped<IChatHistoryRepository, SqlChatHistoryRepository>();
 builder.Services.AddScoped<ISongRepository, SqlSongRepository>();
 
 builder.Services.AddHostedService<GameTimeoutCheckerService>();

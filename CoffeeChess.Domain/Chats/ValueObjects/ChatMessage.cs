@@ -1,3 +1,3 @@
 ﻿namespace CoffeeChess.Domain.Chats.ValueObjects;
 
-public struct ChatMessage(string Username, string Message, DateTime Timestamp);
+public record struct ChatMessage(string Username, string Message, DateTime Timestamp);
