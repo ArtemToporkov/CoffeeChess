@@ -1,6 +1,5 @@
 ﻿using CoffeeChess.Domain.Games.Enums;
 using CoffeeChess.Domain.Matchmaking.Enums;
-using CoffeeChess.Web.Models;
 using CoffeeChess.Web.Models.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 

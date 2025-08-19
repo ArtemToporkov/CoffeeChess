@@ -1,12 +1,9 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using CoffeeChess.Application.Matchmaking.Services.Interfaces;
+﻿using CoffeeChess.Application.Matchmaking.Services.Interfaces;
 using CoffeeChess.Application.Shared.Exceptions;
 using CoffeeChess.Domain.Chats.AggregatesRoots;
 using CoffeeChess.Domain.Chats.Repositories.Interfaces;
 using CoffeeChess.Domain.Games.AggregatesRoots;
-using CoffeeChess.Domain.Games.Enums;
 using CoffeeChess.Domain.Games.Repositories.Interfaces;
-using CoffeeChess.Domain.Games.ValueObjects;
 using CoffeeChess.Domain.Matchmaking.Entities;
 using CoffeeChess.Domain.Matchmaking.Enums;
 using CoffeeChess.Domain.Matchmaking.Repositories.Interfaces;
@@ -14,9 +11,9 @@ using CoffeeChess.Domain.Matchmaking.ValueObjects;
 using CoffeeChess.Domain.Players.AggregatesRoots;
 using CoffeeChess.Domain.Players.Repositories.Interfaces;
 
-namespace CoffeeChess.Application.Matchmaking.Services.Implementations;
+namespace CoffeeChess.Infrastructure.Services.Implementations;
 
-public class InMemoryMatchmakingService(
+public class RedisMatchmakingService(
     IPlayerRepository playerRepository,
     IChallengeRepository challengeRepository, 
     IGameRepository gameRepository,

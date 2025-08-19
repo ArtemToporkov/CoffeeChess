@@ -3,7 +3,6 @@ using CoffeeChess.Application.Chats.Services.Interfaces;
 using CoffeeChess.Application.Games.EventHandlers;
 using CoffeeChess.Application.Games.Repositories.Interfaces;
 using CoffeeChess.Application.Games.Services.Interfaces;
-using CoffeeChess.Application.Matchmaking.Services.Implementations;
 using CoffeeChess.Application.Matchmaking.Services.Interfaces;
 using CoffeeChess.Application.Players.Services.Interfaces;
 using CoffeeChess.Application.Songs.Repositories.Interfaces;
@@ -57,7 +56,7 @@ builder.Services.AddSignalR(cfg => cfg.EnableDetailedErrors = true);
 builder.Services.AddMediatR(cfg => cfg
     .RegisterServicesFromAssembly(typeof(DrawOfferDeclinedEventHandler).Assembly));
 
-builder.Services.AddScoped<IMatchmakingService, InMemoryMatchmakingService>();
+builder.Services.AddScoped<IMatchmakingService, RedisMatchmakingService>();
 builder.Services.AddScoped<IChessMovesValidatorService, ChessDotNetCoreMovesValidatorService>();
 builder.Services.AddScoped<IRatingService, EloRatingService>();
 builder.Services.AddScoped<IPgnBuilderService, StringBuilderPgnBuilderService>();
