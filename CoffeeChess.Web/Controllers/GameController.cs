@@ -27,27 +27,17 @@ public class GameController : Controller
         return View("GameCreationExtended");
     }
 
-    public IActionResult CreateGame(
-        int minutes, int increment,
-        ColorPreference colorPreference = ColorPreference.Any,
-        int minRating = 0,
-        int maxRating = int.MaxValue)
+    public IActionResult CreateGame([FromQuery] ChallengeSettingsViewModel settings)
     {
-        var gameSettings = new GameSettingsViewModel
-        {
-            Minutes = minutes,
-            Increment = increment,
-            ColorPreference = colorPreference,
-            MinRating = minRating,
-            MaxRating = maxRating
-        };
+        if (!ModelState.IsValid)
+            return BadRequest();
         
         if (Request.Headers.XRequestedWith == "XMLHttpRequest")
         {
-            return PartialView("_GameWaiting", gameSettings);
+            return PartialView("_GameWaiting", settings);
         }
 
-        return View("GameWaiting", gameSettings);
+        return View("GameWaiting", settings);
     }
 
     public IActionResult Play(string gameId)
