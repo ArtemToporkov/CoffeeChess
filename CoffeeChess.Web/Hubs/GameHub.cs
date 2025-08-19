@@ -3,6 +3,7 @@ using CoffeeChess.Application.Games.Commands;
 using CoffeeChess.Application.Matchmaking.Services.Interfaces;
 using CoffeeChess.Domain.Games.Enums;
 using CoffeeChess.Domain.Games.ValueObjects;
+using CoffeeChess.Domain.Matchmaking.ValueObjects;
 using CoffeeChess.Infrastructure.Identity;
 using CoffeeChess.Web.Exceptions;
 using MediatR;
@@ -20,10 +21,10 @@ public class GameHub(
         => await userManager.GetUserAsync(Context.User!)
            ?? throw new UserNotFoundException(Context.UserIdentifier!);
 
-    public async Task QueueChallenge(GameSettings settings)
+    public async Task QueueChallenge(ChallengeSettings settings)
     {
         var user = await GetUserAsync();
-        await matchmakingService.QueueChallenge(user.Id, settings, Context.ConnectionAborted);
+        await matchmakingService.QueueOrFindChallenge(user.Id, settings, Context.ConnectionAborted);
     }
 
     public async Task SendChatMessage(string gameId, string message)

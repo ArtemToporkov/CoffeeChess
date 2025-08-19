@@ -1,10 +1,10 @@
 ﻿using System.Text.Json.Serialization;
 using CoffeeChess.Domain.Games.Enums;
 
-namespace CoffeeChess.Domain.Games.ValueObjects;
+namespace CoffeeChess.Domain.Matchmaking.ValueObjects;
 
 [method: JsonConstructor]
-public readonly struct GameSettings(
+public readonly struct ChallengeSettings(
     int minutes,
     int increment,
     ColorPreference colorPreference = ColorPreference.Any,

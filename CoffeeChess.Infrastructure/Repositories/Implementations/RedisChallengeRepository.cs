@@ -1,6 +1,6 @@
 ﻿using System.Text.Json;
+using CoffeeChess.Domain.Matchmaking.Entities;
 using CoffeeChess.Domain.Matchmaking.Repositories.Interfaces;
-using CoffeeChess.Domain.Players.Entities;
 using StackExchange.Redis;
 
 namespace CoffeeChess.Infrastructure.Repositories.Implementations;

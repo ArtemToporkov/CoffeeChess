@@ -1,4 +1,4 @@
-﻿using CoffeeChess.Domain.Players.Entities;
+﻿using CoffeeChess.Domain.Matchmaking.Entities;
 using CoffeeChess.Domain.Shared.Interfaces;
 
 namespace CoffeeChess.Domain.Matchmaking.Repositories.Interfaces;

@@ -1,17 +1,22 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using CoffeeChess.Application.Matchmaking.Services.Interfaces;
+using CoffeeChess.Application.Shared.Exceptions;
 using CoffeeChess.Domain.Chats.AggregatesRoots;
 using CoffeeChess.Domain.Chats.Repositories.Interfaces;
 using CoffeeChess.Domain.Games.AggregatesRoots;
 using CoffeeChess.Domain.Games.Enums;
 using CoffeeChess.Domain.Games.Repositories.Interfaces;
 using CoffeeChess.Domain.Games.ValueObjects;
+using CoffeeChess.Domain.Matchmaking.Entities;
 using CoffeeChess.Domain.Matchmaking.Repositories.Interfaces;
-using CoffeeChess.Domain.Players.Entities;
+using CoffeeChess.Domain.Matchmaking.ValueObjects;
+using CoffeeChess.Domain.Players.AggregatesRoots;
+using CoffeeChess.Domain.Players.Repositories.Interfaces;
 
 namespace CoffeeChess.Application.Matchmaking.Services.Implementations;
 
 public class InMemoryMatchmakingService(
+    IPlayerRepository playerRepository,
     IChallengeRepository challengeRepository, 
     IGameRepository gameRepository,
     IChatRepository chatRepository) : IMatchmakingService
@@ -20,19 +25,23 @@ public class InMemoryMatchmakingService(
     private static readonly Lock Lock = new();
     private static readonly SemaphoreSlim Mutex = new(1, 1);
 
-    public async Task QueueChallenge(
-        string playerId, GameSettings settings, CancellationToken cancellationToken = default)
+    public async Task QueueOrFindChallenge(
+        string playerId, ChallengeSettings settings, CancellationToken cancellationToken = default)
     {
+        var playerRating = (await playerRepository.GetByIdAsync(playerId, cancellationToken))?.Rating
+            ?? throw new NotFoundException(nameof(Player), playerId);
+        
         await Mutex.WaitAsync(cancellationToken);
         try
         {
-            if (TryFindChallenge(playerId, out var foundChallenge))
+            var challenge = await TryFindChallenge(playerId, playerRating, settings, cancellationToken);
+            if (challenge is not null)
             {
-                await CreateGameBasedOnFoundChallenge(playerId, settings, foundChallenge, cancellationToken);
+                await CreateGameBasedOnFoundChallenge(playerId, settings, challenge, cancellationToken);
                 return;
             }
 
-            await CreateGameChallenge(playerId, settings, cancellationToken);
+            await CreateGameChallenge(playerId, playerRating, settings, cancellationToken);
         }
         finally
         {
@@ -41,7 +50,7 @@ public class InMemoryMatchmakingService(
     }
     
     private async Task CreateGameBasedOnFoundChallenge(string connectingPlayerId,
-        GameSettings settings, GameChallenge gameChallenge, CancellationToken cancellationToken = default)
+        ChallengeSettings settings, GameChallenge gameChallenge, CancellationToken cancellationToken = default)
     {
         var connectingPlayerColor = ChooseColor(settings);
         var (whitePlayerId, blackPlayerId) = connectingPlayerColor == ColorPreference.White
@@ -60,33 +69,43 @@ public class InMemoryMatchmakingService(
         await gameRepository.SaveChangesAsync(createdGame, cancellationToken);
     }
     
-    private async Task CreateGameChallenge(string creatorId, GameSettings settings, 
+    private async Task CreateGameChallenge(string creatorId, int creatorRating, ChallengeSettings settings, 
         CancellationToken cancellationToken = default)
     {
-        var gameChallenge = new GameChallenge(creatorId, settings);
+        var gameChallenge = new GameChallenge(creatorId, creatorRating, settings);
         await challengeRepository.AddAsync(gameChallenge, cancellationToken);
     }
 
-    private bool TryFindChallenge(string playerId, 
-        [NotNullWhen(true)] out GameChallenge? foundChallenge)
+    private async Task <GameChallenge?> TryFindChallenge(
+        string playerId, int playerRating, ChallengeSettings settings, CancellationToken cancellationToken = default)
     {
-        // TODO: find appropriate challenge
-        foreach (var gameChallenge in challengeRepository.GetAll())
+        foreach (var gameChallenge in challengeRepository.GetAll()
+                     .Where(c => c.PlayerId != playerId 
+                                 && ValidatePlayerForChallenge(playerRating, settings, c)))
         {
-            if (gameChallenge.PlayerId != playerId)
-            {
-                // TODO: fix async problems
-                challengeRepository.DeleteAsync(gameChallenge);
-                foundChallenge = gameChallenge;
-                return true;
-            }
+            await challengeRepository.DeleteAsync(gameChallenge, cancellationToken);
+            return gameChallenge;
         }
 
-        foundChallenge = null;
-        return false;
+        return null;
     }
 
-    private static ColorPreference ChooseColor(GameSettings settings)
+    private static bool ValidatePlayerForChallenge(
+        int playerRating, ChallengeSettings playerSettings, GameChallenge challengeToJoin)
+    {
+        return playerSettings.Minutes == challengeToJoin.ChallengeSettings.Minutes
+               && playerSettings.Increment == challengeToJoin.ChallengeSettings.Increment
+               && playerRating >= challengeToJoin.ChallengeSettings.MinRating
+               && playerRating <= challengeToJoin.ChallengeSettings.MaxRating
+               && (playerSettings.ColorPreference == ColorPreference.Any
+                   || challengeToJoin.ChallengeSettings.ColorPreference == ColorPreference.Any 
+                   || playerSettings.ColorPreference == ColorPreference.White 
+                       && challengeToJoin.ChallengeSettings.ColorPreference == ColorPreference.Black
+                   || playerSettings.ColorPreference == ColorPreference.Black
+                       && challengeToJoin.ChallengeSettings.ColorPreference == ColorPreference.White);
+    }
+
+    private static ColorPreference ChooseColor(ChallengeSettings settings)
         => settings.ColorPreference switch
         {
             ColorPreference.White => ColorPreference.White,
