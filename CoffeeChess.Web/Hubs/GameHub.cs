@@ -1,8 +1,10 @@
 ﻿using CoffeeChess.Application.Chats.Commands;
 using CoffeeChess.Application.Games.Commands;
+using CoffeeChess.Application.Matchmaking.Commands;
 using CoffeeChess.Application.Matchmaking.Services.Interfaces;
 using CoffeeChess.Domain.Games.Enums;
 using CoffeeChess.Domain.Games.ValueObjects;
+using CoffeeChess.Domain.Matchmaking.Enums;
 using CoffeeChess.Domain.Matchmaking.ValueObjects;
 using CoffeeChess.Infrastructure.Identity;
 using CoffeeChess.Web.Exceptions;
@@ -14,17 +16,14 @@ namespace CoffeeChess.Web.Hubs;
 
 public class GameHub(
     IMediator mediator,
-    IMatchmakingService matchmakingService,
     UserManager<UserModel> userManager) : Hub<IGameClient>
 {
-    private async Task<UserModel> GetUserAsync()
-        => await userManager.GetUserAsync(Context.User!)
-           ?? throw new UserNotFoundException(Context.UserIdentifier!);
-
-    public async Task QueueChallenge(ChallengeSettings settings)
+    public async Task QueueChallenge(
+        int minutes, int increment, ColorPreference colorPreference, int minRating, int maxRating)
     {
         var user = await GetUserAsync();
-        await matchmakingService.QueueOrFindChallenge(user.Id, settings, Context.ConnectionAborted);
+        await mediator.Send(
+            new QueueOrFindChallengeCommand(user.Id, minutes, increment, colorPreference, minRating, maxRating));
     }
 
     public async Task SendChatMessage(string gameId, string message)
@@ -46,4 +45,8 @@ public class GameHub(
             gameId, Context.UserIdentifier!, gameActionType);
         await mediator.Send(performGameActionCommand, Context.ConnectionAborted);
     }
+    
+    private async Task<UserModel> GetUserAsync()
+        => await userManager.GetUserAsync(Context.User!)
+           ?? throw new UserNotFoundException(Context.UserIdentifier!);
 }

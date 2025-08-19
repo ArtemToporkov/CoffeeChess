@@ -28,7 +28,12 @@ const init = async () => {
 
     try {
         await connection.start();
-        await connection.invoke(GameHubMethods.QueueChallenge, gameSettings);
+        await connection.invoke(
+            GameHubMethods.QueueChallenge, 
+            gameSettings.minutes, gameSettings.increment, 
+            gameSettings.colorPreference, 
+            gameSettings.minRating, gameSettings
+        );
     } catch (err) {
         console.error(err.toString());
     }
