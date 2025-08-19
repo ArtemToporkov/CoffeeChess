@@ -9,8 +9,9 @@ public class QueueOrFindChallengeCommandHandler
 {
     public async Task Handle(QueueOrFindChallengeCommand request, CancellationToken cancellationToken)
     {
-        var challengeSettings = new ChallengeSettings(
-            request.Minutes, request.Increment, request.ColorPreference, request.MinRating, request.MaxRating);
+        var timeControl = new TimeControl(request.Minutes, request.Increment);
+        var ratingPreference = new EloRatingPreference(request.MinRating, request.MaxRating);
+        var challengeSettings = new ChallengeSettings(timeControl, request.ColorPreference, ratingPreference);
         await matchmaking.QueueOrFindChallenge(request.PlayerId, challengeSettings, cancellationToken);
     }
 }

@@ -1,20 +1,13 @@
-﻿using System.Text.Json.Serialization;
-using CoffeeChess.Domain.Games.Enums;
-using CoffeeChess.Domain.Matchmaking.Enums;
+﻿using CoffeeChess.Domain.Matchmaking.Enums;
 
 namespace CoffeeChess.Domain.Matchmaking.ValueObjects;
 
-[method: JsonConstructor]
 public readonly struct ChallengeSettings(
-    int minutes,
-    int increment,
+    TimeControl timeControl,
     ColorPreference colorPreference = ColorPreference.Any,
-    int minRating = 0,
-    int maxRating = int.MaxValue)
+    EloRatingPreference? eloRatingPreference = null)
 {
-    public int Minutes { get; } = minutes;
-    public int Increment { get; } = increment;
+    public TimeControl TimeControl { get; } = timeControl;
     public ColorPreference ColorPreference { get; } = colorPreference;
-    public int MinRating { get; } = minRating;
-    public int MaxRating { get; } = maxRating;
+    public EloRatingPreference EloRatingPreference { get; } = eloRatingPreference ?? EloRatingPreference.Any;
 }

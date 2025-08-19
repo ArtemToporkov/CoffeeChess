@@ -58,8 +58,8 @@ public class RedisMatchmakingService(
             Guid.NewGuid().ToString("N")[..8],
             whitePlayerId,
             blackPlayerId,
-            TimeSpan.FromMinutes(settings.Minutes),
-            TimeSpan.FromSeconds(settings.Increment)
+            TimeSpan.FromMinutes(settings.TimeControl.Minutes),
+            TimeSpan.FromSeconds(settings.TimeControl.Increment)
         );
         await gameRepository.AddAsync(createdGame, cancellationToken);
         var chat = new Chat(createdGame.GameId);
@@ -91,10 +91,10 @@ public class RedisMatchmakingService(
     private static bool ValidatePlayerForChallenge(
         int playerRating, ChallengeSettings playerSettings, GameChallenge challengeToJoin)
     {
-        return playerSettings.Minutes == challengeToJoin.ChallengeSettings.Minutes
-               && playerSettings.Increment == challengeToJoin.ChallengeSettings.Increment
-               && playerRating >= challengeToJoin.ChallengeSettings.MinRating
-               && playerRating <= challengeToJoin.ChallengeSettings.MaxRating
+        return playerSettings.TimeControl.Minutes == challengeToJoin.ChallengeSettings.TimeControl.Minutes
+               && playerSettings.TimeControl.Increment == challengeToJoin.ChallengeSettings.TimeControl.Increment
+               && playerRating >= challengeToJoin.ChallengeSettings.EloRatingPreference.Min
+               && playerRating <= challengeToJoin.ChallengeSettings.EloRatingPreference.Max
                && (playerSettings.ColorPreference == ColorPreference.Any
                    || challengeToJoin.ChallengeSettings.ColorPreference == ColorPreference.Any 
                    || playerSettings.ColorPreference == ColorPreference.White 
