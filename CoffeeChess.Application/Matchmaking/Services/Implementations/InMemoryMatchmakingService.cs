@@ -8,6 +8,7 @@ using CoffeeChess.Domain.Games.Enums;
 using CoffeeChess.Domain.Games.Repositories.Interfaces;
 using CoffeeChess.Domain.Games.ValueObjects;
 using CoffeeChess.Domain.Matchmaking.Entities;
+using CoffeeChess.Domain.Matchmaking.Enums;
 using CoffeeChess.Domain.Matchmaking.Repositories.Interfaces;
 using CoffeeChess.Domain.Matchmaking.ValueObjects;
 using CoffeeChess.Domain.Players.AggregatesRoots;

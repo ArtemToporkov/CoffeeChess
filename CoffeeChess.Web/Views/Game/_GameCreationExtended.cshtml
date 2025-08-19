@@ -1,12 +1,15 @@
+<div data-page-module-src="/js/game/game-creation-extended.js"></div>
 <div class="game-creation-extended-panel hideable" data-animation-order="1">
     <p class="game-creation-extended-title">Extended</p>
-    <form class="game-creation-extended-form" method="post">
+    <form id="gameCreationExtendedForm" class="game-creation-extended-form" method="post">
         <div class="form-section">
             <p class="extended-subtitle">Time control</p>
             <div class="form-values">
-                <input type="number" min="1" max="180" placeholder="Mins" onchange="validateTime(this)" class="form-input"/>
+                <input type="number" min="1" max="180" placeholder="Mins" 
+                       class="form-input time-input" name="minutes"/>
                 <p class="separator">I</p>
-                <input type="number" min="0" max="59" placeholder="Secs" onchange="validateTime(this)" class="form-input"/>
+                <input type="number" min="0" max="59" placeholder="Secs" 
+                       class="form-input time-input" name="increment"/>
             </div>
         </div>
         
@@ -14,17 +17,17 @@
             <p class="extended-subtitle">Color</p>
             <div class="form-values">
                 <label class="any">
-                    <input class="color-radio" type="radio" id="any" value="Any" name="color" checked/>
+                    <input class="color-radio" type="radio" id="anyColorPreference" value="2" name="colorPreference" checked/>
                     <p class="any-text">
                         Any
                     </p>
                 </label>
                 <label class="white">
-                    <input class="color-radio" type="radio" id="black" value="White" name="color"/>
+                    <input class="color-radio" type="radio" id="whiteColorPreference" value="0" name="colorPreference"/>
                     White
                 </label>
                 <label class="black">
-                    <input class="color-radio" type="radio" id="white" value="Black" name="color"/>
+                    <input class="color-radio" type="radio" id="blackColorPreference" value="1" name="colorPreference"/>
                     Black
                 </label>
             </div>
@@ -34,45 +37,14 @@
             <p class="extended-subtitle">Rating range</p>
             <div class="form-values">
                 <input type="number" min="0" max="4000" placeholder="0" 
-                       onchange="validateRating(this)" class="form-input" id="minRating"/>
+                       class="form-input rating-input" id="minRating" name="minRating"/>
                 <p class="separator">—</p>
                 <input type="number" min="0" max="4000" placeholder="any" 
-                       onchange="validateRating(this)" class="form-input" id="maxRating"/>
+                       class="form-input rating-input" id="maxRating" name="maxRating"/>
             </div>
         </div>
         
-        <button type="submit" class="play-button">Play</button>
+        <button type="submit" id="playButton" class="play-button">Play</button>
     </form>
     <a class="ajax-nav-link fast-start" asp-action="GameCreation" asp-controller="Game">Fast start</a>
 </div>
-<script>
-function validateTime(input) {
-    const min = parseInt(input.min);
-    const max = parseInt(input.max);
-
-    if (input.value < min) {
-        input.value = min;
-    } else if (input.value > max) {
-        input.value = max;
-    }
-}
-function validateRating(input) {
-    const min = parseInt(input.min);
-    const max = parseInt(input.max);
-    const minRatingInput = document.getElementById('minRating');
-    const maxRatingInput = document.getElementById('maxRating');
-
-    if (input.value < min) {
-        input.value = min;
-    } else if (input.value > max) {
-        input.value = max;
-    }
-
-    const minValue = parseInt(minRatingInput.value) || 0;
-    const maxValue = parseInt(maxRatingInput.value) || max;
-
-    if (minValue > maxValue) {
-        maxRatingInput.value = minValue;
-    }
-}
-</script>

@@ -1,4 +1,5 @@
 ﻿using CoffeeChess.Domain.Games.Enums;
+using CoffeeChess.Domain.Matchmaking.Enums;
 
 namespace CoffeeChess.Web.Models.ViewModels;
 

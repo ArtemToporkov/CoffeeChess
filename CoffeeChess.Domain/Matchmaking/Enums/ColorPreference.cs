@@ -1,4 +1,4 @@
-﻿namespace CoffeeChess.Domain.Games.Enums;
+﻿namespace CoffeeChess.Domain.Matchmaking.Enums;
 
 public enum  ColorPreference
 {

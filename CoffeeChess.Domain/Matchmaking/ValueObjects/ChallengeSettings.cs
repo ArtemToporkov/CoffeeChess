@@ -1,5 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 using CoffeeChess.Domain.Games.Enums;
+using CoffeeChess.Domain.Matchmaking.Enums;
 
 namespace CoffeeChess.Domain.Matchmaking.ValueObjects;
 
