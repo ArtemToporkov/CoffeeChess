@@ -78,7 +78,8 @@ public class RedisMatchmakingService(
         string playerId, int playerRating, ChallengeSettings settings, CancellationToken cancellationToken = default)
     {
         foreach (var gameChallenge in challengeRepository.GetAll()
-                     .Where(c => c.PlayerId != playerId))
+                     .Where(c => 
+                         c.PlayerId != playerId && ValidatePlayerForChallenge(playerRating, settings, c)))
         {
             await challengeRepository.DeleteAsync(gameChallenge, cancellationToken);
             return gameChallenge;
@@ -94,6 +95,8 @@ public class RedisMatchmakingService(
                && playerSettings.TimeControl.Increment == challengeToJoin.ChallengeSettings.TimeControl.Increment
                && playerRating >= challengeToJoin.ChallengeSettings.EloRatingPreference.Min
                && playerRating <= challengeToJoin.ChallengeSettings.EloRatingPreference.Max
+               && challengeToJoin.PlayerRating >= playerSettings.EloRatingPreference.Min
+               && challengeToJoin.PlayerRating <= playerSettings.EloRatingPreference.Max
                && (playerSettings.ColorPreference == ColorPreference.Any
                    || challengeToJoin.ChallengeSettings.ColorPreference == ColorPreference.Any 
                    || playerSettings.ColorPreference == ColorPreference.White 

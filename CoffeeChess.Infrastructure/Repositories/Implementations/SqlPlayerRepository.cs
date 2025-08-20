@@ -11,9 +11,9 @@ public class SqlPlayerRepository(ApplicationDbContext dbContext, IMediator media
     public async Task<Player?> GetByIdAsync(string id, CancellationToken cancellationToken = default) 
         => await dbContext.Players.FirstOrDefaultAsync(p => p.Id == id, cancellationToken);
 
-    public async Task AddAsync(Player entity, CancellationToken cancellationToken = default)
+    public async Task AddAsync(Player player, CancellationToken cancellationToken = default)
     {
-        await dbContext.Players.AddAsync(entity, cancellationToken);
+        await dbContext.Players.AddAsync(player, cancellationToken);
         await dbContext.SaveChangesAsync(cancellationToken);
     }
 

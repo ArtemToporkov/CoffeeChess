@@ -31,10 +31,10 @@ public class RedisGameRepository(
         return JsonSerializer.Deserialize<Game>(redisValue!, GameSerializationOptions);
     }
 
-    public async Task AddAsync(Game game, CancellationToken cancellationToken = default)
+    public async Task AddAsync(Game gameChallenge, CancellationToken cancellationToken = default)
     {
-        var serializedGame = JsonSerializer.Serialize(game, GameSerializationOptions);
-        await _database.StringSetAsync($"{GameKeyPrefix}:{game.GameId}", serializedGame, when: When.NotExists);
+        var serializedGame = JsonSerializer.Serialize(gameChallenge, GameSerializationOptions);
+        await _database.StringSetAsync($"{GameKeyPrefix}:{gameChallenge.GameId}", serializedGame, when: When.NotExists);
     }
 
     public async Task DeleteAsync(Game game, CancellationToken cancellationToken = default)
