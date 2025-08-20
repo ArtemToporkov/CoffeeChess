@@ -5,33 +5,38 @@ namespace CoffeeChess.Web.Models.ViewModels;
 
 public class ChallengeSettingsViewModel : IValidatableObject
 {
-    [Required] 
-    [Range(1, 180)]
-    public int Minutes { get; set; }
+    [Display(Name = "minutes")]
+    [Required(ErrorMessage = "The number of {0} for the time control is required.")] 
+    [Range(1, 180,ErrorMessage = "The number of {0} should be in the range between {1} and {2}.")]
+    public int Minutes { get; init; }
     
-    [Required]
-    [Range(0, 59)]
-    public int Increment { get; set; }
+    [Display(Name = "increment")]
+    [Required(ErrorMessage = "The {0} for the time control is required.")]
+    [Range(0, 59, ErrorMessage = "The {0} should be in the range between {1} and {2}.")]
+    public int Increment { get; init; }
     
-    [EnumDataType(typeof(ColorPreference))]
-    public ColorPreference ColorPreference { get; set; } = ColorPreference.Any;
+    [Display(Name = "color preference")]
+    [EnumDataType(typeof(ColorPreference), ErrorMessage = "The {0} should be either White, Black or Any.")]
+    public ColorPreference ColorPreference { get; init; } = ColorPreference.Any;
     
-    [Range(0, 4000)]
-    [Display(Name = "Min rating")]
-    public int MinRating { get; set; } = 0;
+    [Range(0, 4000, ErrorMessage = "The {0} for the rating range preference " +
+                                   "should be in the range between {1} and {2}.")]
+    [Display(Name = "min rating")]
+    public int MinRating { get; init; } = 0;
     
-    [Range(0, 4000)]
-    [Display(Name = "Max rating")]
-    public int MaxRating { get; set; } = int.MaxValue;
+    [Range(0, 4000, ErrorMessage = "The {0} for the rating range preference " +
+                                   "should be in the range between {1} and {2}.")]
+    [Display(Name = "max rating")]
+    public int MaxRating { get; init; } = 4000;
 
 
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {
         if (MinRating > MaxRating)
             yield return new ValidationResult(
-                $"{GetDisplayName(nameof(MinRating))} should be less than " +
-                $"or equal to {GetDisplayName(nameof(MaxRating))}",
-                [nameof(MinRating), nameof(MaxRating)]);
+                $"The {GetDisplayName(nameof(MinRating))} for the rating range preference " +
+                $"should be less than or equal to the {GetDisplayName(nameof(MaxRating))}.",
+                [nameof(MinRating)]);
     }
     
     private static string GetDisplayName(string propertyName)

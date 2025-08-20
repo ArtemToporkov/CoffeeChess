@@ -27,10 +27,10 @@ public class GameController : Controller
         return View("GameCreationExtended");
     }
 
-    public IActionResult CreateGame([FromQuery] ChallengeSettingsViewModel settings)
+    public IActionResult CreateGame(ChallengeSettingsViewModel settings)
     {
         if (!ModelState.IsValid)
-            return BadRequest();
+            return BadRequest(ModelState);
         
         if (Request.Headers.XRequestedWith == "XMLHttpRequest")
         {
