@@ -1,11 +1,13 @@
-﻿using CoffeeChess.Domain.Games.Enums;
-using CoffeeChess.Domain.Matchmaking.Enums;
+﻿using System.Security.Authentication;
+using System.Security.Claims;
+using CoffeeChess.Application.Matchmaking.Commands;
 using CoffeeChess.Web.Models.ViewModels;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CoffeeChess.Web.Controllers;
 
-public class GameController : Controller
+public class GameController(IMediator mediator) : Controller
 {
     public IActionResult GameCreation()
     {
@@ -40,7 +42,28 @@ public class GameController : Controller
         return View("GameWaiting", settings);
     }
 
+    [HttpPost("Game/GameCreation/QueueOrFindChallenge")]
+    public async Task<IActionResult> QueueOrFindChallenge([FromBody] ChallengeSettingsViewModel settings)
+    {
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+        
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (userId is null)
+            return Unauthorized();
+        
+        await mediator.Send(new QueueOrFindChallengeCommand(
+            userId, 
+            settings.Minutes, 
+            settings.Increment, 
+            settings.ColorPreference, 
+            settings.MinRating, 
+            settings.MaxRating));
+        return Ok();
+    }
+    
     public IActionResult Play(string gameId)
+
     {
         if (Request.Headers.XRequestedWith == "XMLHttpRequest")
         {

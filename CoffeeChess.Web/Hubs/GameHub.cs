@@ -18,14 +18,6 @@ public class GameHub(
     IMediator mediator,
     UserManager<UserModel> userManager) : Hub<IGameClient>
 {
-    public async Task QueueChallenge(
-        int minutes, int increment, ColorPreference colorPreference, int minRating, int maxRating)
-    {
-        var user = await GetUserAsync();
-        await mediator.Send(
-            new QueueOrFindChallengeCommand(user.Id, minutes, increment, colorPreference, minRating, maxRating));
-    }
-
     public async Task SendChatMessage(string gameId, string message)
     {
         var user = await GetUserAsync();

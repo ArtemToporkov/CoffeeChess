@@ -1,5 +1,4 @@
 ﻿import { GameHubEvents } from "./enums/GameHubEvents.js";
-import { GameHubMethods } from "./enums/GameHubMethods.js";
 import { animateSearching } from "./ui.js";
 import { ajaxNavigator } from "../site.js"
 
@@ -22,21 +21,24 @@ const init = async () => {
         localStorage.setItem("blackPlayerInfo", JSON.stringify(blackPlayerInfo));
         await ajaxNavigator.loadContent(`/Game/Play/${gameId}`);
     });
+    
+    await connection.start();
+    const challengeSettingsParams = new URLSearchParams(window.location.search);
+    const keys = ['minutes', 'increment', 'colorPreference', 'minRating', 'maxRating'];
 
-    const gameSettings = $("#gameSettings").data('gameSettings');
-    console.log(gameSettings);
+    const challengeSettings = keys.reduce((obj, key) => {
+        const value = parseInt(challengeSettingsParams.get(key));
+        if (!isNaN(value)) 
+            obj[key] = value;
+        return obj;
+    }, {});
 
-    try {
-        await connection.start();
-        await connection.invoke(
-            GameHubMethods.QueueChallenge, 
-            gameSettings.minutes, gameSettings.increment, 
-            gameSettings.colorPreference, 
-            gameSettings.minRating, gameSettings
-        );
-    } catch (err) {
-        console.error(err.toString());
-    }
+    await $.ajax({
+        url: `/Game/GameCreation/QueueOrFindChallenge`,
+        method: 'POST',
+        data: JSON.stringify(challengeSettings),
+        contentType: 'application/json',
+    });
 };
 
 const destroy = async () => {

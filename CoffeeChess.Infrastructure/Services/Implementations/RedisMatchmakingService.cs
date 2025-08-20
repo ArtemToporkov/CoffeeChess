@@ -78,8 +78,7 @@ public class RedisMatchmakingService(
         string playerId, int playerRating, ChallengeSettings settings, CancellationToken cancellationToken = default)
     {
         foreach (var gameChallenge in challengeRepository.GetAll()
-                     .Where(c => c.PlayerId != playerId 
-                                 && ValidatePlayerForChallenge(playerRating, settings, c)))
+                     .Where(c => c.PlayerId != playerId))
         {
             await challengeRepository.DeleteAsync(gameChallenge, cancellationToken);
             return gameChallenge;
