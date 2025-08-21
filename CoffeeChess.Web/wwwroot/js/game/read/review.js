@@ -82,6 +82,10 @@ function setUiForGame(gameRole, game) {
         historyManager.moveToLastMove();
     }
 
+    if (gameRole === GameRole.Black) {
+        $('.game-middle-panel').addClass('flipped');
+    }
+    
     const $pgnToShare = $('#pgnToShare');
     $('#shareButton').on('click', () => showShareModal(getPgn(game), chess.fen()));
     setCopyButton($('#pgnCopyButton'), () => $pgnToShare.val());
@@ -130,27 +134,18 @@ async function setChatHistory(gameRole, gameId) {
     // TODO: check on the server
     if (gameRole === GameRole.Spectator)
         return;
-    const chatHistory = await $.ajax({
-        url: `/Chats/${gameId}`,
-        dataType: 'json'
-    });
-    const $chatMessages = $('#chatMessages');
-    for (const message of chatHistory.messages) {
-        const messageDiv = $('<div>', {
-            class: 'chat-message',
-        }).append(
-            $('<span>', {
-                class: 'chat-message-sender',
-                text: `${message.username || '?'}:`
-            }),
-            $('<span>', {
-                class: 'chat-message-text',
-                text: ` ${message.message || '?'}`
-            })
-        );
-        $chatMessages.append(messageDiv);
+    try {
+        const chatHistory = await $.ajax({
+            url: `/Chats/${gameId}`,
+            dataType: 'json'
+        });
+    } catch (error) {
+        if (error.status === 404) {
+            // NOTE: the chat saving feature was implemented after the game saving feature 
+            return;
+        }
+        throw error;
     }
-    $chatMessages.scrollTop(0);
 }
 
 function setNamesAndRatings(game) {
