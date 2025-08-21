@@ -28,28 +28,21 @@
 }
 
 .nav-link {
-    text-decoration: none;
-    position: relative;
     color: var(--milk-coffee);
     font-size: 24px;
     font-family: 'Caprasimo', sans-serif;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    border-radius: 30px;
+    
+    position: relative;
+    padding: 5px 20px;
+    box-sizing: border-box;
+    text-decoration: none;
 }
 
-.nav-link::after {
-    content: '';
-    position: absolute;
-    left: 50%;
-    bottom: -2px;
-    width: 0;
-    height: 2px;
+.nav-link:hover:hover {
+    color: var(--dark-coffee);
     background-color: var(--milk-coffee);
-    transition: width 0.3s ease, left 0.3s ease;
-    transform: translateX(-50%);
-}
-
-.nav-link:hover::after {
-    width: 100%;
-    transform: translateX(-50%);
 }
 
 .nav-left,

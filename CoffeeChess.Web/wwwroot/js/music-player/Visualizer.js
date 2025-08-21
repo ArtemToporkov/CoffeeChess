@@ -5,7 +5,6 @@
     #canvasContext;
     #shuffledIndexes;
     
-    
     constructor(audioAnalyzer, canvas, canvasContext) {
         this.#audioAnalyzer = audioAnalyzer;
         this.#canvas = canvas;
@@ -13,7 +12,7 @@
         const linesCount = Math.min(this.#audioAnalyzer.frequencyBinCount, 32);
         this.#audioDataArray = new Uint8Array(linesCount);
         const barWidth = (this.#canvas.width / linesCount);
-        const rightOffset = 12;
+        const rightOffset = 10;
         this.#shuffledIndexes = this.#createShuffledIndexes(linesCount - rightOffset);
         this.#loopVisualizer(barWidth);
     }
