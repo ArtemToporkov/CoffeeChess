@@ -83,11 +83,24 @@
             <p class="modal-section-title dark dark-scrollable">PGN:</p>
             <div class="modal-text-wrapper dark">
                 <textarea id="pgnToShare" class="modal-text milk milk-scrollable" readonly></textarea>
+                <div class="modal-text-options">
+                    <button id="pgnCopyButton" class="modal-text-option">
+                        <img src="~/img/copy-milk-icon.png" alt="copy"/>
+                    </button>
+                    <button id="addTimersInfoButton" class="modal-text-option">
+                        <img src="~/img/clock-milk-icon.png" alt="timers info"/>
+                    </button>
+                </div>
             </div>
         </div>
         <div class="modal-section">
             <p class="modal-section-title dark">FEN:</p>
-            <input type="text" id="fenToShare" class="modal-text-line milk" readonly/>
+            <div class="modal-text-line-wrapper dark">
+                <input type="text" id="fenToShare" class="modal-text-line milk" readonly/>
+                <button id="fenCopyButton" class="modal-text-option">
+                    <img src="~/img/copy-milk-icon.png" alt="copy"/>
+                </button>
+            </div>
         </div>
     </div>
     <div class="modal-buttons">

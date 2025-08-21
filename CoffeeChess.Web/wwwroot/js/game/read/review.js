@@ -82,7 +82,45 @@ function setUiForGame(gameRole, game) {
         historyManager.moveToLastMove();
     }
 
-    $('#shareButton').on('click', () => showShareModal(getPgn(game), chess.fen()))
+    $('#shareButton').on('click', () => showShareModal(getPgn(game), chess.fen()));
+    setCopyButton($('#pgnCopyButton'), () => $('#pgnToShare').val());
+    setCopyButton($('#fenCopyButton'), () => $('#fenToShare').val());
+    setOptionButton($('#addTimersInfoButton'), {
+        on: '/img/clock-milk-icon.png',
+        off: '/img/clock-milk-unselected-icon.png'
+    }, () => {});
+}
+
+function setCopyButton($copyButton, copyCallback) {
+    const imgSources = {
+        success: '/img/success-icon.png',
+        base: '/img/copy-milk-icon.png',
+        fail: '/img/error-icon.png'
+    }
+    $copyButton.on('pointerdown', async () => {
+        $copyButton.addClass('clicked').one('transitionend', () => $copyButton.removeClass('clicked'));
+        const value = copyCallback();
+        const $img = $copyButton.find('img');
+        if (value && navigator.clipboard && navigator.clipboard.writeText) {
+            $img.attr('src', imgSources.success);
+            await navigator.clipboard.writeText(value);
+        } else {
+            $img.attr('src', imgSources.fail);
+        }
+        setTimeout(() => $img.attr('src', imgSources.base), 1000);
+    });
+}
+
+function setOptionButton($button, stateSources, callback) {
+    const $img = $button.find('img');
+    $button.on('click', () => {
+        $button.addClass('clicked').one('transitionend', () => $button.removeClass('clicked'));
+        if ($img.attr('src') === stateSources.on) {
+            $img.attr('src', stateSources.off);
+        } else {
+            $img.attr('src', stateSources.on);
+        }
+    });
 }
 
 async function setChatHistory(gameRole, gameId) {
