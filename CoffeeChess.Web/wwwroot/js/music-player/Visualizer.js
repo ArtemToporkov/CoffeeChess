@@ -30,7 +30,7 @@
         this.#canvasContext.fillStyle = '#2b1100';
 
         this.#shuffledIndexes.forEach(i => {
-            const barHeight = this.#audioDataArray[i] / 5;
+            const barHeight = this.#audioDataArray[i] / 5 + 5;
             this.#canvasContext.fillRect(
                 drawCoordinate, this.#canvas.height - barHeight / 2, barWidth, barHeight / 2);
             drawCoordinate += barWidth + 2;
