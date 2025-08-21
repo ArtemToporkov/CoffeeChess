@@ -83,6 +83,7 @@ function setUiForGame(gameRole, game) {
     }
 
     if (gameRole === GameRole.Black) {
+        board.flip();
         $('.game-middle-panel').addClass('flipped');
     }
     
