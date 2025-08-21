@@ -17,8 +17,8 @@ This project is being done for educational purposes to practice creating project
 ---
 ### TODO
 - [ ] handle the case when a player tries to create multiple challenges
-- [ ] save games to db
-- [ ] add viewing of past games
+- [x] save games to db
+- [x] add viewing of past games
 - [ ] send all game info after reconnection
 - [ ] handle the case when a user who is not part of the game connects to it
 - [ ] move to typescript to create an SPA

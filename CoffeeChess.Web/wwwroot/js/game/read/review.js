@@ -82,13 +82,14 @@ function setUiForGame(gameRole, game) {
         historyManager.moveToLastMove();
     }
 
+    const $pgnToShare = $('#pgnToShare');
     $('#shareButton').on('click', () => showShareModal(getPgn(game), chess.fen()));
-    setCopyButton($('#pgnCopyButton'), () => $('#pgnToShare').val());
+    setCopyButton($('#pgnCopyButton'), () => $pgnToShare.val());
     setCopyButton($('#fenCopyButton'), () => $('#fenToShare').val());
     setOptionButton($('#addTimersInfoButton'), {
         on: '/img/clock-milk-icon.png',
         off: '/img/clock-milk-unselected-icon.png'
-    }, () => {});
+    }, showTimersInfo => $pgnToShare.val(getPgn(game, showTimersInfo)));
 }
 
 function setCopyButton($copyButton, copyCallback) {
@@ -113,11 +114,13 @@ function setCopyButton($copyButton, copyCallback) {
 
 function setOptionButton($button, stateSources, callback) {
     const $img = $button.find('img');
-    $button.on('click', () => {
+    $button.on('pointerdown', () => {
         $button.addClass('clicked').one('transitionend', () => $button.removeClass('clicked'));
         if ($img.attr('src') === stateSources.on) {
+            callback(false);
             $img.attr('src', stateSources.off);
         } else {
+            callback(true);
             $img.attr('src', stateSources.on);
         }
     });
@@ -306,7 +309,7 @@ function viewHistoryTimers(time, isWhite, isWhiteMoved) {
     setTimerHighlighting(!isWhiteMoved);
 }
 
-function getPgn(game) {
+function getPgnHeaders(game) {
     const result = [];
     result.push(`[Date "${getPlayedDate(game) || '??.??.???? ??:??'}"]\n`);
     result.push(`[White "${game.whitePlayerName || '?'}"]\n`);
@@ -316,12 +319,18 @@ function getPgn(game) {
     result.push(`[WhiteElo "${game.whitePlayerRating || '?'}"]\n`);
     result.push(`[BlackElo "${game.blackPlayerRating || '?'}"]\n`);
     result.push(`[TimeControl "${getTimeControl(game) || '?'}"]\n`)
+    return result.join('');
+}
+
+function getPgn(game, withClock = false) {
+    const result = [getPgnHeaders(game)];
     let currentPly = 0;
     for (const moveInfo of game.movesHistory) {
+        const timeInfo = withClock ? ` [%clk ${moveInfo.timeAfterMove.split('.')[0]}]` : '';
         currentPly += 1;
         result.push(currentPly % 2 !== 0 
-            ? `${Math.ceil(currentPly / 2)}. ${moveInfo.san}`
-            : ` ${moveInfo.san} `)
+            ? `${Math.ceil(currentPly / 2)}. ${moveInfo.san}${timeInfo}`
+            : ` ${moveInfo.san}${timeInfo} `)
     }
     return result.join('');
 }
