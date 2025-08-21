@@ -89,7 +89,8 @@ body:has(.chat-panel) .music-player-panel:not(.hide).extended {
 }
 
 .song-title-and-visualizer-container {
-    width: 100%;
+    flex: 1;
+    min-width: 0;
     padding: 10px 0;
     justify-content: space-between;
 }
@@ -103,7 +104,9 @@ body:has(.chat-panel) .music-player-panel:not(.hide).extended {
 
 .author,
 .song {
+    display: inline-block;
     color: var(--dark-coffee);
+    white-space: nowrap;
     transition: transform 0.3s ease, opacity 0.3s ease;
 }
 
@@ -250,10 +253,18 @@ body:has(.chat-panel) .music-player-panel:not(.hide).extended {
     outline: 4px solid var(--dark-coffee);
 }
 
+.list-song-title-author-wrapper {
+    width: 100%;
+    flex: 1;
+    overflow: hidden;
+}
+
 .list-song-author,
 .list-song-title {
     color: var(--dark-coffee);
     font-size: 17px;
+    white-space: nowrap;
+    display: inline-block;
 }
 
 .list-song-info.song-selected .list-song-author,
@@ -269,5 +280,37 @@ body:has(.chat-panel) .music-player-panel:not(.hide).extended {
     font-family: Montserrat, sans-serif;
 }
 
+.list-song-author.scrolling-text,
+.list-song-title.scrolling-text {
+    animation: marqueeForListSongInfo 15s ease infinite;
+}
 
+@keyframes marqueeForListSongInfo {
+    0% {
+        transform: translateX(0%);
+    }
+    50% {
+        transform: translateX(calc(-100% + 96px));
+    }
+    100% {
+        transform: translateX(0%);
+    }
+}
+
+.author.scrolling-text,
+.song.scrolling-text {
+    animation: marqueeForMusicPlayer 15s ease infinite;
+}
+
+@keyframes marqueeForMusicPlayer {
+    0% {
+        transform: translateX(0%);
+    }
+    50% {
+        transform: translateX(calc(-100% + 174px));
+    }
+    100% {
+        transform: translateX(0%);
+    }
+}
 
