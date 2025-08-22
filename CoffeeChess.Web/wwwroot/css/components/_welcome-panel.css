@@ -24,12 +24,59 @@
 
 .welcome-title {
     font-family: 'Caprasimo', sans-serif;
-    color: var(--dark-coffee);
     font-size: 80px;
-    text-shadow: 
-        -4px 4px 0 var(--milk-coffee),
-        -8px 8px 0 var(--dark-coffee);
     margin: 0;
+    transition: top 1s ease, 
+                left 1s ease,
+                color 1s ease,
+                text-shadow 1s ease,
+                transform 1s ease;
+}
+
+.welcome-title.hide {
+    opacity: 0;
+}
+
+.welcome-title.dark {
+    color: var(--dark-coffee);
+    text-shadow:
+            -4px 4px 0 var(--milk-coffee),
+            -8px 8px 0 var(--dark-coffee);
+}
+
+.welcome-title.milk {
+    color: var(--milk-coffee);
+    text-shadow:
+            -4px 4px 0 var(--dark-coffee),
+            -8px 8px 0 var(--milk-coffee);
+}
+
+.welcome-title-overlay {
+    background-color: var(--dark-coffee);
+    z-index: 2;
+    width: 500px;
+    height: 300px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    transition: transform 1s ease, left 1s ease;
+}
+
+.welcome-title-overlay.hide {
+    display: none;
+}
+
+#welcomeTitleForAnimation {
+    position: absolute;
+    z-index: 2;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(1.2);
+}
+
+#welcomeTitleForAnimation.hide {
+    display: none;
 }
 
 .welcome-text {
@@ -74,4 +121,32 @@
     box-shadow:
         0 0 0 var(--milk-coffee),
         0 0 0 var(--dark-coffee);
+}
+
+.welcome-text,
+.welcome-button {
+    transition: transform 1s ease, opacity 1s ease;
+}
+
+.welcome-text.hide,
+.welcome-button.hide {
+    transform: translateX(20%);
+    opacity: 0;
+}
+
+.welcome-page-overlay {
+    position: absolute;
+    display: flex;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--dark-coffee);
+    z-index: 2;
+    transition: opacity 1s ease;
+}
+
+.welcome-page-overlay.hide {
+    opacity: 0;
+    pointer-events: none;
 }
