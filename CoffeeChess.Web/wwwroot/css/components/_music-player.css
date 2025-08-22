@@ -124,12 +124,6 @@ body:has(.chat-panel) .music-player-panel:not(.hide).extended {
     opacity: 0;
 }
 
-.song.hide,
-.author.hide {
-    transform: translateX(10%);
-    opacity: 0;
-}
-
 .song-controls-container {
     display: flex;
     flex-direction: row;
@@ -260,6 +254,12 @@ body:has(.chat-panel) .music-player-panel:not(.hide).extended {
     width: 100%;
     flex: 1;
     overflow: hidden;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.list-song-title-author-wrapper.hide {
+    transform: translateX(10%);
+    opacity: 0;
 }
 
 .list-song-author,

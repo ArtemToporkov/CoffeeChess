@@ -15,8 +15,8 @@ export class MusicPlayer {
     
     #musicPlayer;
     #playlist;
-    #$author;
-    #$title;
+    #$authorWrapper;
+    #$titleWrapper;
     #$cover;
     #isPaused;
 
@@ -31,8 +31,8 @@ export class MusicPlayer {
         this.#playlist = playlist;
         this.#musicPlayer = $('#musicPlayer')[0];
         this.#musicPlayer.crossOrigin = "anonymous";
-        this.#$author = $('#songAuthor');
-        this.#$title = $('#songTitle');
+        this.#$authorWrapper = $('#songAuthorWrapper');
+        this.#$titleWrapper = $('#songTitleWrapper');
         this.#$cover = $('#songCover');
         this.#fillSongsList();
         
@@ -142,20 +142,26 @@ export class MusicPlayer {
         const songInfoAndVisualizerContainerWidth = $('.song-title-and-visualizer-container').width();
         const toChange = [
             {$el: this.#$cover, changeFunc: () => this.#$cover.attr('src', coverSrc)},
-            {$el: this.#$author, changeFunc: () => this.#$author.text(author)}, 
-            {$el: this.#$title, changeFunc: () => this.#$title.text(title)}
+            {$el: this.#$authorWrapper, changeFunc: () => {
+                const $text = this.#$authorWrapper.find('span');
+                $text.text(author);
+                $text.toggleClass('scrolling-text', $text.width() > songInfoAndVisualizerContainerWidth);
+            }}, 
+            {$el: this.#$titleWrapper, changeFunc: () => {
+                const $text = this.#$titleWrapper.find('span');
+                $text.text(title);
+                $text.toggleClass('scrolling-text', $text.width() > songInfoAndVisualizerContainerWidth);
+            }}
         ]
-        toChange.forEach((change, i) => setTimeout(() => {
-            change.$el.addClass('hide')
-                .on('transitionend', () => {
-                    change.changeFunc();
-                    change.$el.removeClass('hide');
-                    if (change.$el.width() > songInfoAndVisualizerContainerWidth)
-                        change.$el.addClass('scrolling-text');
-                    else
-                        change.$el.removeClass('scrolling-text');
-                });
-        }, i * delay));
+        toChange.forEach((change, i) => {
+            setTimeout(() => {
+                change.$el.addClass('hide')
+                    .one('transitionend', () => {
+                        change.changeFunc();
+                        change.$el.removeClass('hide');
+                    });
+            }, i * delay);
+        })
     }
 
     #setupAudioContext() {
