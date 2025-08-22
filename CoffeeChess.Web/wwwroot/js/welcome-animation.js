@@ -2,7 +2,12 @@
 playWelcomeAnimation();
 
 function setUpWelcomeAnimation() {
-    const toUnhide = [$('#welcomePageOverlay'), $('#welcomeTitleForAnimation'), $('#welcomeTitleOverlay')];
+    const toUnhide = [
+        $('#welcomePageOverlay'), 
+        $('#welcomeTitleForAnimation'), 
+        $('#welcomeTitleOverlay'), 
+        $('#welcomePageOverlayTexture')
+    ];
     toUnhide.forEach($element => {
         $element.css('transition', 'none');
         void $element[0].offsetHeight;
@@ -23,13 +28,14 @@ function playWelcomeAnimation() {
     const $originalWelcomeTitle = $('#welcomeTitle');
     const $welcomeTitleOverlay = $('#welcomeTitleOverlay');
     const $welcomePageOverlay = $('#welcomePageOverlay');
+    const $welcomePageOverlayTexture = $('#welcomePageOverlayTexture');
     const delay = 500;
 
     const animation = [
         () => hideWelcomeTitleOverlay($welcomeTitleOverlay),
         () => moveWelcomeTitleForwardAndScale($welcomeTitleForAnimation),
         () => {
-            hideWelcomePageOverlay($welcomePageOverlay);
+            hideWelcomePageOverlay($welcomePageOverlay, $welcomePageOverlayTexture);
             moveWelcomeTitleToOriginalPlace($originalWelcomeTitle, $welcomeTitleForAnimation);
             changeWelcomeTitleColorToOriginal($welcomeTitleForAnimation);
         },
@@ -55,8 +61,9 @@ function moveWelcomeTitleForwardAndScale($welcomeTitleForAnimation) {
     $welcomeTitleForAnimation.css('transform', 'translate(-50%, -30%) scale(1.3)');
 }
 
-function hideWelcomePageOverlay($welcomePageOverlay) {
+function hideWelcomePageOverlay($welcomePageOverlay, $welcomePageOverlayTexture) {
     $welcomePageOverlay.addClass('hide');
+    $welcomePageOverlayTexture.addClass('hide');
 }
 
 function moveWelcomeTitleToOriginalPlace($originalWelcomeTitle, $welcomeTitleForAnimation) {
