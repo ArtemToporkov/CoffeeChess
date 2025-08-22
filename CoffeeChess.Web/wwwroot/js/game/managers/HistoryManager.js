@@ -28,10 +28,10 @@ export class HistoryManager {
         $(document).off(this.#eventNamespace);
     }
     
-    moveToLastMove() {
+    moveToLastMove(playSound = false) {
         this.currentPly = this.#movesHistory.length - 1;
         const currentPly = this.currentPly;
-        this.#moveToPlyAndHighlight(currentPly);
+        this.#moveToPlyAndHighlight(currentPly, playSound);
         if (this.#viewHistoryTimerCallback) {
             this.#setTimersAfterMove(currentPly);
         }
@@ -78,7 +78,9 @@ export class HistoryManager {
         return $children.last();
     }
     
-    #moveToPlyAndHighlight(ply) {
+    #moveToPlyAndHighlight(ply, playSound = false) {
+        if (playSound)
+            new Audio('../../../sounds/piece-move.mp3').play();
         $(`#${this.#boardName} .piece-417db, body > img.piece-417db`).stop(true, true);
         $('.history-selected').removeClass('history-selected');
         this.#viewHistoryByBoard(this.#movesHistory[ply].fen);
@@ -120,7 +122,7 @@ export class HistoryManager {
                     e.preventDefault();
                     if (this.currentPly > 0) {
                         const ply = this.currentPly;
-                        this.#moveToPlyAndHighlight(ply - 1);
+                        this.#moveToPlyAndHighlight(ply - 1, true);
                         if (this.#viewHistoryTimerCallback !== null)
                             this.#setTimersAfterMove(ply - 1);
                     }
@@ -129,7 +131,7 @@ export class HistoryManager {
                     e.preventDefault();
                     if (this.currentPly < this.#movesHistory.length - 1) {
                         const ply = this.currentPly;
-                        this.#moveToPlyAndHighlight(ply + 1);
+                        this.#moveToPlyAndHighlight(ply + 1, true);
                         if (this.#viewHistoryTimerCallback !== null)
                             this.#setTimersAfterMove(ply + 1);
                     }

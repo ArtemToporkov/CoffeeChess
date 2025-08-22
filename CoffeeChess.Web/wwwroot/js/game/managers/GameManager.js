@@ -43,6 +43,7 @@ export class GameManager {
 
         $('#myBoard .piece-417db, body > img.piece-417db').stop(true, true);
         this.board.position(this.#game.fen());
+        new Audio('../../../sounds/piece-move.mp3').play();
 
         this.#isWhiteTurn = this.#game.turn() === 'w';
         setTimerHighlighting(this.#isWhiteTurn);

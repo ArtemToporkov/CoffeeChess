@@ -79,9 +79,10 @@ function setUiForGame(gameRole, game) {
         const timeAfterMove = getTimeAfterMoveString(moveInfo.timeAfterMove);
         const currentFen = chess.fen();
         historyManager.update(move, currentFen, timeAfterMove);
-        historyManager.moveToLastMove();
     }
-
+    
+    historyManager.moveToLastMove();
+    
     if (gameRole === GameRole.Black) {
         board.flip();
         $('.game-middle-panel').addClass('flipped');
