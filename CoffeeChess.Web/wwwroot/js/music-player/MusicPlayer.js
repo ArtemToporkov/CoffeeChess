@@ -140,16 +140,26 @@ export class MusicPlayer {
     #loadSongInfo(coverSrc, author, title) {
         const delay = 100;
         const songInfoAndVisualizerContainerWidth = $('.song-title-and-visualizer-container').width();
+        const animationDuration = $('.scrolling-text').css('--animation-duration');
+        console.log(animationDuration);
+        const toggleScrolling = $text => {
+            const textWidth = $text.width();
+            $text.toggleClass('scrolling-text', textWidth > songInfoAndVisualizerContainerWidth);
+            $text.css('--animation-duration', textWidth > songInfoAndVisualizerContainerWidth 
+                ? `${textWidth / 20}s` 
+                : animationDuration);
+        }
         const toChange = [
             {$el: this.#$cover, changeFunc: () => this.#$cover.attr('src', coverSrc)},
             {$el: this.#$authorWrapper, changeFunc: () => {
                 const $text = this.#$authorWrapper.find('span');
                 $text.text(author);
-                $text.toggleClass('scrolling-text', $text.width() > songInfoAndVisualizerContainerWidth);
+                toggleScrolling($text);
             }}, 
             {$el: this.#$titleWrapper, changeFunc: () => {
                 const $text = this.#$titleWrapper.find('span');
                 $text.text(title);
+                toggleScrolling($text);
                 $text.toggleClass('scrolling-text', $text.width() > songInfoAndVisualizerContainerWidth);
             }}
         ]
@@ -237,12 +247,23 @@ export class MusicPlayer {
             $songsList.append($songInfo);
             const $wrapper = $songInfo.find('.list-song-title-author-wrapper');
             const $author = $songInfo.find('.list-song-author');
+            const authorWidth = $author.width();
             const $title = $songInfo.find('.list-song-title');
+            const titleWidth = $title.width();
             const wrapperWidth = $wrapper.width();
-            if ($author.width() > wrapperWidth)
-                setTimeout(() => $author.addClass('scrolling-text'), delayForScrollingText * i);
-            if ($title.width() > wrapperWidth)
-                setTimeout(() => $title.addClass('scrolling-text'), delayForScrollingText * i);
+            const pixelsPerSecondDivider = 25;
+            if (authorWidth > wrapperWidth)
+                setTimeout(() => $author
+                        .addClass('scrolling-text')
+                        .css('--animation-duration', `${authorWidth / pixelsPerSecondDivider}s`), 
+                    delayForScrollingText * i
+                );
+            if (titleWidth > wrapperWidth)
+                setTimeout(() => $title
+                        .addClass('scrolling-text')
+                        .css('--animation-duration', `${titleWidth / pixelsPerSecondDivider}s`), 
+                    delayForScrollingText * i
+                );
             $songInfo.on('pointerdown', async () => {
                 await this.#loadSong(i);
             });

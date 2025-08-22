@@ -283,9 +283,13 @@ body:has(.chat-panel) .music-player-panel:not(.hide).extended {
     font-family: Montserrat, sans-serif;
 }
 
+.scrolling-text {
+    --animation-duration: 15s;
+}
+
 .list-song-author.scrolling-text,
 .list-song-title.scrolling-text {
-    animation: marqueeForListSongInfo 15s ease infinite;
+    animation: marqueeForListSongInfo var(--animation-duration) ease infinite;
 }
 
 @keyframes marqueeForListSongInfo {
@@ -302,7 +306,7 @@ body:has(.chat-panel) .music-player-panel:not(.hide).extended {
 
 .author.scrolling-text,
 .song.scrolling-text {
-    animation: marqueeForMusicPlayer 15s ease infinite;
+    animation: marqueeForMusicPlayer var(--animation-duration) ease infinite;
 }
 
 @keyframes marqueeForMusicPlayer {
