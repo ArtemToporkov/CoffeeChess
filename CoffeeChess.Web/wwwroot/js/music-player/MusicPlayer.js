@@ -1,4 +1,5 @@
 ﻿import { Visualizer } from "./Visualizer.js";
+import { songCache } from "./song-cache.js";
 
 export class MusicPlayer {
     #currentSongIdxValue;
@@ -59,23 +60,30 @@ export class MusicPlayer {
         this.#selectSong(this.#currentSongIdx);
         const song = this.#playlist[this.#currentSongIdx];
 
-        const songResponse = await $.ajax({
-            url: `/Songs/Audio/${song.songId}`,
-            type: 'GET',
-            xhrFields: {
-                responseType: 'blob'
-            }
-        });
-        const coverResponse = await $.ajax({
-            url: `/Songs/Cover/${song.songId}`,
-            type: 'GET',
-            xhrFields: {
-                responseType: 'blob'
-            }
-        });
-        const songUrl = URL.createObjectURL(songResponse);
-        const coverUrl = URL.createObjectURL(coverResponse);
+        const cachedFiles = await songCache.getSongFiles(song.songId);
+        let songUrl;
+        let coverUrl;
 
+        if (cachedFiles && cachedFiles.audio && cachedFiles.cover) {
+            songUrl = URL.createObjectURL(cachedFiles.audio);
+            coverUrl = URL.createObjectURL(cachedFiles.cover);
+        } else {
+            const songResponse = await $.ajax({
+                url: `/Songs/Audio/${song.songId}`,
+                type: 'GET',
+                xhrFields: { responseType: 'blob' }
+            });
+            const coverResponse = await $.ajax({
+                url: `/Songs/Cover/${song.songId}`,
+                type: 'GET',
+                xhrFields: { responseType: 'blob' }
+            });
+
+            songUrl = URL.createObjectURL(songResponse);
+            coverUrl = URL.createObjectURL(coverResponse);
+            await songCache.cacheSongFiles(song.songId, songResponse, coverResponse);
+        }
+        
         this.#loadSongInfo(coverUrl, song.author, song.title);
         this.#musicPlayer.src = songUrl;
         this.#musicPlayer.play();
