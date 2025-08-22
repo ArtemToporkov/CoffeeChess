@@ -9,7 +9,11 @@
     width: 100%;
     flex: 1;
     min-height: 0;
-    background-color: var(--dark-coffee);
+    background:
+            url("../../../../img/texture-dark-2.png"),
+            var(--dark-coffee);
+    background-size: 100%;
+    
 
     border-radius: 50px;
     box-shadow:

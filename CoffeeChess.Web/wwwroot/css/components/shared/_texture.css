@@ -1,0 +1,27 @@
+﻿.textured-background-1.milk {
+    background:
+            url("../../../img/texture-milk-1.png"),
+            var(--milk-coffee);
+    background-size: 100% 100%;
+}
+
+.textured-background-2.milk {
+    background:
+            url("../../../img/texture-milk-2.png"),
+            var(--milk-coffee);
+    background-size: 100% 100%;
+}
+
+.textured-background-1.dark {
+    background:
+            url("../../../img/texture-dark-1.png"),
+            var(--dark-coffee);
+    background-size: 100% 100%;
+}
+
+.textured-background-2.dark {
+    background:
+            url("../../../img/texture-dark-2.png"),
+            var(--dark-coffee);
+    background-size: 100% 100%;
+}

@@ -1,6 +1,6 @@
 ﻿@model CoffeeChess.Web.Models.ViewModels.LoginViewModel
 
-<div class="login-panel hideable" data-animation-order="1">
+<div class="login-panel hideable textured-background-1 dark" data-animation-order="1">
     <h1 class="login-title">Log in</h1>
     <form asp-action="Login" asp-route-returnurl="@ViewBag.ReturnUrl" method="post" id="loginForm">
         @Html.AntiForgeryToken() 

@@ -1,3 +1,4 @@
+@import "components/shared/_texture.css";
 @import "components/_welcome-panel.css";
 @import "components/_register-panel.css";
 @import "components/_login-panel.css";
@@ -10,7 +11,7 @@
 @import "components/shared/_hideable.css";
 
 :root {
-    --milk-coffee: #ffd6ba;
+    --milk-coffee: #ffcba8;
     --dark-coffee: #2b1100;
     --milk-coffee-unselected: #af876d;
     --dark-coffee-unselected: #95735d;
