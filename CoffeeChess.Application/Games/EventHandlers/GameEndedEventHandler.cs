@@ -28,7 +28,8 @@ public class GameEndedEventHandler(
         
         var black = await playerRepository.GetByIdAsync(notification.BlackId, cancellationToken) 
                     ?? throw new NotFoundException(nameof(Player), notification.BlackId);
-        
+
+        var (whiteRating, blackRating) = (white.Rating, black.Rating);
         var (newWhiteRating, newBlackRating) = ratingService.CalculateNewRatings(
             white.Rating, black.Rating,
             notification.GameResult);
@@ -39,7 +40,12 @@ public class GameEndedEventHandler(
         var game = await gameRepository.GetByIdAsync(notification.GameId, cancellationToken) 
                    ?? throw new NotFoundException(nameof(Game), notification.GameId);
         await SaveCompletedGameAsync(
-            game, white, black, newWhiteRating, newBlackRating, notification.GameResult, cancellationToken);
+            game, 
+            white, black, 
+            whiteRating, newWhiteRating, 
+            blackRating, newBlackRating, 
+            notification.GameResult, notification.GameResultReason,
+            cancellationToken);
         
 
         var (whiteReason, blackReason) = GetMessageByGameResultReason(notification.GameResult,
@@ -49,7 +55,10 @@ public class GameEndedEventHandler(
     }
 
     private async Task SaveCompletedGameAsync(
-        Game game, Player white, Player black, int whiteNewRating, int blackNewRating, GameResult gameResult, 
+        Game game, Player white, Player black, 
+        int whiteRating, int whiteNewRating, 
+        int blackRating, int blackNewRating, 
+        GameResult gameResult, GameResultReason gameResultReason,
         CancellationToken cancellationToken = default)
     {
         var completedGame = new CompletedGameReadModel
@@ -58,17 +67,18 @@ public class GameEndedEventHandler(
             
             WhitePlayerId = white.Id,
             WhitePlayerName = white.Name,
-            WhitePlayerRating = white.Rating,
+            WhitePlayerRating = whiteRating,
             WhitePlayerNewRating = whiteNewRating,
             
             BlackPlayerId = black.Id,
             BlackPlayerName = black.Name,
-            BlackPlayerRating = black.Rating,
+            BlackPlayerRating = blackRating,
             BlackPlayerNewRating = blackNewRating,
             
             Minutes = (int)game.InitialTimeForOnePlayer.TotalMinutes,
             Increment = (int)game.Increment.TotalSeconds,
             GameResult = gameResult,
+            GameResultReason = gameResultReason,
             PlayedDate = game.LastTimeUpdate,
             MovesHistory = game.MovesHistory.ToList()
         };
