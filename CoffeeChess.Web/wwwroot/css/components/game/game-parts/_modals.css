@@ -20,13 +20,17 @@
     animation: open 0.3s ease;
 }
 
-.modal-panel.share,
+
 .modal-panel.review {
     height: 400px;
 }
 
 .modal-panel.share {
-    padding: 10px 30px;
+    height: 420px;
+}
+
+.modal-panel.share {
+    padding: 25px 30px;
 }
 
 .modal-panel.milk {
