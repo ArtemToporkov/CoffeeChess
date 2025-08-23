@@ -12,7 +12,7 @@
 
     width: 550px;
     height: 550px;
-    top: 55%;
+    top: 54.5%;
     left: 50%;
     transform: translate(-50%, -50%);
 
@@ -89,6 +89,7 @@
     color: var(--dark-coffee);
     text-decoration: none;
 
+    border: none;
     border-radius: 100px;
     width: 160px;
     height: 60px;
