@@ -34,7 +34,7 @@
     color: var(--milk-coffee);
     font-size: 24px;
     font-family: 'Caprasimo', sans-serif;
-    transition: background-color 0.3s ease, color 0.3s ease;
+    transition: background-color 0.3s ease, color 0.3s ease, transform 0.3s ease, opacity 0.3s ease;
     border-radius: 30px;
     
     position: relative;
@@ -50,11 +50,30 @@
 
 .nav-left,
 .nav-right {
+    flex: 1;
     display: flex;
     flex-direction: row;
-    justify-content: center;
     align-items: center;
     gap: 40px;
+}
+
+.nav-left {
+    justify-content: flex-start;
+}
+
+.nav-right {
+    justify-content: flex-end;
+}
+
+.nav-right .nav-link.hide,
+.nav-right .nav-avatar.hide {
+    opacity: 0;
+    transform: translateX(-20px);
+}
+
+.nav-right .nav-link.not-displayed,
+.nav-right .nav-avatar.not-displayed {
+    display: none;
 }
 
 .nav-logo {
@@ -79,7 +98,7 @@
     width: 20px;
     height: 20px;
     
-    transition: border-color 0.3s ease;
+    transition: border-color 0.3s ease, transform 0.3s ease, opacity 0.3s ease;
 }
 
 .nav-avatar:hover {

@@ -73,6 +73,38 @@
             document.head.appendChild(script);
         });
     }
+    
+    toggleAuthenticatedHeader(wasAuthenticated = false, username = null) {
+        if (wasAuthenticated) {
+            $('#username').text(username);
+        }
+        const $authLinks = $('.auth-link');
+        const $userLinks = $('.user-link')
+        const [$toHide, $toUnhide] = wasAuthenticated
+            ? [$authLinks, $userLinks]
+            : [$userLinks, $authLinks];
+        const delay = 100;
+        const lastToHideIndex = $toHide.length - 1;
+        const unhide = () => {
+            $toUnhide.addClass('hide');
+            $toUnhide.removeClass('not-displayed');
+            $toUnhide.each((i, el) => {
+                const $el = $(el);
+                setTimeout(() => $el.removeClass('hide'), i * delay);
+            })
+        }
+        $toHide.each((i, el) => {
+            const $el = $(el);
+            setTimeout(() => {
+                $el.addClass('hide').one('transitionend', () => {
+                    $el.addClass('not-displayed').removeClass('hide');
+                    if (i === lastToHideIndex) {
+                        unhide();
+                    }
+                });
+            }, i * delay);
+        })
+    }
 
     async hideEverythingHideable(delay) {
         let transitionDuration = 700;

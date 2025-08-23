@@ -42,7 +42,12 @@ namespace CoffeeChess.Web.Controllers
                     
                     if (Request.Headers.XRequestedWith == "XMLHttpRequest")
                     {
-                        return Json(new { success = true, redirectUrl = returnUrl ?? Url.Action("Index", "Home") });
+                        return Json(new
+                        {
+                            success = true, 
+                            redirectUrl = returnUrl ?? Url.Action("Index", "Home"),
+                            username = user.UserName
+                        });
                     }
                     return RedirectToLocal(returnUrl);
                 }
@@ -80,19 +85,17 @@ namespace CoffeeChess.Web.Controllers
                     logger.LogInformation("User logged in.");
                     if (Request.Headers.XRequestedWith == "XMLHttpRequest")
                     {
-                        return Json(new { success = true, redirectUrl = returnUrl ?? Url.Action("Index", "Home") });
+                        return Json(new
+                        {
+                            success = true, 
+                            redirectUrl = returnUrl ?? Url.Action("Index", "Home"),
+                            username = model.UserName
+                        });
                     }
                     return RedirectToLocal(returnUrl);
                 }
-                else
-                {
-                    ModelState.AddModelError(string.Empty, "Invalid login attempt.");
-                    if (Request.Headers.XRequestedWith == "XMLHttpRequest")
-                    {
-                        return PartialView("_LoginPanel", model);
-                    }
-                    return View("LoginPanel", model);
-                }
+
+                ModelState.AddModelError(string.Empty, "Invalid login attempt.");
             }
 
             if (Request.Headers.XRequestedWith == "XMLHttpRequest")

@@ -1,5 +1,5 @@
 ﻿@model CoffeeChess.Web.Models.ViewModels.LoginViewModel
-
+<div data-page-module-src="/js/auth.js"></div>
 <div class="login-panel hideable textured-background-1 dark" data-animation-order="1">
     <h1 class="login-title">Log in</h1>
     <form asp-action="Login" asp-route-returnurl="@ViewBag.ReturnUrl" method="post" id="loginForm">
@@ -19,7 +19,8 @@
     </form>
     <p class="login-switch-to-register-link">
         Doesn't have an account? 
-        <a asp-action="Register" asp-route-returnurl="@ViewData["ReturnUrl"]" class="login-link" data-url="@Url.Action("Register", "Account", new { returnUrl = ViewData["ReturnUrl"] })">Sign up</a>
+        <a asp-action="Register" asp-route-returnurl="@ViewData["ReturnUrl"]" 
+           class="login-link" data-url="@Url.Action("Register", "Account", new { returnUrl = ViewData["ReturnUrl"] })">Sign up</a>
     </p>
 </div>
 

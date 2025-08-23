@@ -1,4 +1,11 @@
-﻿<!DOCTYPE html>
+﻿@{
+    var isAuthenticated = User.Identity is not null && User.Identity.IsAuthenticated;
+    const string notDisplayedClass = "not-displayed";
+    var (authLinkClass, userLinkClass) = isAuthenticated
+        ? (notDisplayedClass, string.Empty)
+        : (string.Empty, notDisplayedClass);
+}
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -25,24 +32,17 @@
                 <img src="~/img/coffee-cup.png" alt="Coffee Chess Logo"/>
             </a>
         </div>
-        @if (User.Identity is not null && User.Identity.IsAuthenticated)
-        {
-            <div class="nav-right">
-                <a id="username" class="ajax-nav-link nav-link"
-                   asp-controller="GamesHistory" asp-action="GamesHistory">@User.Identity.Name</a>
-                <a class="ajax-nav-link nav-avatar"
-                   asp-controller="GamesHistory" asp-action="GamesHistory">
-                    <img src="/img/empty-avatar-icon.png" alt="avatar"/>
-                </a>
-            </div>
-        }
-        else
-        {
-            <div class="nav-right">
-                <a class="ajax-nav-link nav-link" asp-controller="Account" asp-action="Login">Log in</a>
-                <a class="ajax-nav-link nav-link" asp-controller="Account" asp-action="Register">Sign up</a>
-            </div>
-        }
+        <div class="nav-right">
+            <a id="username" class="ajax-nav-link nav-link user-link @userLinkClass"
+               asp-controller="GamesHistory" asp-action="GamesHistory">@User.Identity?.Name</a>
+            <a class="ajax-nav-link nav-avatar user-link @userLinkClass"
+               asp-controller="GamesHistory" asp-action="GamesHistory">
+                <img src="/img/empty-avatar-icon.png" alt="avatar"/>
+            </a>
+            
+            <a class="ajax-nav-link nav-link auth-link @authLinkClass" asp-controller="Account" asp-action="Login">Log in</a>
+            <a class="ajax-nav-link nav-link auth-link @authLinkClass" asp-controller="Account" asp-action="Register">Sign up</a>
+        </div>
     </nav>
 </header>
 
