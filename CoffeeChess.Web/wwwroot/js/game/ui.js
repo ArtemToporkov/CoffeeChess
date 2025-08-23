@@ -167,7 +167,7 @@ export function playRatingsChangeAnimation(oldRating, newRating) {
         const step = (newRating - oldRating) / steps;
         const timer = setInterval(() => {
             current += step;
-            if ((step > 0 && current >= newRating) || (step < 0 && current <= newRating)) {
+            if ((step >= 0 && current >= newRating) || (step <= 0 && current <= newRating)) {
                 current = newRating;
                 clearInterval(timer);
             }

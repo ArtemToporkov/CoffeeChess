@@ -74,20 +74,3 @@ body:has(.music-player-panel:not(.hide).extended) .spacer-for-music-player {
     width: 330px;
     height: 550px;
 }
-
-.modal-overlay {
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    position: absolute;
-    pointer-events: none;
-    z-index: 3;
-
-    transition: backdrop-filter 0.3s ease;
-}
-
-.modal-overlay.show {
-    backdrop-filter: blur(4px);
-    pointer-events: auto;
-}
