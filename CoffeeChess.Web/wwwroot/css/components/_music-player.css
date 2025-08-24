@@ -107,6 +107,8 @@ body:has(.chat-panel) .music-player-panel:not(.hide).extended {
 
 .author,
 .song {
+    --container-width: 0px;
+    
     display: inline-block;
     color: var(--dark-coffee);
     white-space: nowrap;
@@ -268,6 +270,8 @@ body:has(.chat-panel) .music-player-panel:not(.hide).extended {
 
 .list-song-author,
 .list-song-title {
+    --container-width: 0px;
+    
     color: var(--dark-coffee);
     font-size: 17px;
     white-space: nowrap;
@@ -301,7 +305,7 @@ body:has(.chat-panel) .music-player-panel:not(.hide).extended {
         transform: translateX(0%);
     }
     50% {
-        transform: translateX(calc(-100% + 96px));
+        transform: translateX(calc(-100% + var(--container-width)));
     }
     100% {
         transform: translateX(0%);
@@ -318,7 +322,7 @@ body:has(.chat-panel) .music-player-panel:not(.hide).extended {
         transform: translateX(0%);
     }
     50% {
-        transform: translateX(calc(-100% + 174px));
+        transform: translateX(calc(-100% + var(--container-width)));
     }
     100% {
         transform: translateX(0%);
