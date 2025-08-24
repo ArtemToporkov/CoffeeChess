@@ -47,6 +47,10 @@ export class MusicPlayer {
         this.#setNextPreviousEvents(false);
         this.#setExtendButton();
         this.#setHideButton();
+
+        this.#musicPlayer.addEventListener('ended', async () => {
+            await this.#loadSong(this.#currentSongIdx + 1);
+        });
     }
     
     async start() {
