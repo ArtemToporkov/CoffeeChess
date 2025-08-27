@@ -3,7 +3,7 @@ using CoffeeChess.Domain.Shared.Interfaces;
 
 namespace CoffeeChess.Domain.Matchmaking.Repositories.Interfaces;
 
-public interface IChallengeRepository : IBaseRepository<GameChallenge>
+public interface IChallengeRepository : IBaseRepository<Challenge>
 {
-    IEnumerable<GameChallenge> GetAll();
+    IEnumerable<Challenge> GetAll();
 }

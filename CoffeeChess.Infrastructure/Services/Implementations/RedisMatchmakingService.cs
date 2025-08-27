@@ -48,12 +48,12 @@ public class RedisMatchmakingService(
     }
     
     private async Task CreateGameBasedOnFoundChallenge(string connectingPlayerId,
-        ChallengeSettings settings, GameChallenge gameChallenge, CancellationToken cancellationToken = default)
+        ChallengeSettings settings, Challenge challenge, CancellationToken cancellationToken = default)
     {
         var connectingPlayerColor = ChooseColor(settings);
         var (whitePlayerId, blackPlayerId) = connectingPlayerColor == ColorPreference.White
-            ? (connectingPlayerId, gameChallenge.PlayerId)
-            : (gameChallenge.PlayerId, connectingPlayerId);
+            ? (connectingPlayerId, challenge.PlayerId)
+            : (challenge.PlayerId, connectingPlayerId);
         var createdGame = new Game(
             Guid.NewGuid().ToString("N")[..8],
             whitePlayerId,
@@ -70,11 +70,11 @@ public class RedisMatchmakingService(
     private async Task CreateGameChallenge(string creatorId, int creatorRating, ChallengeSettings settings, 
         CancellationToken cancellationToken = default)
     {
-        var gameChallenge = new GameChallenge(creatorId, creatorRating, settings);
+        var gameChallenge = new Challenge(creatorId, creatorRating, settings);
         await challengeRepository.AddAsync(gameChallenge, cancellationToken);
     }
 
-    private async Task <GameChallenge?> TryFindChallenge(
+    private async Task <Challenge?> TryFindChallenge(
         string playerId, int playerRating, ChallengeSettings settings, CancellationToken cancellationToken = default)
     {
         foreach (var gameChallenge in challengeRepository.GetAll()
@@ -89,7 +89,7 @@ public class RedisMatchmakingService(
     }
 
     private static bool ValidatePlayerForChallenge(
-        int playerRating, ChallengeSettings playerSettings, GameChallenge challengeToJoin)
+        int playerRating, ChallengeSettings playerSettings, Challenge challengeToJoin)
     {
         return playerSettings.TimeControl.Minutes == challengeToJoin.ChallengeSettings.TimeControl.Minutes
                && playerSettings.TimeControl.Increment == challengeToJoin.ChallengeSettings.TimeControl.Increment
