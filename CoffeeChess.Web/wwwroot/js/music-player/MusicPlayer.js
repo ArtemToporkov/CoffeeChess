@@ -29,6 +29,8 @@ export class MusicPlayer {
     #visualizer;
     
     constructor(playlist) {
+        if (!playlist || playlist.length === 0)
+            throw new Error("playlist can't be empty to initialize MusicPlayer");
         this.#playlist = playlist;
         this.#musicPlayer = $('#musicPlayer')[0];
         this.#musicPlayer.crossOrigin = "anonymous";

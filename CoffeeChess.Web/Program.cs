@@ -77,6 +77,18 @@ builder.Services.AddHostedService<GameTimeoutCheckerService>();
 
 var app = builder.Build();
 
+using var scope = app.Services.CreateScope();
+try
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    await dbContext.Database.MigrateAsync();
+}
+catch (Exception exception)
+{
+    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+    logger.LogError(exception, exception.Message);
+}
+
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");

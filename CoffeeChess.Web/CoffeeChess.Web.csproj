@@ -4,6 +4,7 @@
         <TargetFramework>net9.0</TargetFramework>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
+        <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     </PropertyGroup>
 
     <ItemGroup>
@@ -82,6 +83,12 @@
       <None Include="wwwroot\songs\Proleter-April-Showers\Proleter-April-Showers.mp3" />
       <None Include="wwwroot\songs\Proleter-U-Can-Get-It\Proleter-U-Can-Get-It.jpg" />
       <None Include="wwwroot\songs\Proleter-U-Can-Get-It\Proleter-U-Can-Get-It.mp3" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Content Include="..\.dockerignore">
+        <Link>.dockerignore</Link>
+      </Content>
     </ItemGroup>
 
 </Project>

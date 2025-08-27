@@ -11,6 +11,8 @@ $(document).ready(async () => {
         });
         await songCache.cachePlaylist(playlist);
     }
-    const musicPlayer = new MusicPlayer(playlist);
-    await musicPlayer.start();
+    if (playlist && playlist.length !== 0) {
+        const musicPlayer = new MusicPlayer(playlist);
+        await musicPlayer.start();
+    }
 });

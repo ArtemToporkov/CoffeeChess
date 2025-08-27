@@ -1,0 +1,55 @@
+﻿services:
+  coffeechess-app:
+    image: coffeechess-app:1.0.0-alpha
+    build:
+      context: .
+      dockerfile: CoffeeChess.Web/Dockerfile
+    environment:
+      ConnectionStrings__DefaultConnection: "Host=postgres-db;Port=5432;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}"
+      ConnectionStrings__RedisConnection: "redis-db:6379"
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT}
+    ports:
+      - "5230:8080"
+      - "7120:8081"
+    depends_on:
+      postgres-db:
+        condition: service_healthy
+    networks:
+      - coffeechess-network
+  postgres-db: 
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_PASSWORD}" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - coffeechess-network
+  redis-db:
+    image: redis:8-alpine
+    restart: unless-stopped
+    networks:
+      - coffeechess-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+volumes:
+  postgres_data:    
+    driver: local
+  redis_data:
+    driver: local
+networks:
+  coffeechess-network: 
+    name: coffeechess-network
+    driver: bridge
