@@ -1,13 +1,12 @@
-﻿using System.Reflection;
-using System.Runtime.CompilerServices;
-using System.Runtime.Serialization;
+﻿using System.Collections.Concurrent;
+using System.Reflection;
 using System.Text.Json;
-using System.Text.Json.Serialization.Metadata;
 using CoffeeChess.Domain.Chats.AggregatesRoots;
+using CoffeeChess.Domain.Chats.Events;
 using CoffeeChess.Domain.Chats.Repositories.Interfaces;
-using CoffeeChess.Domain.Games.AggregatesRoots;
-using CoffeeChess.Domain.Shared.Abstractions;
-using CoffeeChess.Domain.Shared.Interfaces;
+using CoffeeChess.Domain.Chats.ValueObjects;
+using CoffeeChess.Infrastructure.Exceptions;
+using CoffeeChess.Infrastructure.Serialization;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using StackExchange.Redis;
@@ -20,72 +19,73 @@ public class RedisChatRepository(
 {
     private readonly IDatabase _database = redis.GetDatabase();
     private const string ChatKeyPrefix = "chat";
-    private static JsonSerializerOptions ChatSerializationOptions => GetChatSerializationOptions();
+    private const string ChatMetadataSuffix = "metadata";
+    
+    private static JsonSerializerOptions ChatMessageSerializationOptions => GetChatSerializationOptions();
     
     public async Task<Chat?> GetByIdAsync(string id, CancellationToken cancellationToken = default)
     {
-        var redisValue = await _database.StringGetAsync($"{ChatKeyPrefix}:{id}");
-        if (redisValue.IsNullOrEmpty)
-            return null;
-
-        return JsonSerializer.Deserialize<Chat>(redisValue!, ChatSerializationOptions);
+        var metadata = (await _database.HashGetAllAsync(GetChatMetadataKey(id)))
+            .ToDictionary(entry => entry.Name.ToString(), entry => entry.Value);
+        if (!metadata.TryGetValue("gameId", out var gameId))
+            throw new KeyNotFoundException($"Metadata for {nameof(Chat)} with ID \"{id}\" not found.");
+        var chat = new Chat(gameId!);
+        foreach (var entry in await _database.ListRangeAsync(GetChatKey(id)))
+        {
+            var message = JsonSerializer.Deserialize<ChatMessage>(entry!, ChatMessageSerializationOptions);
+            // TODO: don't use reflection
+            var messagesField = typeof(Chat).GetField(
+                "_messages", BindingFlags.NonPublic | BindingFlags.Instance)!;
+            var queue = (ConcurrentQueue<ChatMessage>)messagesField.GetValue(chat)!;
+            queue.Enqueue(message);
+        }
+        return chat;
     }
 
     public async Task AddAsync(Chat chat, CancellationToken cancellationToken = default)
     {
-        var serializedChat = JsonSerializer.Serialize(chat, ChatSerializationOptions);
-        await _database.StringSetAsync($"{ChatKeyPrefix}:{chat.GameId}", serializedChat, when: When.NotExists);
+        var metaKey = GetChatMetadataKey(chat.GameId);
+
+        if (await _database.KeyExistsAsync(metaKey))
+            throw new KeyAlreadyExistsException(metaKey);
+        
+        var hashEntries = new HashEntry[]
+        {
+            new("gameId", chat.GameId)
+        };
+        await _database.HashSetAsync(metaKey, hashEntries);
     }
 
     public async Task DeleteAsync(Chat chat, CancellationToken cancellationToken = default)
-        => await _database.KeyDeleteAsync($"{ChatKeyPrefix}:{chat.GameId}");
+    {
+        // TODO: make in transaction
+        await _database.KeyDeleteAsync(GetChatKey(chat.GameId));
+        await _database.KeyDeleteAsync(GetChatMetadataKey(chat.GameId));
+    }
 
     public async Task SaveChangesAsync(Chat chat, CancellationToken cancellationToken = default)
     {
-        var serializedGame = JsonSerializer.Serialize(chat, ChatSerializationOptions);
-        await _database.StringSetAsync($"{ChatKeyPrefix}:{chat.GameId}", serializedGame);
-        
         using var scope = serviceProvider.CreateScope();
         var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
         foreach (var @event in chat.DomainEvents)
+        {
+            if (@event is ChatMessageAdded messageEvent)
+            {
+                var message = new ChatMessage(messageEvent.Username, messageEvent.Message);
+                await _database.ListRightPushAsync(
+                    GetChatKey(chat.GameId), JsonSerializer.Serialize(message, ChatMessageSerializationOptions));
+            }
             await mediator.Publish(@event, cancellationToken);
+        }
         chat.ClearDomainEvents();
     }
 
-    private static JsonSerializerOptions GetChatSerializationOptions()
-    {
-        var jsonTypeResolver = new DefaultJsonTypeInfoResolver();
-        jsonTypeResolver.Modifiers.Add(jsonTypeInfo =>
-        {
-            if (jsonTypeInfo.Type != typeof(Chat))
-                return;
-            var propsToRemove = jsonTypeInfo.Properties
-                .Where(p => p.Name is nameof(Chat.Messages)
-                    or nameof(AggregateRoot<IDomainEvent>.DomainEvents))
-                .ToList();
-            propsToRemove.ForEach(p => jsonTypeInfo.Properties.Remove(p));
+    private static string GetChatKey(string id) => $"{ChatKeyPrefix}:{id}";
 
-            foreach (var field in typeof(Chat).GetFields(BindingFlags.NonPublic | BindingFlags.Instance)
-                         .Where(f => !f.Name.StartsWith('<')))
-            {
-                var fieldInfo = jsonTypeInfo.CreateJsonPropertyInfo(field.FieldType, field.Name);
-                fieldInfo.Get = field.GetValue;
-                fieldInfo.Set = field.SetValue;
-                jsonTypeInfo.Properties.Add(fieldInfo);
-            }
-            jsonTypeInfo.CreateObject = () =>
-            {
-                var chat = (Chat)RuntimeHelpers.GetUninitializedObject(typeof(Chat));
-                var domainEventsField = typeof(AggregateRoot<IDomainEvent>).GetField(
-                    "_domainEvents", BindingFlags.NonPublic | BindingFlags.Instance) 
-                                        ?? throw new SerializationException("Can't find \"_domainEvents\" field.");
-                domainEventsField.SetValue(chat, new List<IDomainEvent>());
-                return chat;
-            };
-        });
-        return new()
-        {
-            TypeInfoResolver = jsonTypeResolver
-        };
-    }
+    private static string GetChatMetadataKey(string id) => $"{ChatKeyPrefix}:{id}:{ChatMetadataSuffix}";
+
+    private static JsonSerializerOptions GetChatSerializationOptions() => new()
+    {
+        Converters = { new ChatMessageConverter() }
+    };
 }

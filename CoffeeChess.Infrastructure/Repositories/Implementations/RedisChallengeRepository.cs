@@ -3,6 +3,7 @@ using CoffeeChess.Domain.Matchmaking.Entities;
 using CoffeeChess.Domain.Matchmaking.Enums;
 using CoffeeChess.Domain.Matchmaking.Repositories.Interfaces;
 using CoffeeChess.Domain.Matchmaking.ValueObjects;
+using CoffeeChess.Infrastructure.Exceptions;
 using CoffeeChess.Infrastructure.Serialization;
 using StackExchange.Redis;
 
@@ -26,8 +27,9 @@ public class RedisChallengeRepository(
     public async Task AddAsync(Challenge challenge, CancellationToken cancellationToken = default)
     {
         var key = $"{ChallengeKeyPrefix}:{challenge.PlayerId}";
-        
-        // TODO: throw exception if the challenge already exists
+
+        if (await _database.KeyExistsAsync(key))
+            throw new KeyAlreadyExistsException(key);
 
         var hashEntries = GetHashEntriesFromChallenge(challenge);
         await _database.HashSetAsync(key, hashEntries);

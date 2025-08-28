@@ -18,10 +18,7 @@ public class ChatMessageConverter : JsonConverter<ChatMessage>
         var message = GetPropertyElementOrThrow(root, GetPropertyName(policy, nameof(ChatMessage.Message)))
                           .GetString() 
                       ?? throw new JsonException($"Can't cast \"{nameof(ChatMessage.Message)}\" property to string.");
-        var timestampEl = GetPropertyElementOrThrow(
-            root, GetPropertyName(policy, nameof(ChatMessage.Timestamp)));
-        var timestamp = timestampEl.Deserialize<DateTime>();
-        return new(username, message, timestamp);
+        return new(username, message);
     }
 
     public override void Write(Utf8JsonWriter writer, ChatMessage value, JsonSerializerOptions options)
@@ -32,8 +29,6 @@ public class ChatMessageConverter : JsonConverter<ChatMessage>
         JsonSerializer.Serialize(writer, value.Username, options);
         writer.WritePropertyName(GetPropertyName(policy, nameof(value.Message)));
         JsonSerializer.Serialize(writer, value.Message, options);
-        writer.WritePropertyName(GetPropertyName(policy, nameof(value.Timestamp)));
-        JsonSerializer.Serialize(writer, value.Timestamp, options);
         writer.WriteEndObject();
     }
     
