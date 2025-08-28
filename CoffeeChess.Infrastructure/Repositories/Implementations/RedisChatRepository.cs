@@ -33,7 +33,7 @@ public class RedisChatRepository(
         foreach (var entry in await _database.ListRangeAsync(GetChatKey(id)))
         {
             var message = JsonSerializer.Deserialize<ChatMessage>(entry!, ChatMessageSerializationOptions);
-            // TODO: don't use reflection
+            // TODO: don't use a reflection
             var messagesField = typeof(Chat).GetField(
                 "_messages", BindingFlags.NonPublic | BindingFlags.Instance)!;
             var queue = (ConcurrentQueue<ChatMessage>)messagesField.GetValue(chat)!;
@@ -58,7 +58,7 @@ public class RedisChatRepository(
 
     public async Task DeleteAsync(Chat chat, CancellationToken cancellationToken = default)
     {
-        // TODO: make in transaction
+        // TODO: perform in a transaction
         await _database.KeyDeleteAsync(GetChatKey(chat.GameId));
         await _database.KeyDeleteAsync(GetChatMetadataKey(chat.GameId));
     }

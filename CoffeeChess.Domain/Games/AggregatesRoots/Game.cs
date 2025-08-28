@@ -12,22 +12,22 @@ namespace CoffeeChess.Domain.Games.AggregatesRoots;
 
 public class Game : AggregateRoot<IDomainEvent>
 {
-    public string GameId { get; init; } = null!;
-    public string WhitePlayerId { get; init; } = null!;
-    public string BlackPlayerId { get; init; } = null!;
+    public string GameId { get; }
+    public string WhitePlayerId { get; }
+    public string BlackPlayerId { get; }
     public bool IsOver { get; private set; }
-    public TimeSpan InitialTimeForOnePlayer { get; init; }
-    public TimeSpan Increment { get; init; }
+    public TimeSpan InitialTimeForOnePlayer { get; }
+    public TimeSpan Increment { get; }
     public DateTime LastTimeUpdate { get; private set; }
     public IReadOnlyList<MoveInfo> MovesHistory => _movesHistory.AsReadOnly();
-
-    private TimeSpan _whiteTimeLeft;
-    private TimeSpan _blackTimeLeft;
-    private PlayerColor _currentPlayerColor;
-    private PlayerColor? _playerWithDrawOffer;
-    private Fen _currentFen;
-    private Dictionary<string, int> _positionsForThreefoldCount = null!;
-    private List<MoveInfo> _movesHistory = null!;
+    public TimeSpan WhiteTimeLeft { get; private set; }
+    public TimeSpan BlackTimeLeft { get; private set; }
+    public PlayerColor CurrentPlayerColor { get; private set; }
+    public PlayerColor? PlayerWithDrawOffer { get; private set; }
+    public Fen CurrentFen { get; private set; }
+    
+    private readonly Dictionary<string, int> _positionsForThreefoldCount;
+    private readonly List<MoveInfo> _movesHistory;
 
     public Game(
         string gameId,
@@ -42,14 +42,14 @@ public class Game : AggregateRoot<IDomainEvent>
         Increment = increment;
         LastTimeUpdate = DateTime.UtcNow;
         
-        _whiteTimeLeft = InitialTimeForOnePlayer;
-        _blackTimeLeft = InitialTimeForOnePlayer;
-        _currentPlayerColor = PlayerColor.White;
+        WhiteTimeLeft = InitialTimeForOnePlayer;
+        BlackTimeLeft = InitialTimeForOnePlayer;
+        CurrentPlayerColor = PlayerColor.White;
         _positionsForThreefoldCount = new();
         _movesHistory = new();
-        _currentFen = new Fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+        CurrentFen = new Fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
         AddDomainEvent(new GameStarted(
-            GameId, WhitePlayerId, BlackPlayerId, (int)_whiteTimeLeft.TotalMilliseconds));
+            GameId, WhitePlayerId, BlackPlayerId, (int)WhiteTimeLeft.TotalMilliseconds));
     }
 
     public void ApplyMove(IChessMovesValidatorService chessMovesValidatorService, 
@@ -58,7 +58,7 @@ public class Game : AggregateRoot<IDomainEvent>
         if (IsOver) throw new InvalidGameOperationException("Game is over.");
         if (CheckAndPublishNotYourTurn(playerId)) return;
 
-        var moveResult = chessMovesValidatorService.ApplyMove(_currentFen, _currentPlayerColor, from, to, promotion);
+        var moveResult = chessMovesValidatorService.ApplyMove(CurrentFen, CurrentPlayerColor, from, to, promotion);
         if (CheckAndPublishInvalidMove(playerId, moveResult)) return;
         
         DeclineDrawOfferIfPending(playerId);
@@ -79,9 +79,9 @@ public class Game : AggregateRoot<IDomainEvent>
 
     public void OfferADraw(string playerId)
     {
-        if (_playerWithDrawOffer.HasValue)
+        if (PlayerWithDrawOffer.HasValue)
             throw new InvalidGameOperationException("There's already pending draw offer.");
-        _playerWithDrawOffer = playerId == WhitePlayerId ? PlayerColor.White : PlayerColor.Black;
+        PlayerWithDrawOffer = playerId == WhitePlayerId ? PlayerColor.White : PlayerColor.Black;
         var senderColor = GetColorById(playerId);
         var (senderId, receiverId) = senderColor == PlayerColor.White
             ? (WhitePlayerId, BlackPlayerId)
@@ -91,24 +91,24 @@ public class Game : AggregateRoot<IDomainEvent>
 
     public void AcceptDrawOffer(string playerId)
     {
-        if (!_playerWithDrawOffer.HasValue)
+        if (!PlayerWithDrawOffer.HasValue)
             throw new InvalidGameOperationException("There's no pending draw offers.");
         var playerColor = GetColorById(playerId);
-        if (_playerWithDrawOffer == playerColor)
+        if (PlayerWithDrawOffer == playerColor)
             throw new InvalidGameOperationException("The same side tries to offer and accept a draw.");
-        _playerWithDrawOffer = null;
+        PlayerWithDrawOffer = null;
         EndGameAndPublish(GameResult.Draw, GameResultReason.Agreement);
     }
 
     public void DeclineDrawOffer(string playerId)
     {
-        if (!_playerWithDrawOffer.HasValue)
+        if (!PlayerWithDrawOffer.HasValue)
             throw new InvalidGameOperationException("There's no pending draw offers.");
         var playerColor = GetColorById(playerId);
-        if (_playerWithDrawOffer == playerColor)
+        if (PlayerWithDrawOffer == playerColor)
             throw new InvalidGameOperationException("The same side tries to offer and decline a draw.");
-        _playerWithDrawOffer = null;
-        var (rejectingId, senderId) = _playerWithDrawOffer == PlayerColor.White
+        PlayerWithDrawOffer = null;
+        var (rejectingId, senderId) = PlayerWithDrawOffer == PlayerColor.White
             ? (BlackPlayerId, WhitePlayerId)
             : (WhitePlayerId, BlackPlayerId);
         AddDomainEvent(new DrawOfferDeclined(rejectingId, senderId));
@@ -130,7 +130,7 @@ public class Game : AggregateRoot<IDomainEvent>
     private bool CheckAndPublishNotYourTurn(string playerId)
     {
         var playerColor = GetColorById(playerId);
-        if (playerColor == _currentPlayerColor) 
+        if (playerColor == CurrentPlayerColor) 
             return false;
         
         AddDomainEvent(new MoveFailed(playerId, MoveFailedReason.NotYourTurn));
@@ -141,10 +141,10 @@ public class Game : AggregateRoot<IDomainEvent>
     {
         var deltaTime = DateTime.UtcNow - LastTimeUpdate;
         LastTimeUpdate = DateTime.UtcNow;
-        if (_currentPlayerColor is PlayerColor.White)
-            _whiteTimeLeft -= deltaTime;
+        if (CurrentPlayerColor is PlayerColor.White)
+            WhiteTimeLeft -= deltaTime;
         else
-            _blackTimeLeft -= deltaTime;
+            BlackTimeLeft -= deltaTime;
     }
 
     private bool CheckAndPublishCheckmate(MoveResult moveResult)
@@ -152,7 +152,7 @@ public class Game : AggregateRoot<IDomainEvent>
         if (moveResult.MoveResultType is not MoveResultType.Checkmate)
             return false;
 
-        var result = _currentPlayerColor == PlayerColor.White ? GameResult.WhiteWon : GameResult.BlackWon;
+        var result = CurrentPlayerColor == PlayerColor.White ? GameResult.WhiteWon : GameResult.BlackWon;
         EndGameAndPublish(result, GameResultReason.Checkmate);
         return true;
     }
@@ -177,44 +177,45 @@ public class Game : AggregateRoot<IDomainEvent>
     
     private bool CheckAndPublishTimeout(string? movingPlayerId = null)
     {
-        if (_currentPlayerColor is PlayerColor.White)
+        if (CurrentPlayerColor is PlayerColor.White)
         {
-            if (_whiteTimeLeft > TimeSpan.Zero)
+            if (WhiteTimeLeft > TimeSpan.Zero)
                 return false;
-            _whiteTimeLeft = TimeSpan.Zero;
+            WhiteTimeLeft = TimeSpan.Zero;
             if (!string.IsNullOrEmpty(movingPlayerId))
                 AddDomainEvent(new MoveFailed(movingPlayerId, MoveFailedReason.TimeRanOut));
             EndGameAndPublish(GameResult.BlackWon, GameResultReason.OpponentTimeRanOut);
         }
         else
         {
-            if (_blackTimeLeft > TimeSpan.Zero)
+            if (BlackTimeLeft > TimeSpan.Zero)
                 return false;
             
             if (!string.IsNullOrEmpty(movingPlayerId))
                 AddDomainEvent(new MoveFailed(movingPlayerId, MoveFailedReason.TimeRanOut));
             EndGameAndPublish(GameResult.WhiteWon, GameResultReason.OpponentTimeRanOut);
-            _blackTimeLeft = TimeSpan.Zero;
+            BlackTimeLeft = TimeSpan.Zero;
         }
         return true;
     }
 
     private void UpdateAndPublishAfterSuccessMove(MoveResult moveResult)
     {
-        var timeAfterMove = _currentPlayerColor == PlayerColor.White ? _whiteTimeLeft : _blackTimeLeft;
-        _movesHistory.Add(new(moveResult.San!.Value, timeAfterMove));
-        _currentFen = moveResult.FenAfterMove!.Value;
-        AddDomainEvent(new MoveMade(WhitePlayerId, BlackPlayerId,
-            _movesHistory.AsReadOnly(), _whiteTimeLeft, _blackTimeLeft));
+        var timeAfterMove = CurrentPlayerColor == PlayerColor.White ? WhiteTimeLeft : BlackTimeLeft;
+        var moveInfo = new MoveInfo(moveResult.San!.Value, timeAfterMove);
+        _movesHistory.Add(moveInfo);
+        CurrentFen = moveResult.FenAfterMove!.Value;
+        AddDomainEvent(new MoveMade(
+            WhitePlayerId, BlackPlayerId, MovesHistory, moveInfo, WhiteTimeLeft, BlackTimeLeft));
     }
     private void DeclineDrawOfferIfPending(string playerId)
     {
-        if (_playerWithDrawOffer.HasValue && GetColorById(playerId) != _playerWithDrawOffer)
+        if (PlayerWithDrawOffer.HasValue && GetColorById(playerId) != PlayerWithDrawOffer)
             DeclineDrawOffer(playerId);
     }
 
     private void SwapColors() 
-        => _currentPlayerColor = _currentPlayerColor == PlayerColor.White
+        => CurrentPlayerColor = CurrentPlayerColor == PlayerColor.White
             ? PlayerColor.Black
             : PlayerColor.White;
 
@@ -228,9 +229,9 @@ public class Game : AggregateRoot<IDomainEvent>
     {
         if (!moveResult.IsCaptureOrPawnMove!.Value)
         {
-            _positionsForThreefoldCount.TryAdd(_currentFen.PiecesPlacement, 0);
-            _positionsForThreefoldCount[_currentFen.PiecesPlacement]++;
-            if (_positionsForThreefoldCount[_currentFen.PiecesPlacement] == 3)
+            _positionsForThreefoldCount.TryAdd(CurrentFen.PiecesPlacement, 0);
+            _positionsForThreefoldCount[CurrentFen.PiecesPlacement]++;
+            if (_positionsForThreefoldCount[CurrentFen.PiecesPlacement] == 3)
             {
                 EndGameAndPublish(GameResult.Draw, GameResultReason.Threefold);
                 return true;
@@ -253,10 +254,10 @@ public class Game : AggregateRoot<IDomainEvent>
     
     private void DoIncrement()
     {
-        if (_currentPlayerColor is PlayerColor.White)
-            _whiteTimeLeft += Increment;
+        if (CurrentPlayerColor is PlayerColor.White)
+            WhiteTimeLeft += Increment;
         else
-            _blackTimeLeft += Increment;
+            BlackTimeLeft += Increment;
     }
 
     private PlayerColor GetColorById(string playerId)
