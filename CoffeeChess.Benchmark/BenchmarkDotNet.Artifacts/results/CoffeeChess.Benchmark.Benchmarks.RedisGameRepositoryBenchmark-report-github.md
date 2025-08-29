@@ -9,7 +9,7 @@ AMD Ryzen 5 5500U with Radeon Graphics 2.10GHz, 1 CPU, 12 logical and 6 physical
 InvocationCount=1  UnrollFactor=1  
 
 ```
-| Method             | RepositoryType | Mean      | Error     | StdDev    | Min       | Max       | Median    | Allocated |
-|------------------- |--------------- |----------:|----------:|----------:|----------:|----------:|----------:|----------:|
-| **PlayTenMovesInGame** | **HashesAndList**  | **14.208 ms** | **0.4323 ms** | **1.2543 ms** | **11.418 ms** | **17.367 ms** | **14.066 ms** | **643.32 KB** |
-| **PlayTenMovesInGame** | **Json**           |  **6.550 ms** | **0.2637 ms** | **0.7733 ms** |  **5.201 ms** |  **8.430 ms** |  **6.429 ms** | **598.12 KB** |
+| Method             | RepositoryType | Mean      | Error     | StdDev    | Min      | Max       | Median    | Allocated |
+|------------------- |--------------- |----------:|----------:|----------:|---------:|----------:|----------:|----------:|
+| **PlayTenMovesInGame** | **HashesAndList**  | **12.384 ms** | **0.4154 ms** | **1.1984 ms** | **8.576 ms** | **15.460 ms** | **12.374 ms** | **723.44 KB** |
+| **PlayTenMovesInGame** | **Json**           |  **6.530 ms** | **0.2392 ms** | **0.6901 ms** | **4.495 ms** |  **7.988 ms** |  **6.557 ms** | **606.14 KB** |
