@@ -30,7 +30,7 @@ public class MoveInfoConverter : JsonConverter<MoveInfo>
         var policy = options.PropertyNamingPolicy;
         writer.WriteStartObject();
         writer.WritePropertyName(GetPropertyName(policy, nameof(value.San)));
-        JsonSerializer.Serialize(writer, value.San, options);
+        JsonSerializer.Serialize(writer, value.San.ToString(), options);
         writer.WritePropertyName(GetPropertyName(policy, nameof(value.TimeAfterMove)));
         JsonSerializer.Serialize(writer, value.TimeAfterMove.TotalMicroseconds, options);
         writer.WriteEndObject();
