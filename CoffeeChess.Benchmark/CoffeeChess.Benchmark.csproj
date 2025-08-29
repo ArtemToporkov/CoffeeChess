@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net9.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <OutputType>Exe</OutputType>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="BenchmarkDotNet" Version="0.15.2" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\CoffeeChess.Application\CoffeeChess.Application.csproj" />
+      <ProjectReference Include="..\CoffeeChess.Domain\CoffeeChess.Domain.csproj" />
+      <ProjectReference Include="..\CoffeeChess.Infrastructure\CoffeeChess.Infrastructure.csproj" />
+    </ItemGroup>
+
+</Project>
