@@ -41,11 +41,14 @@ public class RedisGameRepository(
     public async Task AddAsync(Game game, CancellationToken cancellationToken = default)
     {
         var gamePersistenceModel = GamePersistenceModel.FromGame(game, serializerOptions: GameSerializationOptions);
-
+        var metadata = gamePersistenceModel.StaticMetadata
+            .Concat(gamePersistenceModel.MetadataThatCanUpdate)
+            .ToArray();
+        
         // TODO: perform in a transaction
 
         await _database.HashSetAsync(
-            GetMetadataKey(game.GameId), gamePersistenceModel.StaticMetadata);
+            GetMetadataKey(game.GameId), metadata);
         await _database.HashSetAsync(
             GetPositionsForThreefoldKey(game.GameId), gamePersistenceModel.PositionsForThreefold);
         await _database.ListRightPushAsync(
