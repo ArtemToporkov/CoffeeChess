@@ -67,7 +67,7 @@ builder.Services.AddScoped<IMediaProviderService, WwwRootMediaProviderService>()
 
 builder.Services.AddSingleton<IChallengeRepository, RedisChallengeRepository>();
 builder.Services.AddSingleton<IChatRepository, RedisChatRepository>();
-builder.Services.AddSingleton<IGameRepository, RedisGameRepository>();
+builder.Services.AddSingleton<IGameRepository, RedisHashesAndListGameRepository>();
 builder.Services.AddScoped<IPlayerRepository, SqlPlayerRepository>();
 builder.Services.AddScoped<ICompletedGameRepository, SqlCompletedGameRepository>();
 builder.Services.AddScoped<IChatHistoryRepository, SqlChatHistoryRepository>();

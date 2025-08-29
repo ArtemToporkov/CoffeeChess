@@ -1,13 +1,7 @@
-﻿using System.ComponentModel;
-using System.Globalization;
-using System.Reflection;
-using System.Runtime.CompilerServices;
-using System.Text.Json;
+﻿using System.Text.Json;
 using CoffeeChess.Domain.Games.AggregatesRoots;
-using CoffeeChess.Domain.Games.Enums;
 using CoffeeChess.Domain.Games.Events;
 using CoffeeChess.Domain.Games.Repositories.Interfaces;
-using CoffeeChess.Domain.Games.ValueObjects;
 using CoffeeChess.Infrastructure.Persistence.Models;
 using CoffeeChess.Infrastructure.Serialization;
 using MediatR;
@@ -16,7 +10,7 @@ using StackExchange.Redis;
 
 namespace CoffeeChess.Infrastructure.Repositories.Implementations;
 
-public class RedisGameRepository(
+public class RedisHashesAndListGameRepository(
     IServiceProvider serviceProvider,
     IConnectionMultiplexer redis) : IGameRepository
 {
@@ -44,8 +38,12 @@ public class RedisGameRepository(
 
         // TODO: perform in a transaction
 
+        var allMetadata = gamePersistenceModel.StaticMetadata
+            .Concat(gamePersistenceModel.MetadataThatCanUpdate)
+            .ToArray();
         await _database.HashSetAsync(
-            GetMetadataKey(game.GameId), gamePersistenceModel.StaticMetadata);
+            GetMetadataKey(game.GameId), allMetadata);
+
         await _database.HashSetAsync(
             GetPositionsForThreefoldKey(game.GameId), gamePersistenceModel.PositionsForThreefold);
         await _database.ListRightPushAsync(
