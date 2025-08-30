@@ -58,25 +58,29 @@ public class RedisChatRepository(
 
     public async Task DeleteAsync(Chat chat, CancellationToken cancellationToken = default)
     {
-        // TODO: perform in a transaction
-        await _database.KeyDeleteAsync(GetChatKey(chat.GameId));
-        await _database.KeyDeleteAsync(GetChatMetadataKey(chat.GameId));
+        var transaction = _database.CreateTransaction();
+        _ = transaction.KeyDeleteAsync(GetChatKey(chat.GameId));
+        _ = transaction.KeyDeleteAsync(GetChatMetadataKey(chat.GameId));
+        await transaction.ExecuteAsync();
     }
 
     public async Task SaveChangesAsync(Chat chat, CancellationToken cancellationToken = default)
     {
         using var scope = serviceProvider.CreateScope();
         var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+        var transaction = _database.CreateTransaction();
         foreach (var @event in chat.DomainEvents)
         {
             if (@event is ChatMessageAdded messageEvent)
             {
                 var message = new ChatMessage(messageEvent.Username, messageEvent.Message);
-                await _database.ListRightPushAsync(
+                _ = transaction.ListRightPushAsync(
                     GetChatKey(chat.GameId), JsonSerializer.Serialize(message, ChatMessageSerializationOptions));
             }
             await mediator.Publish(@event, cancellationToken);
         }
+
+        await transaction.ExecuteAsync();
         chat.ClearDomainEvents();
     }
 
