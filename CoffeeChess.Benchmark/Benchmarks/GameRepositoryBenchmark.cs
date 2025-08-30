@@ -1,6 +1,7 @@
 ﻿using BenchmarkDotNet.Attributes;
 using CoffeeChess.Application.Games.Commands;
 using CoffeeChess.Application.Games.Services.Interfaces;
+using CoffeeChess.Benchmark.Enums;
 using CoffeeChess.Benchmark.Mocks;
 using CoffeeChess.Domain.Games.AggregatesRoots;
 using CoffeeChess.Domain.Games.Repositories.Interfaces;
@@ -8,6 +9,7 @@ using CoffeeChess.Domain.Games.Services.Implementations;
 using CoffeeChess.Domain.Games.Services.Interfaces;
 using CoffeeChess.Infrastructure.Repositories.Implementations;
 using CoffeeChess.Infrastructure.Services.Implementations;
+using JetBrains.Annotations;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using StackExchange.Redis;
@@ -23,8 +25,9 @@ public class GameRepositoryBenchmark
     private string _gameId = null!;
     private Game _game = null!;
 
-    [Params("HashesAndList", "Json", "InMemory")]
-    public string RepositoryType = null!;
+    [UsedImplicitly]
+    [Params(GameRepositoryType.RedisHashesAndList, GameRepositoryType.RedisJson, GameRepositoryType.InMemory)] 
+    public GameRepositoryType RepositoryType;
 
     [GlobalSetup]
     public void GlobalSetup()
@@ -39,13 +42,13 @@ public class GameRepositoryBenchmark
 
         switch (RepositoryType)
         {
-            case "HashesAndList":
+            case GameRepositoryType.RedisHashesAndList:
                 services.AddSingleton<IGameRepository, RedisHashesAndListGameRepository>();
                 break;
-            case "Json":
+            case GameRepositoryType.RedisJson:
                 services.AddSingleton<IGameRepository, RedisJsonGameRepository>();
                 break;
-            case "InMemory":
+            case GameRepositoryType.InMemory:
                 services.AddSingleton<IGameRepository, InMemoryGameRepository>();
                 break;
         }
