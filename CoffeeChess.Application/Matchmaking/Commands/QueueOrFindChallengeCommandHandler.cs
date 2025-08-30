@@ -1,4 +1,4 @@
-﻿using CoffeeChess.Application.Matchmaking.Services.Interfaces;
+﻿using CoffeeChess.Domain.Matchmaking.Services.Interfaces;
 using CoffeeChess.Domain.Matchmaking.ValueObjects;
 using MediatR;
 

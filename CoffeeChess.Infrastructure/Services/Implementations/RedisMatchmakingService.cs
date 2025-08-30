@@ -1,5 +1,4 @@
-﻿using CoffeeChess.Application.Matchmaking.Services.Interfaces;
-using CoffeeChess.Application.Shared.Exceptions;
+﻿using CoffeeChess.Application.Shared.Exceptions;
 using CoffeeChess.Domain.Chats.AggregatesRoots;
 using CoffeeChess.Domain.Chats.Repositories.Interfaces;
 using CoffeeChess.Domain.Games.AggregatesRoots;
@@ -7,6 +6,7 @@ using CoffeeChess.Domain.Games.Repositories.Interfaces;
 using CoffeeChess.Domain.Matchmaking.Entities;
 using CoffeeChess.Domain.Matchmaking.Enums;
 using CoffeeChess.Domain.Matchmaking.Repositories.Interfaces;
+using CoffeeChess.Domain.Matchmaking.Services.Interfaces;
 using CoffeeChess.Domain.Matchmaking.ValueObjects;
 using CoffeeChess.Domain.Players.AggregatesRoots;
 using CoffeeChess.Domain.Players.Repositories.Interfaces;

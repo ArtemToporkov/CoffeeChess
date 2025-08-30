@@ -1,7 +1,6 @@
-﻿using CoffeeChess.Domain.Games.ValueObjects;
-using CoffeeChess.Domain.Matchmaking.ValueObjects;
+﻿using CoffeeChess.Domain.Matchmaking.ValueObjects;
 
-namespace CoffeeChess.Application.Matchmaking.Services.Interfaces;
+namespace CoffeeChess.Domain.Matchmaking.Services.Interfaces;
 
 public interface IMatchmakingService
 {
