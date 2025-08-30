@@ -7,6 +7,6 @@ public static class Program
 {
     public static void Main()
     {
-        BenchmarkRunner.Run<GameRepositoryBenchmark>();
+        BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run();
     }
 }
