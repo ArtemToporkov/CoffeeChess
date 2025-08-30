@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+<meta charset='utf-8' />
+<title>CoffeeChess.Benchmark.Benchmarks.ChatRepositoryBenchmark-20250830-125921</title>
+
+<style type="text/css">
+	table { border-collapse: collapse; display: block; width: 100%; overflow: auto; }
+	td, th { padding: 6px 13px; border: 1px solid #ddd; text-align: right; }
+	tr { background-color: #fff; border-top: 1px solid #ccc; }
+	tr:nth-child(even) { background: #f8f8f8; }
+</style>
+</head>
+<body>
+<pre><code>
+BenchmarkDotNet v0.15.2, Windows 11 (10.0.22631.5624/23H2/2023Update/SunValley3)
+AMD Ryzen 5 5500U with Radeon Graphics 2.10GHz, 1 CPU, 12 logical and 6 physical cores
+.NET SDK 9.0.300
+  [Host]     : .NET 9.0.5 (9.0.525.21509), X64 RyuJIT AVX2
+  Job-CNUJVU : .NET 9.0.5 (9.0.525.21509), X64 RyuJIT AVX2
+</code></pre>
+<pre><code>InvocationCount=1  UnrollFactor=1  
+</code></pre>
+
+<table>
+<thead><tr><th>Method      </th><th>RepositoryType</th><th>Mean </th><th>Error</th><th>StdDev</th><th>Median</th><th>Min  </th><th>Max  </th><th>Allocated</th>
+</tr>
+</thead><tbody><tr><td>SendThirtyMessages</td><td>RedisList</td><td>11,106.9 &mu;s</td><td>388.21 &mu;s</td><td>1,132.43 &mu;s</td><td>11,120.4 &mu;s</td><td>8,756.4 &mu;s</td><td>13,620.6 &mu;s</td><td>332.92 KB</td>
+</tr><tr><td>GetById</td><td>RedisList</td><td>681.0 &mu;s</td><td>41.66 &mu;s</td><td>117.50 &mu;s</td><td>658.1 &mu;s</td><td>450.9 &mu;s</td><td>993.6 &mu;s</td><td>19.3 KB</td>
+</tr><tr><td>SaveChanges</td><td>RedisList</td><td>386.6 &mu;s</td><td>27.57 &mu;s</td><td>78.66 &mu;s</td><td>376.8 &mu;s</td><td>250.6 &mu;s</td><td>580.3 &mu;s</td><td>8.96 KB</td>
+</tr><tr><td>Delete</td><td>RedisList</td><td>505.1 &mu;s</td><td>36.10 &mu;s</td><td>105.30 &mu;s</td><td>484.1 &mu;s</td><td>340.7 &mu;s</td><td>778.4 &mu;s</td><td>23.13 KB</td>
+</tr><tr><td>SendThirtyMessages</td><td>RedisJson</td><td>20,204.7 &mu;s</td><td>470.19 &mu;s</td><td>1,386.36 &mu;s</td><td>19,895.4 &mu;s</td><td>18,156.9 &mu;s</td><td>23,899.6 &mu;s</td><td>1061.97 KB</td>
+</tr><tr><td>GetById</td><td>RedisJson</td><td>913.1 &mu;s</td><td>64.66 &mu;s</td><td>186.55 &mu;s</td><td>862.0 &mu;s</td><td>677.6 &mu;s</td><td>1,461.8 &mu;s</td><td>51.59 KB</td>
+</tr><tr><td>SaveChanges</td><td>RedisJson</td><td>895.0 &mu;s</td><td>50.46 &mu;s</td><td>144.77 &mu;s</td><td>850.5 &mu;s</td><td>672.2 &mu;s</td><td>1,285.4 &mu;s</td><td>66.14 KB</td>
+</tr><tr><td>Delete</td><td>RedisJson</td><td>406.6 &mu;s</td><td>22.70 &mu;s</td><td>64.02 &mu;s</td><td>406.4 &mu;s</td><td>270.1 &mu;s</td><td>578.8 &mu;s</td><td>8.62 KB</td>
+</tr></tbody></table>
+</body>
+</html>
