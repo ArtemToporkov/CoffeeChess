@@ -1,15 +1,13 @@
-﻿using System.Text.Json;
-using CoffeeChess.Domain.Matchmaking.Entities;
+﻿using CoffeeChess.Domain.Matchmaking.Entities;
 using CoffeeChess.Domain.Matchmaking.Enums;
 using CoffeeChess.Domain.Matchmaking.Repositories.Interfaces;
 using CoffeeChess.Domain.Matchmaking.ValueObjects;
 using CoffeeChess.Infrastructure.Exceptions;
-using CoffeeChess.Infrastructure.Serialization;
 using StackExchange.Redis;
 
 namespace CoffeeChess.Infrastructure.Repositories.Implementations;
 
-public class RedisChallengeRepository(
+public class RedisHashesChallengeRepository(
     IConnectionMultiplexer redis) : IChallengeRepository
 {
     private readonly IDatabase _database = redis.GetDatabase();
