@@ -11,7 +11,7 @@ using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using StackExchange.Redis;
 
-namespace CoffeeChess.Infrastructure.Repositories.Implementations;
+namespace CoffeeChess.Infrastructure.Repositories.Implementations.Chats;
 
 public class RedisChatRepository(
     IServiceProvider serviceProvider,

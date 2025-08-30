@@ -1,20 +1,14 @@
-﻿using System.ComponentModel;
-using System.Globalization;
-using System.Reflection;
-using System.Runtime.CompilerServices;
-using System.Text.Json;
+﻿using System.Text.Json;
 using CoffeeChess.Domain.Games.AggregatesRoots;
-using CoffeeChess.Domain.Games.Enums;
 using CoffeeChess.Domain.Games.Events;
 using CoffeeChess.Domain.Games.Repositories.Interfaces;
-using CoffeeChess.Domain.Games.ValueObjects;
 using CoffeeChess.Infrastructure.Persistence.Models;
 using CoffeeChess.Infrastructure.Serialization;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using StackExchange.Redis;
 
-namespace CoffeeChess.Infrastructure.Repositories.Implementations;
+namespace CoffeeChess.Infrastructure.Repositories.Implementations.Games;
 
 public class RedisGameRepository(
     IServiceProvider serviceProvider,

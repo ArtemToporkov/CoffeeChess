@@ -3,7 +3,7 @@ using CoffeeChess.Application.Games.Repositories.Interfaces;
 using CoffeeChess.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
-namespace CoffeeChess.Infrastructure.Repositories.Implementations;
+namespace CoffeeChess.Infrastructure.Repositories.Implementations.Games;
 
 public class SqlCompletedGameRepository(ApplicationDbContext dbContext) : ICompletedGameRepository
 {
