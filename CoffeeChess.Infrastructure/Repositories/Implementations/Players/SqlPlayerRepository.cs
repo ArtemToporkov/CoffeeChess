@@ -4,7 +4,7 @@ using CoffeeChess.Infrastructure.Persistence;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
-namespace CoffeeChess.Infrastructure.Repositories.Implementations;
+namespace CoffeeChess.Infrastructure.Repositories.Implementations.Players;
 
 public class SqlPlayerRepository(ApplicationDbContext dbContext, IMediator mediator) : IPlayerRepository
 {

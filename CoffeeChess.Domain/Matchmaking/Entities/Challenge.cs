@@ -2,7 +2,7 @@
 
 namespace CoffeeChess.Domain.Matchmaking.Entities;
 
-public class GameChallenge(string playerId, int playerRating, ChallengeSettings challengeSettings)
+public class Challenge(string playerId, int playerRating, ChallengeSettings challengeSettings)
 {
     public string PlayerId { get; } = playerId;
     public int PlayerRating { get; } = playerRating;

@@ -3,7 +3,7 @@ using CoffeeChess.Application.Songs.Repositories.Interfaces;
 using CoffeeChess.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
-namespace CoffeeChess.Infrastructure.Repositories.Implementations;
+namespace CoffeeChess.Infrastructure.Repositories.Implementations.Songs;
 
 public class SqlSongRepository(ApplicationDbContext dbContext) : ISongRepository
 {

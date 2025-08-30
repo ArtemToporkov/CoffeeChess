@@ -3,7 +3,7 @@ using CoffeeChess.Application.Chats.Repositories.Interfaces;
 using CoffeeChess.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
-namespace CoffeeChess.Infrastructure.Repositories.Implementations;
+namespace CoffeeChess.Infrastructure.Repositories.Implementations.Chats;
 
 public class SqlChatHistoryRepository(ApplicationDbContext dbContext) : IChatHistoryRepository
 {

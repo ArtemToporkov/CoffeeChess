@@ -5,10 +5,10 @@ namespace CoffeeChess.Domain.Games.ValueObjects;
 
 public readonly partial record struct Fen
 {
-    public string PiecesPlacement { get; private init; }
-    public int PliesCount { get; private init; }
+    public string PiecesPlacement { get; }
+    public int PliesCount { get; }
+    public string Value { get; }
     
-    private readonly string _value;
     private static readonly Regex FenRegex = RegexForFen();
     
     public Fen(string fenValue)
@@ -25,12 +25,12 @@ public readonly partial record struct Fen
             throw new ArgumentException(
                 $"Position in FEN notation \"{fenValue}\" should contain an info about plies count.");
         PliesCount = pliesCount;
-        _value = fenValue;
+        Value = fenValue;
     }
 
-    public static implicit operator string(Fen fen) => fen._value;
+    public static implicit operator string(Fen fen) => fen.Value;
 
-    public override string ToString() => _value;
+    public override string ToString() => Value;
 
     [GeneratedRegex("""
                     ^(?:[PNBRQKpnbrqk1-8]{1,8}(?:\/[PNBRQKpnbrqk1-8]{1,8}){7})\s(?:[wb])\s(?:-
