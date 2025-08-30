@@ -10,17 +10,14 @@ using CoffeeChess.Domain.Chats.Repositories.Interfaces;
 using CoffeeChess.Domain.Games.Repositories.Interfaces;
 using CoffeeChess.Domain.Games.Services.Implementations;
 using CoffeeChess.Domain.Games.Services.Interfaces;
-using CoffeeChess.Domain.Matchmaking.Repositories.Interfaces;
 using CoffeeChess.Domain.Matchmaking.Services.Interfaces;
 using CoffeeChess.Domain.Players.Repositories.Interfaces;
 using CoffeeChess.Domain.Players.Services.Implementations;
 using CoffeeChess.Domain.Players.Services.Interfaces;
 using CoffeeChess.Infrastructure.Identity;
 using CoffeeChess.Infrastructure.Persistence;
-using CoffeeChess.Infrastructure.Repositories.Implementations;
 using CoffeeChess.Infrastructure.Repositories.Implementations.Chats;
 using CoffeeChess.Infrastructure.Repositories.Implementations.Games;
-using CoffeeChess.Infrastructure.Repositories.Implementations.Matchmaking;
 using CoffeeChess.Infrastructure.Repositories.Implementations.Players;
 using CoffeeChess.Infrastructure.Repositories.Implementations.Songs;
 using CoffeeChess.Infrastructure.Serialization;
@@ -70,7 +67,6 @@ builder.Services.AddScoped<IPlayerEventNotifierService, SignalRPlayerEventNotifi
 builder.Services.AddScoped<IChatEventNotifierService, SignalRChatEventNotifierService>();
 builder.Services.AddScoped<IMediaProviderService, WwwRootMediaProviderService>();
 
-builder.Services.AddSingleton<IChallengeRepository, RedisChallengeRepository>();
 builder.Services.AddSingleton<IChatRepository, RedisChatRepository>();
 builder.Services.AddSingleton<IGameRepository, RedisGameRepository>();
 builder.Services.AddScoped<IPlayerRepository, SqlPlayerRepository>();
