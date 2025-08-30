@@ -1,7 +1,13 @@
-﻿using System.Text.Json;
+﻿using System.ComponentModel;
+using System.Globalization;
+using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Text.Json;
 using CoffeeChess.Domain.Games.AggregatesRoots;
+using CoffeeChess.Domain.Games.Enums;
 using CoffeeChess.Domain.Games.Events;
 using CoffeeChess.Domain.Games.Repositories.Interfaces;
+using CoffeeChess.Domain.Games.ValueObjects;
 using CoffeeChess.Infrastructure.Persistence.Models;
 using CoffeeChess.Infrastructure.Serialization;
 using MediatR;
@@ -15,21 +21,48 @@ public class RedisHashesAndListGameRepository(
     IConnectionMultiplexer redis) : IGameRepository
 {
     private readonly IDatabase _database = redis.GetDatabase();
+    private static readonly JsonSerializerOptions GameSerializationOptions = GetGameSerializationOptions();
     private const string GameKeyPrefix = "game";
     private const string MetadataKeySuffix = "metadata";
     private const string MovesHistoryKeySuffix = "moveshistory";
     private const string PositionsForThreeFoldKeySuffix = "positions";
-    private static readonly JsonSerializerOptions GameSerializationOptions = GetGameSerializationOptions();
+    private const string GetGameScript = """
+                                             local metadata = redis.call('HGETALL', KEYS[1])
+                                             if #metadata == 0 then
+                                                 return nil
+                                             end
+                                             local movesHistory = redis.call('LRANGE', KEYS[2], 0, -1)
+                                             local positions = redis.call('HGETALL', KEYS[3])
+                                             return {metadata, movesHistory, positions}
+                                         """;
 
     public async Task<Game?> GetByIdAsync(string id, CancellationToken cancellationToken = default)
     {
-        var metadata = await _database.HashGetAllAsync(GetMetadataKey(id));
-        if (metadata.Length == 0)
+        var keys = new RedisKey[]
+        {
+            GetMetadataKey(id),
+            GetMovesHistoryKey(id),
+            GetPositionsForThreefoldKey(id)
+        };
+
+        var result = await _database.ScriptEvaluateAsync(GetGameScript, keys);
+        if (result.IsNull) 
             return null;
-        var movesHistory = await _database.ListRangeAsync(GetMovesHistoryKey(id));
-        var positionsForThreefold = await _database.HashGetAllAsync(GetPositionsForThreefoldKey(id));
-        var gamePersistenceModel = new GamePersistenceModel(metadata, positionsForThreefold, movesHistory);
-        return gamePersistenceModel.ToGame(serializerOptions: GameSerializationOptions);
+
+        var resultArray = (RedisResult[])result!;
+        var metadataValues = (RedisValue[])resultArray[0]!;
+        var metadata = new HashEntry[metadataValues.Length / 2];
+        for (var i = 0; i < metadataValues.Length; i += 2)
+            metadata[i / 2] = new HashEntry(metadataValues[i], metadataValues[i + 1]);
+
+        var movesHistory = (RedisValue[])resultArray[1]!;
+        var positionsValues = (RedisValue[])resultArray[2]!;
+        var positionsForThreefold = new HashEntry[positionsValues.Length / 2];
+        for (var i = 0; i < positionsValues.Length; i += 2)
+            positionsForThreefold[i / 2] = new HashEntry(positionsValues[i], positionsValues[i + 1]);
+
+        var model = new GamePersistenceModel(metadata, positionsForThreefold, movesHistory);
+        return model.ToGame(GameSerializationOptions);
     }
 
     public async Task AddAsync(Game game, CancellationToken cancellationToken = default)
