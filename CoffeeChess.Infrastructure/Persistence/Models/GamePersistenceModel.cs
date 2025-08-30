@@ -100,6 +100,8 @@ public class GamePersistenceModel
                (nameof(Game.CurrentPlayerColor),
                     ConvertPlayerColorOrThrow((int)metadataDictionary[CurrentPlayerColorName]!)
                     ?? throw new ArgumentException($"A {nameof(Game.CurrentPlayerColor)} property can't be null.")),
+               (nameof(Game.PlayerWithDrawOffer),
+                    ConvertPlayerColorOrThrow((int)metadataDictionary[PlayerWithDrawOfferName]!)),
                (nameof(Game.CurrentFen), new Fen(metadataDictionary[CurrentFenName]!))
           };
           foreach (var (propertyName, propertyValue) in propertiesToSet)
