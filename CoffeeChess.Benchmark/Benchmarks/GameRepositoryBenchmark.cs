@@ -21,6 +21,7 @@ public class GameRepositoryBenchmark
     private IMediator _mediator = null!;
     private IGameRepository _gameRepository = null!;
     private string _gameId = null!;
+    private Game _game = null!;
 
     [Params("HashesAndList", "Json", "InMemory")]
     public string RepositoryType = null!;
@@ -58,14 +59,14 @@ public class GameRepositoryBenchmark
     public void IterationSetup()
     {
         _gameId = Guid.NewGuid().ToString("N");
-        var game = new Game(
+        _game = new Game(
             _gameId,
             "player-white-id",
             "player-black-id",
             TimeSpan.FromMinutes(5),
             TimeSpan.FromSeconds(3)
         );
-        _gameRepository.AddAsync(game).GetAwaiter().GetResult();
+        _gameRepository.AddAsync(_game).GetAwaiter().GetResult();
     }
 
     [Benchmark]
@@ -119,5 +120,23 @@ public class GameRepositoryBenchmark
             var move = new MakeMoveCommand(_gameId, playerId, moves[i].From, moves[i].To, null);
             await _mediator.Send(move);
         }
+    }
+    
+    [Benchmark]
+    public async Task GetById()
+    {
+        await _gameRepository.GetByIdAsync(_gameId, CancellationToken.None);
+    }
+    
+    [Benchmark]
+    public async Task SaveChanges()
+    {
+        await _gameRepository.SaveChangesAsync(_game, CancellationToken.None);
+    }
+    
+    [Benchmark]
+    public async Task Delete()
+    {
+        await _gameRepository.DeleteAsync(_game, CancellationToken.None);
     }
 }
