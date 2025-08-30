@@ -1,6 +1,6 @@
 ﻿using CoffeeChess.Domain.Games.Exceptions;
 using CoffeeChess.Domain.Matchmaking.Enums;
-using CoffeeChess.Domain.Matchmaking.Event;
+using CoffeeChess.Domain.Matchmaking.Events;
 using CoffeeChess.Domain.Matchmaking.ValueObjects;
 using CoffeeChess.Domain.Shared.Abstractions;
 using CoffeeChess.Domain.Shared.Interfaces;
@@ -24,7 +24,8 @@ public class Challenge(string playerId, int playerRating, ChallengeSettings chal
             throw new InvalidGameOperationException(
                 $"Tried to accept not matching challenge. Player ID: \"{PlayerId}\".");
         IsAccepted = true;
-        AddDomainEvent(new ChallengeAccepted(PlayerId, toAccept.PlayerId));
+        AddDomainEvent(new ChallengeAccepted(
+            PlayerId, ChallengeSettings, toAccept.PlayerId));
     }
 
     private bool IsMatchingWith(Challenge other)

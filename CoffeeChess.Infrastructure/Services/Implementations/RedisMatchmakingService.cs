@@ -10,19 +10,16 @@ using CoffeeChess.Domain.Matchmaking.ValueObjects;
 using CoffeeChess.Domain.Players.AggregatesRoots;
 using CoffeeChess.Domain.Players.Repositories.Interfaces;
 using CoffeeChess.Infrastructure.Exceptions;
+using MediatR;
 using StackExchange.Redis;
 
 namespace CoffeeChess.Infrastructure.Services.Implementations;
 
 public class RedisMatchmakingService(
+    IMediator mediator,
     IConnectionMultiplexer redis,
-    IPlayerRepository playerRepository,
-    IGameRepository gameRepository,
-    IChatRepository chatRepository) : IMatchmakingService
+    IPlayerRepository playerRepository) : IMatchmakingService
 {
-    private static readonly Random Random = new();
-    private static readonly Lock Lock = new();
-    private static readonly SemaphoreSlim Mutex = new(1, 1);
     private readonly IDatabase _database = redis.GetDatabase();
     private const string ChallengeKeyPrefix = "challenge";
 
@@ -31,64 +28,29 @@ public class RedisMatchmakingService(
     {
         var playerRating = (await playerRepository.GetByIdAsync(playerId, cancellationToken))?.Rating
             ?? throw new NotFoundException(nameof(Player), playerId);
-        
-        await Mutex.WaitAsync(cancellationToken);
-        try
+        var challenge = new Challenge(playerId, playerRating, settings);
+        var matchingChallenge = await TryFindFirstMatchingChallengeAndRemove(challenge, cancellationToken);
+        if (matchingChallenge is null)
+            await AddAsync(challenge, cancellationToken);
+        else
         {
-            var challenge = await TryFindChallenge(playerId, playerRating, settings, cancellationToken);
-            if (challenge is not null)
-            {
-                await CreateGameBasedOnFoundChallenge(playerId, settings, challenge, cancellationToken);
-                return;
-            }
-
-            await CreateGameChallenge(playerId, playerRating, settings, cancellationToken);
-        }
-        finally
-        {
-            Mutex.Release();
+            challenge.Accept(matchingChallenge);
+            foreach (var @event in challenge.DomainEvents)
+                await mediator.Publish(@event, cancellationToken);
+            challenge.ClearDomainEvents();
         }
     }
-    
-    private async Task CreateGameBasedOnFoundChallenge(string connectingPlayerId,
-        ChallengeSettings settings, Challenge challenge, CancellationToken cancellationToken = default)
-    {
-        var connectingPlayerColor = ChooseColor(settings);
-        var (whitePlayerId, blackPlayerId) = connectingPlayerColor == ColorPreference.White
-            ? (connectingPlayerId, challenge.PlayerId)
-            : (challenge.PlayerId, connectingPlayerId);
-        var createdGame = new Game(
-            Guid.NewGuid().ToString("N")[..8],
-            whitePlayerId,
-            blackPlayerId,
-            TimeSpan.FromMinutes(settings.TimeControl.Minutes),
-            TimeSpan.FromSeconds(settings.TimeControl.Increment)
-        );
-        await gameRepository.AddAsync(createdGame, cancellationToken);
-        var chat = new Chat(createdGame.GameId);
-        await chatRepository.AddAsync(chat, cancellationToken);
-        await gameRepository.SaveChangesAsync(createdGame, cancellationToken);
-    }
-    
-    private async Task CreateGameChallenge(string creatorId, int creatorRating, ChallengeSettings settings, 
-        CancellationToken cancellationToken = default)
-    {
-        var gameChallenge = new Challenge(creatorId, creatorRating, settings);
-        await AddAsync(gameChallenge, cancellationToken);
-    }
 
-    private async Task <Challenge?> TryFindChallenge(
-        string playerId, int playerRating, ChallengeSettings settings, CancellationToken cancellationToken = default)
+    private async Task<Challenge?> TryFindFirstMatchingChallengeAndRemove(
+        Challenge challenge, CancellationToken cancellationToken = default)
     {
-        foreach (var gameChallenge in GetAll()
-                     .Where(c => 
-                         c.PlayerId != playerId && ValidatePlayerForChallenge(playerRating, settings, c)))
-        {
-            await DeleteAsync(gameChallenge, cancellationToken);
-            return gameChallenge;
-        }
-
-        return null;
+        // TODO: implement matching challenge searching using Redis Sorted Set
+        var matchingChallenge = GetAll()
+            .FirstOrDefault(candidateChallenge => ValidatePlayerForChallenge(
+                challenge.PlayerRating, challenge.ChallengeSettings, candidateChallenge));
+        if (matchingChallenge is not null)
+            await DeleteAsync(matchingChallenge, cancellationToken);
+        return matchingChallenge;
     }
 
     private static bool ValidatePlayerForChallenge(
@@ -106,24 +68,6 @@ public class RedisMatchmakingService(
                        && challengeToJoin.ChallengeSettings.ColorPreference == ColorPreference.Black
                    || playerSettings.ColorPreference == ColorPreference.Black
                        && challengeToJoin.ChallengeSettings.ColorPreference == ColorPreference.White);
-    }
-
-    private static ColorPreference ChooseColor(ChallengeSettings settings)
-        => settings.ColorPreference switch
-        {
-            ColorPreference.White => ColorPreference.White,
-            ColorPreference.Black => ColorPreference.Black,
-            ColorPreference.Any => GetRandomColor(),
-            _ => throw new ArgumentOutOfRangeException(
-                nameof(settings.ColorPreference), settings.ColorPreference, "Unexpected color preference.")
-        };
-
-    private static ColorPreference GetRandomColor()
-    {
-        lock (Lock)
-            return Random.Next(0, 2) == 0
-                ? ColorPreference.White
-                : ColorPreference.Black;
     }
     
     private async Task AddAsync(Challenge challenge, CancellationToken cancellationToken = default)
