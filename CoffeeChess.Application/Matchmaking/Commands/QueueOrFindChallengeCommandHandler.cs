@@ -12,6 +12,6 @@ public class QueueOrFindChallengeCommandHandler
         var timeControl = new TimeControl(request.Minutes, request.Increment);
         var ratingPreference = new EloRatingPreference(request.MinRating, request.MaxRating);
         var challengeSettings = new ChallengeSettings(timeControl, request.ColorPreference, ratingPreference);
-        await matchmaking.QueueOrFindChallenge(request.PlayerId, challengeSettings, cancellationToken);
+        await matchmaking.QueueOrFindMatchingChallenge(request.PlayerId, challengeSettings, cancellationToken);
     }
 }

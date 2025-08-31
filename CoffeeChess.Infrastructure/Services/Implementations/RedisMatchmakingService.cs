@@ -1,15 +1,12 @@
-﻿using CoffeeChess.Application.Shared.Exceptions;
-using CoffeeChess.Domain.Chats.AggregatesRoots;
-using CoffeeChess.Domain.Chats.Repositories.Interfaces;
-using CoffeeChess.Domain.Games.AggregatesRoots;
-using CoffeeChess.Domain.Games.Repositories.Interfaces;
+﻿using System.Reflection;
+using CoffeeChess.Application.Shared.Exceptions;
 using CoffeeChess.Domain.Matchmaking.Entities;
-using CoffeeChess.Domain.Matchmaking.Enums;
 using CoffeeChess.Domain.Matchmaking.Services.Interfaces;
 using CoffeeChess.Domain.Matchmaking.ValueObjects;
 using CoffeeChess.Domain.Players.AggregatesRoots;
 using CoffeeChess.Domain.Players.Repositories.Interfaces;
 using CoffeeChess.Infrastructure.Exceptions;
+using CoffeeChess.Infrastructure.Persistence.Models;
 using MediatR;
 using StackExchange.Redis;
 
@@ -22,16 +19,19 @@ public class RedisMatchmakingService(
 {
     private readonly IDatabase _database = redis.GetDatabase();
     private const string ChallengeKeyPrefix = "challenge";
+    private static readonly string MatchmakingScript = LoadScriptOrThrow(
+        "CoffeeChess.Infrastructure.LuaScripts.matchmaking.lua");
+    private static byte[]? _scriptSha;
 
-    public async Task QueueOrFindChallenge(
+    public async Task QueueOrFindMatchingChallenge(
         string playerId, ChallengeSettings settings, CancellationToken cancellationToken = default)
     {
         var playerRating = (await playerRepository.GetByIdAsync(playerId, cancellationToken))?.Rating
             ?? throw new NotFoundException(nameof(Player), playerId);
         var challenge = new Challenge(playerId, playerRating, settings);
-        var matchingChallenge = await TryFindFirstMatchingChallengeAndRemove(challenge, cancellationToken);
+        var matchingChallenge = await TryFindFirstMatchingChallengeAndRemove(challenge);
         if (matchingChallenge is null)
-            await AddAsync(challenge, cancellationToken);
+            await AddAsync(challenge);
         else
         {
             challenge.Accept(matchingChallenge);
@@ -41,100 +41,87 @@ public class RedisMatchmakingService(
         }
     }
 
-    private async Task<Challenge?> TryFindFirstMatchingChallengeAndRemove(
-        Challenge challenge, CancellationToken cancellationToken = default)
+    private async Task<Challenge?> TryFindFirstMatchingChallengeAndRemove(Challenge challenge)
     {
-        // TODO: implement matching challenge searching using Redis Sorted Set
-        var matchingChallenge = GetAll()
-            .FirstOrDefault(candidateChallenge => ValidatePlayerForChallenge(
-                challenge.PlayerRating, challenge.ChallengeSettings, candidateChallenge));
-        if (matchingChallenge is not null)
-            await DeleteAsync(matchingChallenge, cancellationToken);
+        if (_scriptSha == null)
+        {
+            var loadedScript = await LuaScript.Prepare(MatchmakingScript)
+                .LoadAsync(_database.Multiplexer
+                    .GetServer(_database.Multiplexer
+                        .GetEndPoints()
+                        .First()));
+            _scriptSha = loadedScript.Hash;
+        }
+
+        var poolKey = GetChallengePoolKey(challenge.ChallengeSettings.TimeControl);
+        var challengePersistenceModel = ChallengePersistenceModel.FromChallenge(challenge);
+        var result = await _database.ScriptEvaluateAsync(
+            _scriptSha,
+            keys: [ poolKey ],
+            values:
+            [
+                challengePersistenceModel.PlayerId,
+                challengePersistenceModel.PlayerRating,
+                challengePersistenceModel.MinEloRatingPreference,
+                challengePersistenceModel.MaxEloRatingPreference,
+                challengePersistenceModel.ColorPreference
+            ]);
+        if (result.IsNull)
+            return null;
+        var resultArray = (RedisResult[]?)result;
+        if (resultArray is null)
+            return null;
+        
+        var matchingChallenge = ChallengePersistenceModel.FromRedisResult(resultArray);
+        var transaction = _database.CreateTransaction();
+        AddDeleteToTransaction(transaction, challenge);
+        AddDeleteToTransaction(transaction, matchingChallenge);
+        await transaction.ExecuteAsync();
         return matchingChallenge;
     }
 
-    private static bool ValidatePlayerForChallenge(
-        int playerRating, ChallengeSettings playerSettings, Challenge challengeToJoin)
+    private async Task AddAsync(Challenge challenge)
     {
-        return playerSettings.TimeControl.Minutes == challengeToJoin.ChallengeSettings.TimeControl.Minutes
-               && playerSettings.TimeControl.Increment == challengeToJoin.ChallengeSettings.TimeControl.Increment
-               && playerRating >= challengeToJoin.ChallengeSettings.EloRatingPreference.Min
-               && playerRating <= challengeToJoin.ChallengeSettings.EloRatingPreference.Max
-               && challengeToJoin.PlayerRating >= playerSettings.EloRatingPreference.Min
-               && challengeToJoin.PlayerRating <= playerSettings.EloRatingPreference.Max
-               && (playerSettings.ColorPreference == ColorPreference.Any
-                   || challengeToJoin.ChallengeSettings.ColorPreference == ColorPreference.Any 
-                   || playerSettings.ColorPreference == ColorPreference.White 
-                       && challengeToJoin.ChallengeSettings.ColorPreference == ColorPreference.Black
-                   || playerSettings.ColorPreference == ColorPreference.Black
-                       && challengeToJoin.ChallengeSettings.ColorPreference == ColorPreference.White);
-    }
-    
-    private async Task AddAsync(Challenge challenge, CancellationToken cancellationToken = default)
-    {
-        var key = $"{ChallengeKeyPrefix}:{challenge.PlayerId}";
-
-        if (await _database.KeyExistsAsync(key))
-            throw new KeyAlreadyExistsException(key);
-
-        var hashEntries = GetHashEntriesFromChallenge(challenge);
-        await _database.HashSetAsync(key, hashEntries);
-    }
-
-    private async Task DeleteAsync(Challenge chat, CancellationToken cancellationToken = default)
-        => await _database.KeyDeleteAsync($"{ChallengeKeyPrefix}:{chat.PlayerId}");
-
-    private IEnumerable<Challenge> GetAll()
-    {
-        // TODO: don't use server.Keys because it freezes the server, use SCAN instead or implement FirstOrDefaultAsync
+        if (challenge == null) throw new ArgumentNullException(nameof(challenge));
+        var poolKey = GetChallengePoolKey(challenge.ChallengeSettings.TimeControl);
+        var metadataKey = GetChallengeMetadataKey(challenge.PlayerId);
         
-        var server = _database.Multiplexer
-            .GetServer(_database.Multiplexer.GetEndPoints().First());
+        if (await _database.KeyExistsAsync(metadataKey))
+            throw new KeyAlreadyExistsException(metadataKey);
+        
+        var metadata = ChallengePersistenceModel.FromChallenge(challenge).ToHashEntries();
 
-        foreach (var key in server.Keys(pattern: $"{ChallengeKeyPrefix}:*"))
-        {
-            var hashEntries = _database.HashGetAll(key);
-            if (hashEntries.Length > 0)
-                yield return GetChallengeFromHashEntriesOrThrow(hashEntries);
-        }
+        var transaction = _database.CreateTransaction();
+        _ = transaction.HashSetAsync(metadataKey, metadata);
+        _ = transaction.SortedSetAddAsync(poolKey, challenge.PlayerId, challenge.PlayerRating);
+        await transaction.ExecuteAsync();
     }
 
-    private static HashEntry[] GetHashEntriesFromChallenge(Challenge challenge) =>
-    [
-        new("playerId", challenge.PlayerId),
-        new("playerRating", challenge.PlayerRating),
-        new("colorPreference", (int)challenge.ChallengeSettings.ColorPreference),
-        new("timeControlMinutes", challenge.ChallengeSettings.TimeControl.Minutes),
-        new("timeControlIncrement", challenge.ChallengeSettings.TimeControl.Increment),
-        new("eloRatingPreferenceMin", challenge.ChallengeSettings.EloRatingPreference.Min),
-        new("eloRatingPreferenceMax", challenge.ChallengeSettings.EloRatingPreference.Max)
-    ];
+    private static string GetChallengePoolKey(TimeControl timeControl)
+        => $"{ChallengeKeyPrefix}:{timeControl.Minutes}+{timeControl.Increment}";
+    
+    private static string GetChallengeMetadataKey(string playerId) 
+        => $"{ChallengeKeyPrefix}:{playerId}";
 
-    private static Challenge GetChallengeFromHashEntriesOrThrow(HashEntry[] hashEntries)
+    private static void AddDeleteToTransaction(
+        ITransaction transaction, Challenge challenge)
     {
-        var hashTable = hashEntries.ToDictionary(
-            entry => entry.Name.ToString(), entry => entry.Value);
-        var playerId = hashTable["playerId"].ToString();
-        var playerRating = ParseIntFromRedisValueOrThrow(hashTable["playerRating"]);
-        var minRating = ParseIntFromRedisValueOrThrow(hashTable["eloRatingPreferenceMin"]);
-        var maxRating = ParseIntFromRedisValueOrThrow(hashTable["eloRatingPreferenceMax"]);
-        var minutes = ParseIntFromRedisValueOrThrow(hashTable["timeControlMinutes"]);
-        var increment = ParseIntFromRedisValueOrThrow(hashTable["timeControlIncrement"]);
-        var intColorPreference = ParseIntFromRedisValueOrThrow(hashTable["colorPreference"]);
-        if (!Enum.IsDefined(typeof(ColorPreference), intColorPreference))
-            throw new FormatException(
-                $"Value \"{hashTable["colorPreference"]}\" can't be converted to ColorPreference.");
-        // TODO: forbid usage of empty  domain structs ctors
-        var timeControl = new TimeControl(minutes, increment);
-        var ratingPreference = new EloRatingPreference(minRating, maxRating);
-        var challengeSettings = new ChallengeSettings(timeControl, (ColorPreference)intColorPreference, ratingPreference);
-        return new Challenge(playerId, playerRating, challengeSettings);
+        var metadataKey = GetChallengeMetadataKey(challenge.PlayerId);
+        var poolKey = GetChallengePoolKey(challenge.ChallengeSettings.TimeControl);
+
+        _ = transaction.KeyDeleteAsync(metadataKey);
+        _ = transaction.SortedSetRemoveAsync(poolKey, challenge.PlayerId);
     }
 
-    private static int ParseIntFromRedisValueOrThrow(RedisValue value)
+    private static string LoadScriptOrThrow(string resourceName)
     {
-        if (!int.TryParse(value, out var result))
-            throw new FormatException($"Value \"{value}\" can't be converted to int.");
-        return result;
+        var assembly = Assembly.GetExecutingAssembly();
+        
+        using var stream = assembly.GetManifestResourceStream(resourceName);
+        if (stream is null)
+            throw new FileNotFoundException($"Resource \"{resourceName}\" not found.");
+
+        using var reader = new StreamReader(stream);
+        return reader.ReadToEnd();
     }
 }

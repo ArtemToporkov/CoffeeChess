@@ -4,6 +4,6 @@ namespace CoffeeChess.Domain.Matchmaking.Services.Interfaces;
 
 public interface IMatchmakingService
 {
-    public Task QueueOrFindChallenge(
+    public Task QueueOrFindMatchingChallenge(
         string playerId, ChallengeSettings settings, CancellationToken cancellationToken = default);
 }

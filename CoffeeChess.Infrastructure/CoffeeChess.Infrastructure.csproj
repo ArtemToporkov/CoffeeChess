@@ -36,4 +36,9 @@
       </Content>
     </ItemGroup>
 
+    <ItemGroup>
+      <None Remove="LuaScripts\matchmaking.lua" />
+      <EmbeddedResource Include="LuaScripts\matchmaking.lua" />
+    </ItemGroup>
+
 </Project>
