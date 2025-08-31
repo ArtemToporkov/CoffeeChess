@@ -1,6 +1,7 @@
 ﻿using CoffeeChess.Domain.Games.Exceptions;
 using CoffeeChess.Domain.Matchmaking.Enums;
 using CoffeeChess.Domain.Matchmaking.Events;
+using CoffeeChess.Domain.Matchmaking.Exceptions;
 using CoffeeChess.Domain.Matchmaking.ValueObjects;
 using CoffeeChess.Domain.Shared.Abstractions;
 using CoffeeChess.Domain.Shared.Interfaces;
@@ -18,10 +19,10 @@ public class Challenge(string playerId, int playerRating, ChallengeSettings chal
     public void Accept(Challenge toAccept)
     {
         if (IsAccepted)
-            throw new InvalidGameOperationException(
+            throw new InvalidMatchmakingOperationException(
                 $"Challenge owned by player with ID \"{PlayerId}\" is already accepted.");
         if (!IsMatchingWith(toAccept))
-            throw new InvalidGameOperationException(
+            throw new InvalidMatchmakingOperationException(
                 $"Tried to accept not matching challenge. Player ID: \"{PlayerId}\".");
         IsAccepted = true;
         AddDomainEvent(new ChallengeAccepted(

@@ -82,7 +82,6 @@ public class RedisMatchmakingService(
 
     private async Task AddAsync(Challenge challenge)
     {
-        if (challenge == null) throw new ArgumentNullException(nameof(challenge));
         var poolKey = GetChallengePoolKey(challenge.ChallengeSettings.TimeControl);
         var metadataKey = GetChallengeMetadataKey(challenge.PlayerId);
         
