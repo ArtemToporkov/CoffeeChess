@@ -1,21 +1,15 @@
 ﻿using System.Reflection;
 using CoffeeChess.Application.Matchmaking.Services.Interfaces;
-using CoffeeChess.Application.Shared.Exceptions;
 using CoffeeChess.Domain.Matchmaking.Entities;
 using CoffeeChess.Domain.Matchmaking.ValueObjects;
-using CoffeeChess.Domain.Players.AggregatesRoots;
-using CoffeeChess.Domain.Players.Repositories.Interfaces;
 using CoffeeChess.Infrastructure.Exceptions;
 using CoffeeChess.Infrastructure.Persistence.Models;
-using MediatR;
 using StackExchange.Redis;
 
 namespace CoffeeChess.Infrastructure.Services.Implementations;
 
-public class RedisMatchmakingService(
-    IMediator mediator,
-    IConnectionMultiplexer redis,
-    IPlayerRepository playerRepository) : IMatchmakingService
+public class RedisLuaScriptMatchmakingService(
+    IConnectionMultiplexer redis) : IMatchmakingService
 {
     private readonly IDatabase _database = redis.GetDatabase();
     private const string ChallengeKeyPrefix = "challenge";
@@ -23,22 +17,12 @@ public class RedisMatchmakingService(
         "CoffeeChess.Infrastructure.LuaScripts.matchmaking.lua");
     private static byte[]? _scriptSha;
 
-    public async Task QueueOrFindMatchingChallenge(
-        string playerId, ChallengeSettings settings, CancellationToken cancellationToken = default)
+    public async Task<bool> QueueOrFindMatchingChallenge(
+        string playerId, int playerRating, ChallengeSettings settings, CancellationToken cancellationToken = default)
     {
-        var playerRating = (await playerRepository.GetByIdAsync(playerId, cancellationToken))?.Rating
-            ?? throw new NotFoundException(nameof(Player), playerId);
         var challenge = new Challenge(playerId, playerRating, settings);
         var matchingChallenge = await TryFindFirstMatchingChallengeAndRemove(challenge);
-        if (matchingChallenge is null)
-            await AddAsync(challenge);
-        else
-        {
-            challenge.Accept(matchingChallenge);
-            foreach (var @event in challenge.DomainEvents)
-                await mediator.Publish(@event, cancellationToken);
-            challenge.ClearDomainEvents();
-        }
+        return matchingChallenge is not null;
     }
 
     private async Task<Challenge?> TryFindFirstMatchingChallengeAndRemove(Challenge challenge)
@@ -80,7 +64,7 @@ public class RedisMatchmakingService(
         return matchingChallenge;
     }
 
-    private async Task AddAsync(Challenge challenge)
+    public async Task AddAsync(Challenge challenge)
     {
         var poolKey = GetChallengePoolKey(challenge.ChallengeSettings.TimeControl);
         var metadataKey = GetChallengeMetadataKey(challenge.PlayerId);
@@ -122,10 +106,5 @@ public class RedisMatchmakingService(
 
         using var reader = new StreamReader(stream);
         return reader.ReadToEnd();
-    }
-
-    public Task QueueOrFindChallenge(string playerId, ChallengeSettings settings, CancellationToken cancellationToken = default)
-    {
-        throw new NotImplementedException();
     }
 }
