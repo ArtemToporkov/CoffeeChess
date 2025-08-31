@@ -1,125 +1,131 @@
-﻿using CoffeeChess.Application.Matchmaking.Services.Interfaces;
+﻿using System.Reflection;
+using CoffeeChess.Application.Matchmaking.Services.Interfaces;
 using CoffeeChess.Application.Shared.Exceptions;
-using CoffeeChess.Domain.Chats.AggregatesRoots;
-using CoffeeChess.Domain.Chats.Repositories.Interfaces;
-using CoffeeChess.Domain.Games.AggregatesRoots;
-using CoffeeChess.Domain.Games.Repositories.Interfaces;
 using CoffeeChess.Domain.Matchmaking.Entities;
-using CoffeeChess.Domain.Matchmaking.Enums;
-using CoffeeChess.Domain.Matchmaking.Repositories.Interfaces;
 using CoffeeChess.Domain.Matchmaking.ValueObjects;
 using CoffeeChess.Domain.Players.AggregatesRoots;
 using CoffeeChess.Domain.Players.Repositories.Interfaces;
+using CoffeeChess.Infrastructure.Exceptions;
+using CoffeeChess.Infrastructure.Persistence.Models;
+using MediatR;
+using StackExchange.Redis;
 
 namespace CoffeeChess.Infrastructure.Services.Implementations;
 
 public class RedisMatchmakingService(
-    IPlayerRepository playerRepository,
-    IChallengeRepository challengeRepository, 
-    IGameRepository gameRepository,
-    IChatRepository chatRepository) : IMatchmakingService
+    IMediator mediator,
+    IConnectionMultiplexer redis,
+    IPlayerRepository playerRepository) : IMatchmakingService
 {
-    private static readonly Random Random = new();
-    private static readonly Lock Lock = new();
-    private static readonly SemaphoreSlim Mutex = new(1, 1);
+    private readonly IDatabase _database = redis.GetDatabase();
+    private const string ChallengeKeyPrefix = "challenge";
+    private static readonly string MatchmakingScript = LoadScriptOrThrow(
+        "CoffeeChess.Infrastructure.LuaScripts.matchmaking.lua");
+    private static byte[]? _scriptSha;
 
-    public async Task QueueOrFindChallenge(
+    public async Task QueueOrFindMatchingChallenge(
         string playerId, ChallengeSettings settings, CancellationToken cancellationToken = default)
     {
         var playerRating = (await playerRepository.GetByIdAsync(playerId, cancellationToken))?.Rating
             ?? throw new NotFoundException(nameof(Player), playerId);
+        var challenge = new Challenge(playerId, playerRating, settings);
+        var matchingChallenge = await TryFindFirstMatchingChallengeAndRemove(challenge);
+        if (matchingChallenge is null)
+            await AddAsync(challenge);
+        else
+        {
+            challenge.Accept(matchingChallenge);
+            foreach (var @event in challenge.DomainEvents)
+                await mediator.Publish(@event, cancellationToken);
+            challenge.ClearDomainEvents();
+        }
+    }
+
+    private async Task<Challenge?> TryFindFirstMatchingChallengeAndRemove(Challenge challenge)
+    {
+        if (_scriptSha == null)
+        {
+            var loadedScript = await LuaScript.Prepare(MatchmakingScript)
+                .LoadAsync(_database.Multiplexer
+                    .GetServer(_database.Multiplexer
+                        .GetEndPoints()
+                        .First()));
+            _scriptSha = loadedScript.Hash;
+        }
+
+        var poolKey = GetChallengePoolKey(challenge.ChallengeSettings.TimeControl);
+        var challengePersistenceModel = ChallengePersistenceModel.FromChallenge(challenge);
+        var result = await _database.ScriptEvaluateAsync(
+            _scriptSha,
+            keys: [ poolKey ],
+            values:
+            [
+                challengePersistenceModel.PlayerId,
+                challengePersistenceModel.PlayerRating,
+                challengePersistenceModel.MinEloRatingPreference,
+                challengePersistenceModel.MaxEloRatingPreference,
+                challengePersistenceModel.ColorPreference
+            ]);
+        if (result.IsNull)
+            return null;
+        var resultArray = (RedisResult[]?)result;
+        if (resultArray is null)
+            return null;
         
-        await Mutex.WaitAsync(cancellationToken);
-        try
-        {
-            var challenge = await TryFindChallenge(playerId, playerRating, settings, cancellationToken);
-            if (challenge is not null)
-            {
-                await CreateGameBasedOnFoundChallenge(playerId, settings, challenge, cancellationToken);
-                return;
-            }
-
-            await CreateGameChallenge(playerId, playerRating, settings, cancellationToken);
-        }
-        finally
-        {
-            Mutex.Release();
-        }
+        var matchingChallenge = ChallengePersistenceModel.FromRedisResult(resultArray);
+        var transaction = _database.CreateTransaction();
+        AddDeleteToTransaction(transaction, challenge);
+        AddDeleteToTransaction(transaction, matchingChallenge);
+        await transaction.ExecuteAsync();
+        return matchingChallenge;
     }
+
+    private async Task AddAsync(Challenge challenge)
+    {
+        var poolKey = GetChallengePoolKey(challenge.ChallengeSettings.TimeControl);
+        var metadataKey = GetChallengeMetadataKey(challenge.PlayerId);
+        
+        if (await _database.KeyExistsAsync(metadataKey))
+            throw new KeyAlreadyExistsException(metadataKey);
+        
+        var metadata = ChallengePersistenceModel.FromChallenge(challenge).ToHashEntries();
+
+        var transaction = _database.CreateTransaction();
+        _ = transaction.HashSetAsync(metadataKey, metadata);
+        _ = transaction.SortedSetAddAsync(poolKey, challenge.PlayerId, challenge.PlayerRating);
+        await transaction.ExecuteAsync();
+    }
+
+    private static string GetChallengePoolKey(TimeControl timeControl)
+        => $"{ChallengeKeyPrefix}:{timeControl.Minutes}+{timeControl.Increment}";
     
-    private async Task CreateGameBasedOnFoundChallenge(string connectingPlayerId,
-        ChallengeSettings settings, Challenge challenge, CancellationToken cancellationToken = default)
+    private static string GetChallengeMetadataKey(string playerId) 
+        => $"{ChallengeKeyPrefix}:{playerId}";
+
+    private static void AddDeleteToTransaction(
+        ITransaction transaction, Challenge challenge)
     {
-        var connectingPlayerColor = ChooseColor(settings);
-        var (whitePlayerId, blackPlayerId) = connectingPlayerColor == ColorPreference.White
-            ? (connectingPlayerId, challenge.PlayerId)
-            : (challenge.PlayerId, connectingPlayerId);
-        var createdGame = new Game(
-            Guid.NewGuid().ToString("N")[..8],
-            whitePlayerId,
-            blackPlayerId,
-            TimeSpan.FromMinutes(settings.TimeControl.Minutes),
-            TimeSpan.FromSeconds(settings.TimeControl.Increment)
-        );
-        await gameRepository.AddAsync(createdGame, cancellationToken);
-        var chat = new Chat(createdGame.GameId);
-        await chatRepository.AddAsync(chat, cancellationToken);
-        await gameRepository.SaveChangesAsync(createdGame, cancellationToken);
-    }
-    
-    private async Task CreateGameChallenge(string creatorId, int creatorRating, ChallengeSettings settings, 
-        CancellationToken cancellationToken = default)
-    {
-        var gameChallenge = new Challenge(creatorId, creatorRating, settings);
-        await challengeRepository.AddAsync(gameChallenge, cancellationToken);
+        var metadataKey = GetChallengeMetadataKey(challenge.PlayerId);
+        var poolKey = GetChallengePoolKey(challenge.ChallengeSettings.TimeControl);
+
+        _ = transaction.KeyDeleteAsync(metadataKey);
+        _ = transaction.SortedSetRemoveAsync(poolKey, challenge.PlayerId);
     }
 
-    private async Task <Challenge?> TryFindChallenge(
-        string playerId, int playerRating, ChallengeSettings settings, CancellationToken cancellationToken = default)
+    private static string LoadScriptOrThrow(string resourceName)
     {
-        foreach (var gameChallenge in challengeRepository.GetAll()
-                     .Where(c => 
-                         c.PlayerId != playerId && ValidatePlayerForChallenge(playerRating, settings, c)))
-        {
-            await challengeRepository.DeleteAsync(gameChallenge, cancellationToken);
-            return gameChallenge;
-        }
+        var assembly = Assembly.GetExecutingAssembly();
+        
+        using var stream = assembly.GetManifestResourceStream(resourceName);
+        if (stream is null)
+            throw new FileNotFoundException($"Resource \"{resourceName}\" not found.");
 
-        return null;
+        using var reader = new StreamReader(stream);
+        return reader.ReadToEnd();
     }
 
-    private static bool ValidatePlayerForChallenge(
-        int playerRating, ChallengeSettings playerSettings, Challenge challengeToJoin)
+    public Task QueueOrFindChallenge(string playerId, ChallengeSettings settings, CancellationToken cancellationToken = default)
     {
-        return playerSettings.TimeControl.Minutes == challengeToJoin.ChallengeSettings.TimeControl.Minutes
-               && playerSettings.TimeControl.Increment == challengeToJoin.ChallengeSettings.TimeControl.Increment
-               && playerRating >= challengeToJoin.ChallengeSettings.EloRatingPreference.Min
-               && playerRating <= challengeToJoin.ChallengeSettings.EloRatingPreference.Max
-               && challengeToJoin.PlayerRating >= playerSettings.EloRatingPreference.Min
-               && challengeToJoin.PlayerRating <= playerSettings.EloRatingPreference.Max
-               && (playerSettings.ColorPreference == ColorPreference.Any
-                   || challengeToJoin.ChallengeSettings.ColorPreference == ColorPreference.Any 
-                   || playerSettings.ColorPreference == ColorPreference.White 
-                       && challengeToJoin.ChallengeSettings.ColorPreference == ColorPreference.Black
-                   || playerSettings.ColorPreference == ColorPreference.Black
-                       && challengeToJoin.ChallengeSettings.ColorPreference == ColorPreference.White);
-    }
-
-    private static ColorPreference ChooseColor(ChallengeSettings settings)
-        => settings.ColorPreference switch
-        {
-            ColorPreference.White => ColorPreference.White,
-            ColorPreference.Black => ColorPreference.Black,
-            ColorPreference.Any => GetRandomColor(),
-            _ => throw new ArgumentOutOfRangeException(
-                nameof(settings.ColorPreference), settings.ColorPreference, "Unexpected color preference.")
-        };
-
-    private static ColorPreference GetRandomColor()
-    {
-        lock (Lock)
-            return Random.Next(0, 2) == 0
-                ? ColorPreference.White
-                : ColorPreference.Black;
+        throw new NotImplementedException();
     }
 }
