@@ -36,9 +36,10 @@ public class MatchmakingBenchmark
     public void GlobalSetup()
     {
         var services = new ServiceCollection();
-        services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect("localhost:6379"));
+        // TODO: use other redis server
+        services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(
+            "localhost:6379,allowAdmin=true"));
         services.AddScoped(sp => sp.GetRequiredService<IConnectionMultiplexer>().GetDatabase());
-
         services.AddSingleton<IMediator, MockMediator>();
 
         switch (Implementation)
@@ -58,9 +59,9 @@ public class MatchmakingBenchmark
         _challengeSettingsToMatch = new ChallengeSettings(
             new TimeControl(3, 2),
             ColorPreference.Any,
-            EloRatingPreference.Any);
+            new EloRatingPreference(_ratingToMatch - 100, _ratingToMatch + 100));
         _noiseChallengeSettings = new ChallengeSettings(
-            new TimeControl(3, 2),
+            new TimeControl(1, 1),
             ColorPreference.Any, 
             EloRatingPreference.Any);
     }
@@ -68,21 +69,34 @@ public class MatchmakingBenchmark
     [IterationSetup]
     public void IterationSetup()
     {
+        var multiplexer = _serviceProvider.GetRequiredService<IConnectionMultiplexer>();
+        var server = multiplexer.GetServer(multiplexer.GetEndPoints().First());
+        server.FlushDatabase();
+        
         _matchmakingService = _serviceProvider.GetRequiredService<IMatchmakingService>();
         var noiseChallengesWithMatchingInTheMiddle = new List<Challenge>();
         for (var i = 0; i < NoiseChallengesCount; i++)
-            noiseChallengesWithMatchingInTheMiddle.Add(new($"player_{i}", _noiseRating, _noiseChallengeSettings));
-        noiseChallengesWithMatchingInTheMiddle[NoiseChallengesCount / 2] = new(
-            $"player_{NoiseChallengesCount / 2}", _ratingToMatch, _challengeSettingsToMatch);
+            noiseChallengesWithMatchingInTheMiddle.Add(
+                new($"player_{i}", _noiseRating, _noiseChallengeSettings));
+        
+        const int middle = NoiseChallengesCount / 2;
+        noiseChallengesWithMatchingInTheMiddle[middle] = new(
+            $"player_{middle}", _ratingToMatch, _challengeSettingsToMatch);
         
         switch (Implementation)
         {
             case MatchmakingServiceType.LuaScript:
-                noiseChallengesWithMatchingInTheMiddle.ForEach(async c => await _matchmakingService.AddAsync(c));
+                var luaTasks = noiseChallengesWithMatchingInTheMiddle
+                    .Select(c => _matchmakingService.AddAsync(c))
+                    .ToArray();
+                Task.WhenAll(luaTasks).Wait();
                 break;
             case MatchmakingServiceType.RepositoryScan:
                 var challengeRepository = _serviceProvider.GetRequiredService<IChallengeRepository>();
-                noiseChallengesWithMatchingInTheMiddle.ForEach(async c => await challengeRepository.AddAsync(c));
+                var repoTasks = noiseChallengesWithMatchingInTheMiddle
+                    .Select(c => challengeRepository.AddAsync(c))
+                    .ToArray();
+                Task.WhenAll(repoTasks).Wait();
                 break;
         }
     }
