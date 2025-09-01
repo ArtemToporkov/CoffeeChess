@@ -2,7 +2,7 @@
 
 public enum MatchmakingScenario
 {
-    ThousandAllNoiseLastMatching,
-    ThousandAllNoiseFirstMatching,
-    ThousandHalfNoiseHalfMatching
+    OnlyLastMatching,
+    OnlyFirstMatching,
+    HalfMatching
 }

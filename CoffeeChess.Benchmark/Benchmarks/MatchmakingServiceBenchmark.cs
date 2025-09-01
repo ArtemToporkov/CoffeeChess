@@ -1,4 +1,6 @@
-﻿using BenchmarkDotNet.Attributes;
+﻿using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
+using BenchmarkDotNet.Attributes;
 using CoffeeChess.Application.Matchmaking.Services.Interfaces;
 using CoffeeChess.Benchmark.Enums;
 using CoffeeChess.Infrastructure.Repositories.Implementations;
@@ -30,9 +32,9 @@ public class MatchmakingBenchmark
 
     [UsedImplicitly]
     [Params(
-        MatchmakingScenario.ThousandAllNoiseFirstMatching, 
-        MatchmakingScenario.ThousandAllNoiseLastMatching,
-        MatchmakingScenario.ThousandHalfNoiseHalfMatching)]
+        MatchmakingScenario.OnlyFirstMatching, 
+        MatchmakingScenario.OnlyLastMatching,
+        MatchmakingScenario.HalfMatching)]
     public MatchmakingScenario Scenario;
     
     [UsedImplicitly]
@@ -80,18 +82,18 @@ public class MatchmakingBenchmark
         var challenges = new Challenge[NoiseChallengesCount];
         switch (Scenario)
         {
-            case MatchmakingScenario.ThousandAllNoiseLastMatching:
+            case MatchmakingScenario.OnlyLastMatching:
                 for (var i = 0; i < NoiseChallengesCount - 1; i++)
                     challenges[i] = new($"player_{i}", _noiseRating, _noiseChallengeSettings);
                 challenges[NoiseChallengesCount - 1] = new($"player_{NoiseChallengesCount}", 
                     _ratingToMatch, _challengeSettingsToMatch);
                 break;
-            case MatchmakingScenario.ThousandAllNoiseFirstMatching:
+            case MatchmakingScenario.OnlyFirstMatching:
                 challenges[0] = new($"player_0", _ratingToMatch, _challengeSettingsToMatch);
                 for (var i = 1; i < NoiseChallengesCount; i++)
                     challenges[i] = new($"player_{i}", _noiseRating, _noiseChallengeSettings);
                 break;
-            case MatchmakingScenario.ThousandHalfNoiseHalfMatching:
+            case MatchmakingScenario.HalfMatching:
                 const int middle = NoiseChallengesCount / 2;
                 for (var i = 0; i < middle; i++)
                     challenges[i] = new($"player_{i}", _noiseRating, _noiseChallengeSettings);
