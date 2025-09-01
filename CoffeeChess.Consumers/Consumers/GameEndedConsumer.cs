@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
 using CoffeeChess.Domain.Games.Events;
+using CoffeeChess.Infrastructure.Exceptions;
 using Confluent.Kafka;
 using MediatR;
 
@@ -9,25 +10,29 @@ public class GameEndedConsumer : BackgroundService
 {
     private readonly IConsumer<Ignore, string> _consumer;
     private readonly IServiceProvider _serviceProvider;
-    private const string GameEndedEventsTopic = "game-ended-events";
+    private readonly string _gameEndedEventsTopic;
 
     public GameEndedConsumer(IConfiguration configuration, IServiceProvider serviceProvider)
     {
         _serviceProvider = serviceProvider;
         var consumerConfig = new ConsumerConfig
         {
-            BootstrapServers = configuration["Kafka:BootstrapServers"],
-            GroupId = "coffee-chess-game-ended-processor",
+            BootstrapServers = configuration["Kafka:BootstrapServers"] ?? throw new KafkaConfigurationException(
+                $"Cannot find a parameter for \"BootstrapServers\" in {nameof(configuration)}."),
+            GroupId = configuration["Kafka:GameEndedConsumerGroup"] ?? throw new KafkaConfigurationException(
+                $"Cannot find a parameter for \"GameEndedConsumerGroup\" in {nameof(configuration)}."),
             AutoOffsetReset = AutoOffsetReset.Earliest
         };
         _consumer = new ConsumerBuilder<Ignore, string>(consumerConfig).Build();
+        _gameEndedEventsTopic = configuration["Kafka:GameEndedEventsTopic"] ?? throw new KafkaConfigurationException(
+            $"Cannot find a name for \"{nameof(GameEnded)}\" events in {nameof(configuration)}.");
     }
     
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {
         return Task.Run(() =>
         {
-            _consumer.Subscribe(GameEndedEventsTopic);
+            _consumer.Subscribe(_gameEndedEventsTopic);
             try
             {
                 while (!stoppingToken.IsCancellationRequested)
@@ -40,7 +45,7 @@ public class GameEndedConsumer : BackgroundService
                     
                     using var scope = _serviceProvider.CreateScope();
                         
-                    // TODO: think about getting rid of MediatR dependency
+                    // TODO: think about getting rid of the MediatR dependency
                     var gameEventHandler = scope.ServiceProvider.GetRequiredService<INotificationHandler<GameEnded>>();
                     var chatEventHandler = scope.ServiceProvider.GetRequiredService<INotificationHandler<GameEnded>>();
 

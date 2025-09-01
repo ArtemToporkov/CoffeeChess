@@ -8,10 +8,12 @@ using CoffeeChess.Domain.Games.Events;
 using CoffeeChess.Domain.Games.Repositories.Interfaces;
 using CoffeeChess.Domain.Shared.Abstractions;
 using CoffeeChess.Domain.Shared.Interfaces;
+using CoffeeChess.Infrastructure.Exceptions;
 using CoffeeChess.Infrastructure.Mapping.Helpers;
 using CoffeeChess.Infrastructure.Serialization;
 using Confluent.Kafka;
 using MediatR;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using StackExchange.Redis;
 
@@ -20,11 +22,12 @@ namespace CoffeeChess.Infrastructure.Repositories.Implementations.Games;
 public class RedisGameRepository(
     IServiceProvider serviceProvider,
     IConnectionMultiplexer redis,
-    IProducer<Null, string> producer) : IGameRepository
+    IProducer<Null, string> producer,
+    IConfiguration configuration) : IGameRepository
 {
     private readonly IDatabase _database = redis.GetDatabase();
     private const string GameKeyPrefix = "game";
-    private const string GameEndedEventsTopic = "game-ended-events";
+    private readonly string _gameEndedEventsTopic = GetGameEndedEventsTopicOrThrow(configuration);
     private static readonly JsonSerializerOptions GameSerializationOptions = GetGameSerializationOptions();
 
     public async Task<Game?> GetByIdAsync(string id, CancellationToken cancellationToken = default)
@@ -60,7 +63,7 @@ public class RedisGameRepository(
                 {
                     Value = JsonSerializer.Serialize(gameEndedEvent)
                 };
-                await producer.ProduceAsync(GameEndedEventsTopic, message, cancellationToken);
+                await producer.ProduceAsync(_gameEndedEventsTopic, message, cancellationToken);
             }
             else
                 await mediator.Publish(@event, cancellationToken);
@@ -73,6 +76,10 @@ public class RedisGameRepository(
         // TODO: implement
         return [];
     }
+
+    private static string GetGameEndedEventsTopicOrThrow(IConfiguration configuration) => 
+        configuration["Kafka:GameEndedEventsTopic"] ?? throw new KafkaConfigurationException(
+            $"Cannot find a topic for \"{nameof(GameEnded)}\" events name in {nameof(configuration)}.");
 
     private static JsonSerializerOptions GetGameSerializationOptions()
     {
