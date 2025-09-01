@@ -6,6 +6,7 @@ using CoffeeChess.Application.Games.Services.Interfaces;
 using CoffeeChess.Application.Players.Services.Interfaces;
 using CoffeeChess.Application.Songs.Repositories.Interfaces;
 using CoffeeChess.Application.Songs.Sevices;
+using CoffeeChess.Consumers.Consumers;
 using CoffeeChess.Domain.Chats.Repositories.Interfaces;
 using CoffeeChess.Domain.Games.Repositories.Interfaces;
 using CoffeeChess.Domain.Games.Services.Implementations;
@@ -25,6 +26,7 @@ using CoffeeChess.Infrastructure.Services.Implementations;
 using CoffeeChess.Web.BackgroundWorkers;
 using CoffeeChess.Web.Hubs;
 using CoffeeChess.Web.Services;
+using Confluent.Kafka;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using StackExchange.Redis;
@@ -47,6 +49,13 @@ builder.Services.AddIdentity<UserModel, IdentityRole>(options =>
     })
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
+
+var producerConfig = new ProducerConfig
+{
+    BootstrapServers = builder.Configuration["Kafka:BootstrapServers"]
+};
+builder.Services.AddSingleton(new ProducerBuilder<Null, string>(producerConfig).Build());
+builder.Services.AddHostedService<GameEndedConsumer>();
 
 builder.Services.AddControllersWithViews()
     .AddJsonOptions(opts =>

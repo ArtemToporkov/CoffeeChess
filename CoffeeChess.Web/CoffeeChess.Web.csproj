@@ -75,6 +75,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\CoffeeChess.Application\CoffeeChess.Application.csproj" />
+      <ProjectReference Include="..\CoffeeChess.Consumers\CoffeeChess.Consumers.csproj" />
       <ProjectReference Include="..\CoffeeChess.Infrastructure\CoffeeChess.Infrastructure.csproj" />
     </ItemGroup>
 

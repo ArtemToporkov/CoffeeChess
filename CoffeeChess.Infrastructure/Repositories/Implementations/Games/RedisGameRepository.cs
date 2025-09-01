@@ -4,11 +4,13 @@ using System.Runtime.Serialization;
 using System.Text.Json;
 using System.Text.Json.Serialization.Metadata;
 using CoffeeChess.Domain.Games.AggregatesRoots;
+using CoffeeChess.Domain.Games.Events;
 using CoffeeChess.Domain.Games.Repositories.Interfaces;
 using CoffeeChess.Domain.Shared.Abstractions;
 using CoffeeChess.Domain.Shared.Interfaces;
 using CoffeeChess.Infrastructure.Mapping.Helpers;
 using CoffeeChess.Infrastructure.Serialization;
+using Confluent.Kafka;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using StackExchange.Redis;
@@ -17,10 +19,12 @@ namespace CoffeeChess.Infrastructure.Repositories.Implementations.Games;
 
 public class RedisGameRepository(
     IServiceProvider serviceProvider,
-    IConnectionMultiplexer redis) : IGameRepository
+    IConnectionMultiplexer redis,
+    IProducer<Null, string> producer) : IGameRepository
 {
     private readonly IDatabase _database = redis.GetDatabase();
     private const string GameKeyPrefix = "game";
+    private const string GameEndedEventsTopic = "game-ended-events";
     private static readonly JsonSerializerOptions GameSerializationOptions = GetGameSerializationOptions();
 
     public async Task<Game?> GetByIdAsync(string id, CancellationToken cancellationToken = default)
@@ -49,7 +53,18 @@ public class RedisGameRepository(
         using var scope = serviceProvider.CreateScope();
         var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
         foreach (var @event in game.DomainEvents)
-            await mediator.Publish(@event, cancellationToken);
+        {
+            if (@event is GameEnded gameEndedEvent)
+            {
+                var message = new Message<Null, string>
+                {
+                    Value = JsonSerializer.Serialize(gameEndedEvent)
+                };
+                await producer.ProduceAsync(GameEndedEventsTopic, message, cancellationToken);
+            }
+            else
+                await mediator.Publish(@event, cancellationToken);
+        }
         game.ClearDomainEvents();
     }
 
