@@ -65,8 +65,7 @@ public class RedisGameRepository(
                 };
                 await producer.ProduceAsync(_gameEndedEventsTopic, message, cancellationToken);
             }
-            else
-                await mediator.Publish(@event, cancellationToken);
+            await mediator.Publish(@event, cancellationToken);
         }
         game.ClearDomainEvents();
     }

@@ -1,13 +1,8 @@
-﻿using CoffeeChess.Application.Games.ReadModels;
-using CoffeeChess.Application.Games.Repositories.Interfaces;
-using CoffeeChess.Application.Games.Services.Interfaces;
+﻿using CoffeeChess.Application.Games.Services.Interfaces;
 using CoffeeChess.Application.Shared.Exceptions;
-using CoffeeChess.Domain.Games.AggregatesRoots;
 using CoffeeChess.Domain.Games.Enums;
 using CoffeeChess.Domain.Games.Events;
-using CoffeeChess.Domain.Games.Repositories.Interfaces;
 using CoffeeChess.Domain.Players.AggregatesRoots;
-using CoffeeChess.Domain.Players.Exceptions;
 using CoffeeChess.Domain.Players.Repositories.Interfaces;
 using CoffeeChess.Domain.Players.Services.Interfaces;
 using MediatR;
@@ -15,8 +10,6 @@ using MediatR;
 namespace CoffeeChess.Application.Games.EventHandlers;
 
 public class GameEndedEventHandler(
-    IGameRepository gameRepository,
-    ICompletedGameRepository completedGameRepository,
     IRatingService ratingService,
     IPlayerRepository playerRepository,
     IGameEventNotifierService notifier) : INotificationHandler<GameEnded>
@@ -34,65 +27,11 @@ public class GameEndedEventHandler(
             white.Rating, black.Rating,
             notification.GameResult);
 
-        await UpdateRatingAndSave(white.Id, newWhiteRating, cancellationToken);
-        await UpdateRatingAndSave(black.Id, newBlackRating, cancellationToken);
-
-        var game = await gameRepository.GetByIdAsync(notification.GameId, cancellationToken) 
-                   ?? throw new NotFoundException(nameof(Game), notification.GameId);
-        await SaveCompletedGameAsync(
-            game, 
-            white, black, 
-            whiteRating, newWhiteRating, 
-            blackRating, newBlackRating, 
-            notification.GameResult, notification.GameResultReason,
-            cancellationToken);
-        
-
         var (whiteReason, blackReason) = GetMessageByGameResultReason(notification.GameResult,
             notification.GameResultReason, white.Name, black.Name);
+        // TODO: send a result and a rating changes info
         await notifier.NotifyGameEnded(white, black, notification.GameResult,
             whiteReason, blackReason, cancellationToken);
-    }
-
-    private async Task SaveCompletedGameAsync(
-        Game game, Player white, Player black, 
-        int whiteRating, int whiteNewRating, 
-        int blackRating, int blackNewRating, 
-        GameResult gameResult, GameResultReason gameResultReason,
-        CancellationToken cancellationToken = default)
-    {
-        var completedGame = new CompletedGameReadModel
-        {
-            GameId = game.GameId,
-            
-            WhitePlayerId = white.Id,
-            WhitePlayerName = white.Name,
-            WhitePlayerRating = whiteRating,
-            WhitePlayerNewRating = whiteNewRating,
-            
-            BlackPlayerId = black.Id,
-            BlackPlayerName = black.Name,
-            BlackPlayerRating = blackRating,
-            BlackPlayerNewRating = blackNewRating,
-            
-            Minutes = (int)game.InitialTimeForOnePlayer.TotalMinutes,
-            Increment = (int)game.Increment.TotalSeconds,
-            GameResult = gameResult,
-            GameResultReason = gameResultReason,
-            PlayedDate = game.LastTimeUpdate,
-            MovesHistory = game.MovesHistory.ToList()
-        };
-
-        await completedGameRepository.AddAsync(completedGame, cancellationToken);
-    }
-
-    private async Task UpdateRatingAndSave(string playerId, int newRating,
-        CancellationToken cancellationToken = default)
-    {
-        var player = await playerRepository.GetByIdAsync(playerId, cancellationToken) 
-                     ?? throw new NotFoundException(nameof(Player), playerId);
-        player.UpdateRating(newRating);
-        await playerRepository.SaveChangesAsync(player, cancellationToken);
     }
 
     private static (string WhiteReason, string BlackReason) GetMessageByGameResultReason(GameResult result,
