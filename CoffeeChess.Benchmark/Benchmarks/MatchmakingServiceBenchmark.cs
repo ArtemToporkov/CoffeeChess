@@ -69,10 +69,6 @@ public class MatchmakingBenchmark
     [IterationSetup]
     public void IterationSetup()
     {
-        var multiplexer = _serviceProvider.GetRequiredService<IConnectionMultiplexer>();
-        var server = multiplexer.GetServer(multiplexer.GetEndPoints().First());
-        server.FlushDatabase();
-        
         _matchmakingService = _serviceProvider.GetRequiredService<IMatchmakingService>();
         var noiseChallengesWithMatchingInTheMiddle = new List<Challenge>();
         for (var i = 0; i < NoiseChallengesCount; i++)
@@ -101,12 +97,34 @@ public class MatchmakingBenchmark
         }
     }
 
+    [IterationCleanup]
+    public static void IterationCleanup()
+    {
+        var multiplexer = _serviceProvider.GetRequiredService<IConnectionMultiplexer>();
+        var server = multiplexer.GetServer(multiplexer.GetEndPoints().First());
+        server.FlushDatabase();
+    }
+
     [Benchmark]
-    public async Task FindMatch()
+#pragma warning disable CA1822
+    public async Task FindMatchingChallenge_InTheMiddleOfThousandChallenges()
+#pragma warning restore CA1822
     {
         const string playerId = "some_player_that_wants_to_find_challenge";
         var found = await _matchmakingService.QueueOrFindMatchingChallenge(
             playerId, _ratingToMatch, _challengeSettingsToMatch);
+        if (!found)
+            throw new Exception("Matching challenge is not found.");
+    }
+    
+    [Benchmark]
+#pragma warning disable CA1822
+    public async Task FindMatchingChallenge_First()
+#pragma warning restore CA1822
+    {
+        const string playerId = "some_player_that_wants_to_find_challenge";
+        var found = await _matchmakingService.QueueOrFindMatchingChallenge(
+            playerId, _noiseRating, _noiseChallengeSettings);
         if (!found)
             throw new Exception("Matching challenge is not found.");
     }
