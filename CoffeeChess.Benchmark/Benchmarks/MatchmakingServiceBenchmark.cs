@@ -29,6 +29,13 @@ public class MatchmakingBenchmark
 
 
     [UsedImplicitly]
+    [Params(
+        MatchmakingScenario.ThousandAllNoiseFirstMatching, 
+        MatchmakingScenario.ThousandAllNoiseLastMatching,
+        MatchmakingScenario.ThousandHalfNoiseHalfMatching)]
+    public MatchmakingScenario Scenario;
+    
+    [UsedImplicitly]
     [Params(MatchmakingServiceType.LuaScript, MatchmakingServiceType.RepositoryScan)]
     public MatchmakingServiceType Implementation;
 
@@ -70,26 +77,40 @@ public class MatchmakingBenchmark
     public void IterationSetup()
     {
         _matchmakingService = _serviceProvider.GetRequiredService<IMatchmakingService>();
-        var noiseChallengesWithMatchingInTheMiddle = new List<Challenge>();
-        for (var i = 0; i < NoiseChallengesCount; i++)
-            noiseChallengesWithMatchingInTheMiddle.Add(
-                new($"player_{i}", _noiseRating, _noiseChallengeSettings));
-        
-        const int middle = NoiseChallengesCount / 2;
-        noiseChallengesWithMatchingInTheMiddle[middle] = new(
-            $"player_{middle}", _ratingToMatch, _challengeSettingsToMatch);
+        var challenges = new Challenge[NoiseChallengesCount];
+        switch (Scenario)
+        {
+            case MatchmakingScenario.ThousandAllNoiseLastMatching:
+                for (var i = 0; i < NoiseChallengesCount - 1; i++)
+                    challenges[i] = new($"player_{i}", _noiseRating, _noiseChallengeSettings);
+                challenges[NoiseChallengesCount - 1] = new($"player_{NoiseChallengesCount}", 
+                    _ratingToMatch, _challengeSettingsToMatch);
+                break;
+            case MatchmakingScenario.ThousandAllNoiseFirstMatching:
+                challenges[0] = new($"player_0", _ratingToMatch, _challengeSettingsToMatch);
+                for (var i = 1; i < NoiseChallengesCount; i++)
+                    challenges[i] = new($"player_{i}", _noiseRating, _noiseChallengeSettings);
+                break;
+            case MatchmakingScenario.ThousandHalfNoiseHalfMatching:
+                const int middle = NoiseChallengesCount / 2;
+                for (var i = 0; i < middle; i++)
+                    challenges[i] = new($"player_{i}", _noiseRating, _noiseChallengeSettings);
+                for (var i = middle; i < NoiseChallengesCount; i++)
+                    challenges[i] = new($"player_{i}", _ratingToMatch, _challengeSettingsToMatch);
+                break;
+        }
         
         switch (Implementation)
         {
             case MatchmakingServiceType.LuaScript:
-                var luaTasks = noiseChallengesWithMatchingInTheMiddle
+                var luaTasks = challenges
                     .Select(c => _matchmakingService.AddAsync(c))
                     .ToArray();
                 Task.WhenAll(luaTasks).Wait();
                 break;
             case MatchmakingServiceType.RepositoryScan:
                 var challengeRepository = _serviceProvider.GetRequiredService<IChallengeRepository>();
-                var repoTasks = noiseChallengesWithMatchingInTheMiddle
+                var repoTasks = challenges
                     .Select(c => challengeRepository.AddAsync(c))
                     .ToArray();
                 Task.WhenAll(repoTasks).Wait();
@@ -107,24 +128,12 @@ public class MatchmakingBenchmark
 
     [Benchmark]
 #pragma warning disable CA1822
-    public async Task FindMatchingChallenge_InTheMiddleOfThousandChallenges()
+    public async Task FindMatchingChallenge()
 #pragma warning restore CA1822
     {
         const string playerId = "some_player_that_wants_to_find_challenge";
         var found = await _matchmakingService.QueueOrFindMatchingChallenge(
             playerId, _ratingToMatch, _challengeSettingsToMatch);
-        if (!found)
-            throw new Exception("Matching challenge is not found.");
-    }
-    
-    [Benchmark]
-#pragma warning disable CA1822
-    public async Task FindMatchingChallenge_First()
-#pragma warning restore CA1822
-    {
-        const string playerId = "some_player_that_wants_to_find_challenge";
-        var found = await _matchmakingService.QueueOrFindMatchingChallenge(
-            playerId, _noiseRating, _noiseChallengeSettings);
         if (!found)
             throw new Exception("Matching challenge is not found.");
     }
