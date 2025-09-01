@@ -56,10 +56,11 @@ public class GameEndedConsumer : BackgroundService
                             $"was not deserialized successfully.");
                     
                     using var scope = _serviceProvider.CreateScope();
-                    var playerRepository = _serviceProvider.GetRequiredService<IPlayerRepository>();
-                    var gameRepository = _serviceProvider.GetRequiredService<IGameRepository>();
-                    var completedGameRepository = _serviceProvider.GetRequiredService<ICompletedGameRepository>();
-                    var ratingService = _serviceProvider.GetRequiredService<IRatingService>();
+                    var playerRepository = scope.ServiceProvider.GetRequiredService<IPlayerRepository>();
+                    var gameRepository = scope.ServiceProvider.GetRequiredService<IGameRepository>();
+                    var completedGameRepository = scope.ServiceProvider.GetRequiredService<ICompletedGameRepository>();
+                    var ratingService = scope.ServiceProvider.GetRequiredService<IRatingService>();
+                    
                     Handle(gameEndedEvent, 
                         playerRepository, 
                         gameRepository, 
