@@ -29,13 +29,13 @@ public class ChessLibMovesValidatorService : IChessMovesValidatorService
             return MoveResult.Fail;
         var move = moveExt.Move;
         
-        game.Pos.MakeMove(move, new State());
         var movedPiece = game.Pos.MovedPiece(move);
         var isCaptureOrPawnMove = game.Pos.IsCapture(move)
                                   || movedPiece == Pieces.BlackPawn
                                   || movedPiece == Pieces.WhitePawn;
         var sanNotation = new SanNotation(game.Pos);
         var san = sanNotation.Convert(move);
+        game.Pos.MakeMove(move, new State());
         return new MoveResult
         {
             Valid = true,
