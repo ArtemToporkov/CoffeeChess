@@ -22,7 +22,9 @@ public class ChessLibMovesValidatorService : IChessMovesValidatorService
         
         var moveExt = validMoves
             .FirstOrDefault(m => m.Move.FromSquare() == fromSquare 
-                                 && m.Move.ToSquare() == toSquare);
+                                 && m.Move.ToSquare() == toSquare
+                                 && (m.Move.MoveType() != MoveTypes.Promotion 
+                                     || m.Move.PromotedPieceType() == promotionPieceType));
         if (moveExt == ExtMove.Empty || !moveExt.Move.IsValidMove())
             return MoveResult.Fail;
         var move = moveExt.Move;
