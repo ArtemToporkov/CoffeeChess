@@ -15,6 +15,7 @@
             0 0 0 6px var(--milk-coffee);
     border-radius: 20px;
     
+    z-index: 4;
     overflow: hidden;
 }
 
