@@ -18,4 +18,6 @@ public readonly struct MoveResult
     public Fen? FenAfterMove { get; init; }
     public bool? IsCaptureOrPawnMove { get; init; }
     public MoveResultType? MoveResultType { get; init; }
+    
+    public static MoveResult Fail => new() { Valid = false };
 }

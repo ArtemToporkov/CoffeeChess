@@ -59,7 +59,7 @@ builder.Services.AddMediatR(cfg => cfg
     .RegisterServicesFromAssembly(typeof(DrawOfferDeclinedEventHandler).Assembly));
 
 builder.Services.AddScoped<IMatchmakingService, RedisMatchmakingService>();
-builder.Services.AddScoped<IChessMovesValidatorService, ChessDotNetCoreMovesValidatorService>();
+builder.Services.AddScoped<IChessMovesValidatorService, ChessLibMovesValidatorService>();
 builder.Services.AddScoped<IRatingService, EloRatingService>();
 builder.Services.AddScoped<IPgnBuilderService, StringBuilderPgnBuilderService>();
 builder.Services.AddScoped<IGameEventNotifierService, SignalRGameEventNotifierService>();

@@ -9,6 +9,7 @@
     <ItemGroup>
       <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.7" />
       <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
+      <PackageReference Include="Rudzoft.ChessLib" Version="0.0.3" />
       <PackageReference Include="StackExchange.Redis" Version="2.8.58" />
     </ItemGroup>
 
