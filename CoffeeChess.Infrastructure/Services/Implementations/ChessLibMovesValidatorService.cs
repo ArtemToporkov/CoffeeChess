@@ -18,13 +18,11 @@ public class ChessLibMovesValidatorService : IChessMovesValidatorService
         var promotionPieceType = ConvertPromotionOrThrow(promotion);
         var fromSquare = ConvertSquareOrThrow(from);
         var toSquare = ConvertSquareOrThrow(to);
-        var convertedMove = promotionPieceType is PieceTypes.NoPieceType
-            ? new Move(fromSquare, toSquare)
-            : new Move(fromSquare, toSquare, MoveTypes.Promotion, promotionPieceType);
-
-        var moveExt = game.Pos
-            .GenerateMoves()
-            .FirstOrDefault(m => m.Move == convertedMove);
+        var validMoves = game.Pos.GenerateMoves();
+        
+        var moveExt = validMoves
+            .FirstOrDefault(m => m.Move.FromSquare() == fromSquare 
+                                 && m.Move.ToSquare() == toSquare);
         if (moveExt == ExtMove.Empty || !moveExt.Move.IsValidMove())
             return MoveResult.Fail;
         var move = moveExt.Move;
@@ -35,6 +33,8 @@ public class ChessLibMovesValidatorService : IChessMovesValidatorService
                                   || movedPiece == Pieces.WhitePawn;
         var sanNotation = new SanNotation(game.Pos);
         var san = sanNotation.Convert(move);
+        if (move.MoveType() == MoveTypes.Enpassant)
+            san = ConvertEnPassantSanNotation(san);
         game.Pos.MakeMove(move, new State());
         return new MoveResult
         {
@@ -90,5 +90,20 @@ public class ChessLibMovesValidatorService : IChessMovesValidatorService
         };
         var convertedSquare = new Square((rank, file));
         return convertedSquare;
+    }
+
+    private static string ConvertEnPassantSanNotation(string notation)
+    {
+        // NOTE: It seems that Rudzoft.ChessLib.Notation.Notations.SanNotation converts an en passant move
+        // to something like "epgf6", i guess "ep" means "en passant", "gf6" means
+        // "a pawn from the g file takes a pawn from the f6 square. So it should be "gxf6".
+        var result = new[]
+        {
+            notation[2],
+            'x',
+            notation[3],
+            notation[4]
+        };
+        return new string(result);
     }
 }
