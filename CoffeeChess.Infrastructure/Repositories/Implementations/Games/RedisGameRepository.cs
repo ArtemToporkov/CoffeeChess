@@ -53,6 +53,12 @@ public class RedisGameRepository(
         game.ClearDomainEvents();
     }
 
+    public async Task<Game?> CheckForActiveGames(string playerId)
+    {
+        // TODO: implement
+        return null;
+    }
+
     public IEnumerable<Game> GetActiveGames()
     {
         // TODO: implement
