@@ -12,8 +12,8 @@ import { loadUi,
 import { GameActionType } from "./enums/GameActionType.js";
 import { GameHubEvents } from "./enums/GameHubEvents.js";
 import { ajaxNavigator } from "../site.js";
+import { connection } from "../connection.js";
 
-let connection;
 let gameManager;
 let chatManager;
 
@@ -21,11 +21,6 @@ const init = async () => {
     await ajaxNavigator.loadScript("/lib/chess.js/chess.min.js");
     await ajaxNavigator.loadScript("/lib/chessboardjs/chessboard-1.0.0.js");
     
-    connection = new signalR.HubConnectionBuilder()
-        .withUrl("/gameHub")
-        .configureLogging(signalR.LogLevel.Information)
-        .build();
-
     const pathParts = window.location.pathname.split('/');
     const gameId = pathParts[pathParts.length - 1];
     
@@ -34,7 +29,6 @@ const init = async () => {
         method: "GET",
         dataType: "json"
     });
-    console.log(gameInfo);
     
     gameManager = new GameManager(
         connection, 
@@ -90,16 +84,12 @@ const init = async () => {
     connection.on(GameHubEvents.PlayerRatingUpdated, (oldRating, newRating) => {
         playRatingsChangeAnimation(oldRating, newRating);
     });
-    
-    connection.start();
 };
 
 const destroy = async () => {
-    await connection.stop();
-    connection = null;
-    gameManager.destroy();
+    await gameManager.destroy();
     gameManager = null;
-    chatManager.destroy();
+    await chatManager.destroy();
     chatManager = null;
 }
 
