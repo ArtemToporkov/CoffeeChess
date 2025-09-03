@@ -63,18 +63,23 @@ public class GameController(IMediator mediator) : Controller
         return Ok();
     }
     
-    [HttpGet("/Game/{gameId}")]
     public IActionResult Play(string gameId)
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (userId is null)
-            return Unauthorized();
-        var playerGameInfoDto = new GetPlayerGameInfoCommand(gameId, userId);
         if (Request.Headers.XRequestedWith == "XMLHttpRequest")
         {
             return PartialView("_Game");
         }
 
         return View("Game");
+    }
+
+    [HttpGet("/Game/GetGameInfo/{gameId}")]
+    public async Task<IActionResult> GetGameInfo(string gameId)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (userId is null)
+            return Unauthorized();
+        var getGameInfoCommand = new GetPlayerGameInfoCommand(gameId, userId);
+        return Json(await mediator.Send(getGameInfoCommand));
     }
 }
