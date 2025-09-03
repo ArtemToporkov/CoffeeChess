@@ -87,6 +87,13 @@ const init = async () => {
 };
 
 const destroy = async () => {
+    connection.off(GameHubEvents.MoveMade);
+    connection.off(GameHubEvents.MoveFailed);
+    connection.off(GameHubEvents.ChatMessageReceived);
+    connection.off(GameHubEvents.GameActionPerformed);
+    connection.off(GameHubEvents.PerformingGameActionFailed);
+    connection.off(GameHubEvents.GameEnded);
+    connection.off(GameHubEvents.PlayerRatingUpdated);
     await gameManager.destroy();
     gameManager = null;
     await chatManager.destroy();

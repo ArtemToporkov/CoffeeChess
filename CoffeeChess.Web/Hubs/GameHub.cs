@@ -1,10 +1,6 @@
 ﻿using CoffeeChess.Application.Chats.Commands;
 using CoffeeChess.Application.Games.Commands;
-using CoffeeChess.Application.Matchmaking.Commands;
 using CoffeeChess.Domain.Games.Enums;
-using CoffeeChess.Domain.Games.ValueObjects;
-using CoffeeChess.Domain.Matchmaking.Enums;
-using CoffeeChess.Domain.Matchmaking.ValueObjects;
 using CoffeeChess.Infrastructure.Identity;
 using CoffeeChess.Web.Exceptions;
 using MediatR;
