@@ -3,10 +3,7 @@ import { ButtonStyle } from "./enums/ButtonStyle.js";
 import { GameResult } from "./enums/GameResult.js";
 import { GameHubMethods } from "./enums/GameHubMethods.js";
 
-export function loadUi(connection, gameManager, gameId) {
-    const whitePlayerInfo = JSON.parse(localStorage.getItem('whitePlayerInfo'));
-    const blackPlayerInfo = JSON.parse(localStorage.getItem('blackPlayerInfo'));
-
+export function loadUi(connection, gameManager, gameId, whitePlayerInfo, blackPlayerInfo) {
     $('#whiteUsername').text(whitePlayerInfo.name);
     $('#blackUsername').text(blackPlayerInfo.name);
     $('#whiteRating').text(whitePlayerInfo.rating);

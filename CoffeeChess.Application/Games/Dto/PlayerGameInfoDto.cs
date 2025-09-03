@@ -3,7 +3,7 @@
 public record struct PlayerGameInfoDto(
     string GameId,
     bool IsWhite,
-    PlayerInfoDto WhitePlayerInfoDto,
-    PlayerInfoDto BlackPlayerInfoDto,
+    PlayerInfoDto WhitePlayerInfo,
+    PlayerInfoDto BlackPlayerInfo,
     List<string> SanMovesHistory,
     List<(string Sender, string Message)> MessagesHistory);

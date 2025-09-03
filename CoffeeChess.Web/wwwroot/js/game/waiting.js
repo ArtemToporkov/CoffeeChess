@@ -13,12 +13,7 @@ const init = async () => {
         .configureLogging(signalR.LogLevel.Information)
         .build();
     
-    connection.on(GameHubEvents.GameStarted, async (gameId, isWhite, whitePlayerInfo,
-                                              blackPlayerInfo, totalMillisecondsLeft) => {
-        localStorage.setItem("totalMillisecondsLeft", totalMillisecondsLeft);
-        localStorage.setItem("isWhite", isWhite);
-        localStorage.setItem("whitePlayerInfo", JSON.stringify(whitePlayerInfo));
-        localStorage.setItem("blackPlayerInfo", JSON.stringify(blackPlayerInfo));
+    connection.on(GameHubEvents.GameStarted, async (gameId) => {
         await ajaxNavigator.loadContent(`/Game/Play/${gameId}`);
     });
     

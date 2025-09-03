@@ -29,14 +29,22 @@ const init = async () => {
     const pathParts = window.location.pathname.split('/');
     const gameId = pathParts[pathParts.length - 1];
     
+    const gameInfo = await $.ajax({
+        url: `/Game/GetGameInfo/${gameId}`,
+        method: "GET",
+        dataType: "json"
+    });
+    console.log(gameInfo);
+    
     gameManager = new GameManager(
         connection, 
         gameId, 
-        localStorage.getItem('isWhite') === "true",
-        localStorage.getItem('totalMillisecondsLeft')
+        gameInfo.isWhite,
+        gameInfo.whitePlayerInfo.currentMillisecondsLeft,
+        gameInfo.blackPlayerInfo.currentMillisecondsLeft
     );
     chatManager = new ChatManager(connection, gameId);
-    loadUi(connection, gameManager, gameId);
+    loadUi(connection, gameManager, gameId, gameInfo.whitePlayerInfo, gameInfo.blackPlayerInfo);
     
     connection.on(GameHubEvents.MoveMade, (pgn, newWhiteMillisecondsLeft, newBlackMillisecondsLeft) => {
         gameManager.updateGameState(pgn, newWhiteMillisecondsLeft, newBlackMillisecondsLeft);
