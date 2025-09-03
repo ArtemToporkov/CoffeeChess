@@ -6,9 +6,7 @@ namespace CoffeeChess.Web.Hubs;
 
 public interface IGameClient
 {
-    public Task GameStarted(string gameId, bool isWhite,
-        PlayerInfoViewModel whitePlayer, PlayerInfoViewModel blackPlayer,
-        double totalMillisecondsForOnePlayerLeft, CancellationToken cancellationToken = default);
+    public Task GameStarted(string gameId);
 
     public Task ChatMessageReceived(string username, string message, CancellationToken cancellationToken = default);
 

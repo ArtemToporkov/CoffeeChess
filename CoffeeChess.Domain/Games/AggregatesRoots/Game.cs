@@ -48,8 +48,7 @@ public class Game : AggregateRoot<IDomainEvent>
         _positionsForThreefoldCount = new();
         _movesHistory = new();
         CurrentFen = new Fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
-        AddDomainEvent(new GameStarted(
-            GameId, WhitePlayerId, BlackPlayerId, (int)WhiteTimeLeft.TotalMilliseconds));
+        AddDomainEvent(new GameStarted(GameId));
     }
 
     public void ApplyMove(IChessMovesValidatorService chessMovesValidatorService, 

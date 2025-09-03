@@ -1,4 +1,7 @@
-﻿<div data-page-module-src="/js/game/connection.js"></div>
+﻿@model CoffeeChess.Application.Games.Dto.PlayerGameInfoDto
+
+<div data-page-module-src="/js/game/connection.js"></div>
+<div class="game-info-data" data-game-info>@Json.Serialize(Model)</div>
 <div class="game-left-panel hideable" data-animation-order="1">
     <div class="spacer-for-music-player"></div>
     <div class="chat-panel">

@@ -1,4 +1,5 @@
-﻿using CoffeeChess.Domain.Games.Enums;
+﻿using CoffeeChess.Application.Games.Dto;
+using CoffeeChess.Domain.Games.Enums;
 using CoffeeChess.Domain.Players.AggregatesRoots;
 
 namespace CoffeeChess.Application.Games.Services.Interfaces;
@@ -19,6 +20,6 @@ public interface IGameEventNotifierService
     public Task NotifyDrawOfferDeclined(string rejectingId, string senderId, 
         CancellationToken cancellationToken = default);
 
-    public Task NotifyGameStarted(string gameId, string whitePlayerId, string blackPlayerId,
-        int totalMillisecondsForOnePlayerLeft, CancellationToken cancellationToken = default);
+    public Task NotifyGameStarted(string whitePlayerId, string blackPlayerId, string gameId,
+        CancellationToken cancellationToken = default);
 }

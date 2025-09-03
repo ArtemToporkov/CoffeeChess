@@ -1,4 +1,6 @@
-﻿using CoffeeChess.Application.Games.Payloads;
+﻿using CoffeeChess.Application.Games.Commands;
+using CoffeeChess.Application.Games.Dto;
+using CoffeeChess.Application.Games.Payloads;
 using CoffeeChess.Application.Games.Services.Interfaces;
 using CoffeeChess.Domain.Games.Enums;
 using CoffeeChess.Domain.Players.AggregatesRoots;
@@ -6,11 +8,14 @@ using CoffeeChess.Domain.Players.Repositories.Interfaces;
 using CoffeeChess.Web.Exceptions;
 using CoffeeChess.Web.Hubs;
 using CoffeeChess.Web.Models.ViewModels;
+using MediatR;
 using Microsoft.AspNetCore.SignalR;
 
 namespace CoffeeChess.Web.Services;
 
-public class SignalRGameEventNotifierService(IPlayerRepository playerRepository,
+public class SignalRGameEventNotifierService(
+    IMediator mediator,
+    IPlayerRepository playerRepository,
     IHubContext<GameHub, IGameClient> hubContext) : IGameEventNotifierService
 {
     public async Task NotifyMoveMade(string whiteId, string blackId, string pgn, 
@@ -54,25 +59,7 @@ public class SignalRGameEventNotifierService(IPlayerRepository playerRepository,
         await hubContext.Clients.User(rejectingId).GameActionPerformed(rejectingPayload, cancellationToken);
     }
 
-    public async Task NotifyGameStarted(string gameId, string whitePlayerId, string blackPlayerId,
-        int totalMillisecondsForOnePlayerLeft, CancellationToken cancellationToken = default)
-    {
-        var whitePlayer = await playerRepository.GetByIdAsync(whitePlayerId, cancellationToken) 
-                          ?? throw new UserNotFoundException(whitePlayerId);
-        var whiteInfo = new PlayerInfoViewModel(whitePlayer.Name, whitePlayer.Rating);
-        
-        var blackPlayer = await playerRepository.GetByIdAsync(blackPlayerId, cancellationToken) 
-                          ?? throw new UserNotFoundException(blackPlayerId);
-        var blackInfo = new PlayerInfoViewModel(blackPlayer.Name, blackPlayer.Rating);
-        
-        await hubContext.Clients.User(whitePlayerId).GameStarted(
-            gameId, true, whiteInfo, blackInfo,
-            totalMillisecondsForOnePlayerLeft, cancellationToken);
-        await hubContext.Clients.User(blackPlayerId).GameStarted(
-            gameId, false, whiteInfo, blackInfo,
-            totalMillisecondsForOnePlayerLeft, cancellationToken);
-        await hubContext.Clients.Users(whitePlayerId, blackPlayerId)
-            .ChatMessageReceived(
-                "CoffeeChess", "You have 10 seconds to make a move.", cancellationToken);
-    }
+    public async Task NotifyGameStarted(string whitePlayerId, string blackPlayerId, string gameId,
+        CancellationToken cancellationToken = default)
+        => await hubContext.Clients.Users(whitePlayerId, blackPlayerId).GameStarted(gameId);
 }

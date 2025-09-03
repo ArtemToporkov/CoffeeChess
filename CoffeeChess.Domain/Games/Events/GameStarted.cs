@@ -2,8 +2,4 @@
 
 namespace CoffeeChess.Domain.Games.Events;
 
-public record GameStarted(
-    string GameId, 
-    string WhitePlayerId, 
-    string BlackPlayerId, 
-    int TotalMillisecondsForOnePlayerLeft) : IDomainEvent;
+public record GameStarted(string GameId) : IDomainEvent;

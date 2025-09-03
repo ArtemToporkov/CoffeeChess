@@ -36,6 +36,16 @@ public class GameHub(
             gameId, Context.UserIdentifier!, gameActionType);
         await mediator.Send(performGameActionCommand, Context.ConnectionAborted);
     }
+
+    public override async Task OnConnectedAsync()
+    {
+        var playerId = Context.UserIdentifier!;
+        var checkForActiveGamesCommand = new CheckForActiveGamesCommand(playerId);
+        var activeGameId = await mediator.Send(checkForActiveGamesCommand);
+        if (!string.IsNullOrEmpty(activeGameId))
+            await Clients.User(playerId).GameStarted(activeGameId);
+        await base.OnConnectedAsync();
+    }
     
     private async Task<UserModel> GetUserAsync()
         => await userManager.GetUserAsync(Context.User!)

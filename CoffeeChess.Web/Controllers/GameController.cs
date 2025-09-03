@@ -1,5 +1,6 @@
 ﻿using System.Security.Authentication;
 using System.Security.Claims;
+using CoffeeChess.Application.Games.Commands;
 using CoffeeChess.Application.Matchmaking.Commands;
 using CoffeeChess.Web.Models.ViewModels;
 using MediatR;
@@ -62,9 +63,13 @@ public class GameController(IMediator mediator) : Controller
         return Ok();
     }
     
+    [HttpGet("/Game/{gameId}")]
     public IActionResult Play(string gameId)
-
     {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (userId is null)
+            return Unauthorized();
+        var playerGameInfoDto = new GetPlayerGameInfoCommand(gameId, userId);
         if (Request.Headers.XRequestedWith == "XMLHttpRequest")
         {
             return PartialView("_Game");
