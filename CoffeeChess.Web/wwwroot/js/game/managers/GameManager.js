@@ -15,7 +15,7 @@ export class GameManager {
     #connection;
     #isWhiteTurn;
     
-    constructor(connection, gameId, isWhite, totalMillisecondsLeft) {
+    constructor(connection, gameId, isWhite, whiteMillisecondsLeft, blackMillisecondsLeft) {
         this.isWhite = isWhite; 
         this.board = ChessBoard('myBoard', this.#getConfig());
         
@@ -24,7 +24,7 @@ export class GameManager {
         
         this.#game = new Chess();
         this.#historyManager = new HistoryManager("myBoard", fen => this.board.position(fen));
-        this.#timersManager = new TimersManager(totalMillisecondsLeft);
+        this.#timersManager = new TimersManager(whiteMillisecondsLeft, blackMillisecondsLeft);
         this.#timersManager.start();
         setTimerHighlighting(true);
         

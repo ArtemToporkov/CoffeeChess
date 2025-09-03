@@ -4,11 +4,11 @@
     whiteMillisecondsLeft;
     blackMillisecondsLeft;
     
-    constructor(totalMillisecondsLeft) {
+    constructor(whiteMillisecondsLeft, blackMillisecondsLeft) {
         this.#isWhiteTurn = true;
         this.#timer = null;
-        this.whiteMillisecondsLeft = totalMillisecondsLeft;
-        this.blackMillisecondsLeft = totalMillisecondsLeft;
+        this.whiteMillisecondsLeft = whiteMillisecondsLeft;
+        this.blackMillisecondsLeft = blackMillisecondsLeft;
         this.updateTimers();
     }
     
