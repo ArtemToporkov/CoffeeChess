@@ -34,15 +34,15 @@ const init = async () => {
         connection, 
         gameId, 
         gameInfo.isWhite,
-        gameInfo.whitePlayerInfo.currentMillisecondsLeft,
-        gameInfo.blackPlayerInfo.currentMillisecondsLeft
+        gameInfo.whitePlayerInfo.millisecondsLeft,
+        gameInfo.blackPlayerInfo.millisecondsLeft
     );
     
     if (gameInfo.pgn && gameInfo.pgn.length > 0) {
         gameManager.updateGameState(
             gameInfo.pgn, 
-            gameInfo.whitePlayerInfo.currentMillisecondsLeft, 
-            gameInfo.blackPlayerInfo.currentMillisecondsLeft
+            gameInfo.whitePlayerInfo.millisecondsLeft, 
+            gameInfo.blackPlayerInfo.millisecondsLeft
         );    
     }
     
