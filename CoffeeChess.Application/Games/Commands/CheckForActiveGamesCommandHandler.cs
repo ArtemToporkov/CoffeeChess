@@ -8,7 +8,7 @@ public class CheckForActiveGamesCommandHandler(
 {
     public async Task<string?> Handle(CheckForActiveGamesCommand request, CancellationToken cancellationToken)
     {
-        var activeGame = await gameRepository.CheckForActiveGames(request.PlayerId);
+        var activeGame = await gameRepository.CheckPlayerForActiveGames(request.PlayerId);
         return activeGame?.GameId;
     }
 }

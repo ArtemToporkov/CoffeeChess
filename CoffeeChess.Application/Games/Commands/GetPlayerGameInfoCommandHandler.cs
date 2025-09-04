@@ -2,12 +2,14 @@
 using CoffeeChess.Domain.Chats.Repositories.Interfaces;
 using CoffeeChess.Domain.Games.AggregatesRoots;
 using CoffeeChess.Domain.Games.Repositories.Interfaces;
+using CoffeeChess.Domain.Games.Services.Interfaces;
 using CoffeeChess.Domain.Players.Repositories.Interfaces;
 using MediatR;
 
 namespace CoffeeChess.Application.Games.Commands;
 
 public class GetPlayerGameInfoCommandHandler(
+    IPgnBuilderService pgnBuilder,
     IPlayerRepository playerRepository,
     IChatRepository chatRepository,
     IGameRepository gameRepository) : IRequestHandler<GetPlayerGameInfoCommand, PlayerGameInfoDto?>
@@ -30,6 +32,7 @@ public class GetPlayerGameInfoCommandHandler(
             return null;
         var messagesHistory = chat.Messages.Select(
             message => (Sender: message.Username, Message: message.Message)).ToList();
+        var pgn = pgnBuilder.GetPgnWithMovesOnly(activeGame.MovesHistory.Select(x => x.San).ToList());
         
         var isWhite = activeGame.WhitePlayerId == request.PlayerId;
         var gameInfoDto = new PlayerGameInfoDto(
@@ -37,7 +40,7 @@ public class GetPlayerGameInfoCommandHandler(
             isWhite,
             whiteInfoDto.Value,
             blackInfoDto.Value,
-            activeGame.MovesHistory.Select(x => x.San.ToString()).ToList(),
+            pgn,
             messagesHistory);
         return gameInfoDto;
     }

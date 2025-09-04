@@ -5,5 +5,5 @@ public record struct PlayerGameInfoDto(
     bool IsWhite,
     PlayerInfoDto WhitePlayerInfo,
     PlayerInfoDto BlackPlayerInfo,
-    List<string> SanMovesHistory,
+    string Pgn,
     List<(string Sender, string Message)> MessagesHistory);

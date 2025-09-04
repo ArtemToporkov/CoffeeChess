@@ -37,7 +37,22 @@ const init = async () => {
         gameInfo.whitePlayerInfo.currentMillisecondsLeft,
         gameInfo.blackPlayerInfo.currentMillisecondsLeft
     );
+    
+    if (gameInfo.pgn && gameInfo.pgn.length > 0) {
+        gameManager.updateGameState(
+            gameInfo.pgn, 
+            gameInfo.whitePlayerInfo.currentMillisecondsLeft, 
+            gameInfo.blackPlayerInfo.currentMillisecondsLeft
+        );    
+    }
+    
     chatManager = new ChatManager(connection, gameId);
+    
+    if (gameInfo.messagesHistory && gameInfo.messagesHistory.length > 0)
+        gameInfo.messagesHistory.forEach(
+            messageInfo => chatManager.addMessageToChat(messageInfo.sender, messageInfo.message)
+        );
+    
     loadUi(connection, gameManager, gameId, gameInfo.whitePlayerInfo, gameInfo.blackPlayerInfo);
     
     connection.on(GameHubEvents.MoveMade, (pgn, newWhiteMillisecondsLeft, newBlackMillisecondsLeft) => {
