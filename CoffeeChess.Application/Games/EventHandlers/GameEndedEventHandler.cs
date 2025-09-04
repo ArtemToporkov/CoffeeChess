@@ -46,12 +46,12 @@ public class GameEndedEventHandler(
             blackRating, newBlackRating, 
             notification.GameResult, notification.GameResultReason,
             cancellationToken);
-        
-
+        await gameRepository.DeleteAsync(game, cancellationToken);
         var (whiteReason, blackReason) = GetMessageByGameResultReason(notification.GameResult,
             notification.GameResultReason, white.Name, black.Name);
         await notifier.NotifyGameEnded(white, black, notification.GameResult,
             whiteReason, blackReason, cancellationToken);
+        
     }
 
     private async Task SaveCompletedGameAsync(
