@@ -35,9 +35,10 @@ const init = async () => {
         gameId, 
         gameInfo.isWhite,
         gameInfo.whitePlayerInfo.millisecondsLeft,
-        gameInfo.blackPlayerInfo.millisecondsLeft,
-        gameInfo.pgn === "" ? null : gameInfo.pgn
+        gameInfo.blackPlayerInfo.millisecondsLeft
     );
+    if (gameInfo.pgn && gameInfo.pgn.length > 0)
+        gameManager.loadPgn(gameInfo.pgn);
     
     chatManager = new ChatManager(connection, gameId);
     

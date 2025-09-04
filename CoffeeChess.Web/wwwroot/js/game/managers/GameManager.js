@@ -15,7 +15,7 @@ export class GameManager {
     #connection;
     #isWhiteTurn;
     
-    constructor(connection, gameId, isWhite, whiteMillisecondsLeft, blackMillisecondsLeft, pgn = null) {
+    constructor(connection, gameId, isWhite, whiteMillisecondsLeft, blackMillisecondsLeft) {
         this.isWhite = isWhite; 
         this.board = ChessBoard('myBoard', this.#getConfig());
         
@@ -27,18 +27,8 @@ export class GameManager {
         this.#timersManager = new TimersManager(whiteMillisecondsLeft, blackMillisecondsLeft);
         this.#timersManager.start();
         setTimerHighlighting(true);
-        if (pgn) {
-            const tempGame = new Chess();
-            tempGame.load_pgn(pgn);
-            const history = tempGame.history({ verbose: true });
-            history.forEach(move => {
-                this.#game.move(move.san);
-                this.#historyManager.update(move, this.#game.fen());
-            });
-            this.board.position(this.#game.fen());
-        }
         this.#shouldReturnToLive = false;
-        this.#isWhiteTurn = this.#game.turn() === 'w';
+        this.#isWhiteTurn = true;
         this.#isGameOver = false;
     }
     
@@ -63,6 +53,20 @@ export class GameManager {
         const move = history[history.length - 1];
         this.#historyManager.update(move, this.#game.fen());
         highlightSquares(move.from, move.to);
+    }
+    
+    loadPgn(pgn) {
+        const tempGame = new Chess();
+        tempGame.load_pgn(pgn);
+        const history = tempGame.history({ verbose: true });
+        history.forEach(move => {
+            this.#game.move(move.san);
+            this.#historyManager.update(move, this.#game.fen());
+        });
+        const lastMove = history[history.length - 1];
+        highlightSquares(lastMove.from, lastMove.to);
+        this.board.position(this.#game.fen());
+        this.#isWhiteTurn = this.#game.turn() === 'w';
     }
     
     undoLastMove() {
