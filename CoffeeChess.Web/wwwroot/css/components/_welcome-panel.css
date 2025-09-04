@@ -123,11 +123,6 @@
         0 0 0 var(--dark-coffee);
 }
 
-.welcome-text,
-.welcome-button {
-    transition: transform 1s ease, opacity 1s ease;
-}
-
 .welcome-text.hide,
 .welcome-button.hide {
     transform: translateX(20%);

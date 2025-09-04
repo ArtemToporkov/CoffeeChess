@@ -88,13 +88,15 @@ function changeWelcomeTitleColorToOriginal($welcomeTitleForAnimation) {
 }
 
 function unhideWelcomeTextAndButtons() {
+    const welcomeAnimationTransitionStyle = "transform 1s ease, opacity 1s ease";
     const delay = 100;
     const toUnhide = [];
     $('.welcome-button').each((i, el) => toUnhide.push($(el)));
     toUnhide.push($('.welcome-text'));
     toUnhide.forEach(($el, i) => {
+        $el.css("transition", welcomeAnimationTransitionStyle);
         setTimeout(() => {
-            $el.removeClass('hide')
+            $el.removeClass('hide').one('transitionend', () => $el.css("transition", ""))
         }, delay * i)
     })
 }
