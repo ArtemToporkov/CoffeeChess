@@ -1,4 +1,5 @@
 ﻿import { ajaxNavigator } from "./site.js";
+import { connection } from "./connection.js";
 
 const init = async () => {
     const $loginForm = $('#loginForm');
@@ -18,6 +19,9 @@ function onSubmitForm($form) {
             success: async response => {
                 await ajaxNavigator.loadContent(response.url);
                 ajaxNavigator.toggleAuthenticatedHeader(true, response.username);
+                if (connection.state === signalR.HubConnectionState.Connected)
+                    await connection.stop();
+                await connection.start();
             },
             error: error => {
                 
