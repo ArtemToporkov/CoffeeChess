@@ -1,5 +1,10 @@
-﻿setUpWelcomeAnimation();
-playWelcomeAnimation();
+﻿const trueString = "true"
+const welcomeAnimationAlreadyPlayed = localStorage.getItem("welcomeAnimationAlreadyPlayed") === trueString;
+if (!welcomeAnimationAlreadyPlayed) {
+    setUpWelcomeAnimation();
+    playWelcomeAnimation();
+    localStorage.setItem("welcomeAnimationAlreadyPlayed", trueString);
+}
 
 function setUpWelcomeAnimation() {
     const toUnhide = [
