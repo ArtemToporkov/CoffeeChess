@@ -7,8 +7,5 @@ public class CheckForActiveGamesCommandHandler(
     IGameRepository gameRepository) : IRequestHandler<CheckForActiveGamesCommand, string?>
 {
     public async Task<string?> Handle(CheckForActiveGamesCommand request, CancellationToken cancellationToken)
-    {
-        var activeGame = await gameRepository.CheckPlayerForActiveGames(request.PlayerId);
-        return activeGame?.GameId;
-    }
+        => await gameRepository.CheckPlayerForActiveGames(request.PlayerId);
 }

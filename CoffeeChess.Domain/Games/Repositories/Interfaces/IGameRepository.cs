@@ -7,5 +7,5 @@ public interface IGameRepository : IBaseRepository<Game>
 {
     public IEnumerable<Game> GetActiveGames();
 
-    public Task<Game?> CheckPlayerForActiveGames(string playerId);
+    public Task<string?> CheckPlayerForActiveGames(string playerId);
 }

@@ -21,6 +21,7 @@ public class RedisGameRepository(
 {
     private readonly IDatabase _database = redis.GetDatabase();
     private const string GameKeyPrefix = "game";
+    private const string ActiveGameForPlayerKeySuffix = "activegame";
     private static readonly JsonSerializerOptions GameSerializationOptions = GetGameSerializationOptions();
 
     public async Task<Game?> GetByIdAsync(string id, CancellationToken cancellationToken = default)
@@ -32,14 +33,26 @@ public class RedisGameRepository(
         return JsonSerializer.Deserialize<Game>(redisValue!, GameSerializationOptions);
     }
 
-    public async Task AddAsync(Game gameChallenge, CancellationToken cancellationToken = default)
+    public async Task AddAsync(Game game, CancellationToken cancellationToken = default)
     {
-        var serializedGame = JsonSerializer.Serialize(gameChallenge, GameSerializationOptions);
-        await _database.StringSetAsync($"{GameKeyPrefix}:{gameChallenge.GameId}", serializedGame, when: When.NotExists);
+        var serializedGame = JsonSerializer.Serialize(game, GameSerializationOptions);
+        var transaction = _database.CreateTransaction();
+        _ = transaction.StringSetAsync(GetGameKey(game.GameId), serializedGame, when: When.NotExists);
+        _ = transaction.StringSetAsync(
+            GetPlayerActiveGameKey(game.WhitePlayerId), game.GameId, when: When.NotExists);
+        _ = transaction.StringSetAsync(
+            GetPlayerActiveGameKey(game.BlackPlayerId), game.GameId, when: When.NotExists);
+        await transaction.ExecuteAsync();
     }
 
     public async Task DeleteAsync(Game game, CancellationToken cancellationToken = default)
-        => await _database.KeyDeleteAsync($"{GameKeyPrefix}:{game.GameId}");
+    {
+        var transaction = _database.CreateTransaction();
+        _ = transaction.KeyDeleteAsync(GetGameKey(game.GameId));
+        _ = transaction.KeyDeleteAsync(GetPlayerActiveGameKey(game.WhitePlayerId));
+        _ = transaction.KeyDeleteAsync(GetPlayerActiveGameKey(game.BlackPlayerId));
+        await transaction.ExecuteAsync();
+    }
 
     public async Task SaveChangesAsync(Game game, CancellationToken cancellationToken = default)
     {
@@ -53,10 +66,12 @@ public class RedisGameRepository(
         game.ClearDomainEvents();
     }
 
-    public async Task<Game?> CheckPlayerForActiveGames(string playerId)
+    public async Task<string?> CheckPlayerForActiveGames(string playerId)
     {
-        // TODO: implement
-        return null;
+        var value = await _database.StringGetAsync(GetPlayerActiveGameKey(playerId));
+        if (value.IsNull)
+            return null;
+        return value;
     }
 
     public IEnumerable<Game> GetActiveGames()
@@ -64,6 +79,12 @@ public class RedisGameRepository(
         // TODO: implement
         return [];
     }
+
+    private static string GetGameKey(string gameId)
+        => $"{GameKeyPrefix}:{gameId}";
+
+    private static string GetPlayerActiveGameKey(string playerId)
+        => $"{playerId}:{ActiveGameForPlayerKeySuffix}";
 
     private static JsonSerializerOptions GetGameSerializationOptions()
     {
