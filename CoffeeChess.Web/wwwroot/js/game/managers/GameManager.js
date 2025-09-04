@@ -15,7 +15,7 @@ export class GameManager {
     #connection;
     #isWhiteTurn;
     
-    constructor(connection, gameId, isWhite, whiteMillisecondsLeft, blackMillisecondsLeft) {
+    constructor(connection, gameId, isWhite, whiteMillisecondsLeft, blackMillisecondsLeft, pgn = null) {
         this.isWhite = isWhite; 
         this.board = ChessBoard('myBoard', this.#getConfig());
         
@@ -27,9 +27,18 @@ export class GameManager {
         this.#timersManager = new TimersManager(whiteMillisecondsLeft, blackMillisecondsLeft);
         this.#timersManager.start();
         setTimerHighlighting(true);
-        
+        if (pgn) {
+            const tempGame = new Chess();
+            tempGame.load_pgn(pgn);
+            const history = tempGame.history({ verbose: true });
+            history.forEach(move => {
+                this.#game.move(move.san);
+                this.#historyManager.update(move, this.#game.fen());
+            });
+            this.board.position(this.#game.fen());
+        }
         this.#shouldReturnToLive = false;
-        this.#isWhiteTurn = true;
+        this.#isWhiteTurn = this.#game.turn() === 'w';
         this.#isGameOver = false;
     }
     

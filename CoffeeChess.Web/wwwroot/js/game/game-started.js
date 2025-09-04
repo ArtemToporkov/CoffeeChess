@@ -35,16 +35,9 @@ const init = async () => {
         gameId, 
         gameInfo.isWhite,
         gameInfo.whitePlayerInfo.millisecondsLeft,
-        gameInfo.blackPlayerInfo.millisecondsLeft
+        gameInfo.blackPlayerInfo.millisecondsLeft,
+        gameInfo.pgn === "" ? null : gameInfo.pgn
     );
-    
-    if (gameInfo.pgn && gameInfo.pgn.length > 0) {
-        gameManager.updateGameState(
-            gameInfo.pgn, 
-            gameInfo.whitePlayerInfo.millisecondsLeft, 
-            gameInfo.blackPlayerInfo.millisecondsLeft
-        );    
-    }
     
     chatManager = new ChatManager(connection, gameId);
     
