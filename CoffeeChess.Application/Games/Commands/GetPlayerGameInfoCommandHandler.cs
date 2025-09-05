@@ -1,6 +1,7 @@
 ﻿using CoffeeChess.Application.Games.Dto;
 using CoffeeChess.Domain.Chats.Repositories.Interfaces;
 using CoffeeChess.Domain.Games.AggregatesRoots;
+using CoffeeChess.Domain.Games.Enums;
 using CoffeeChess.Domain.Games.Repositories.Interfaces;
 using CoffeeChess.Domain.Games.Services.Interfaces;
 using CoffeeChess.Domain.Players.Repositories.Interfaces;
@@ -52,12 +53,17 @@ public class GetPlayerGameInfoCommandHandler(
         if (player == null)
             return null;
         
+        var millisecondsLeft = isForWhite 
+            ? game.WhiteTimeLeft.TotalMilliseconds 
+            : game.BlackTimeLeft.TotalMilliseconds;
+        if (game.CurrentPlayerColor is PlayerColor.White && isForWhite
+            || game.CurrentPlayerColor is PlayerColor.Black && !isForWhite)
+            millisecondsLeft -= (DateTime.UtcNow - game.LastTimeUpdate).TotalMilliseconds;
+
         var playerInfoDto = new PlayerInfoDto(
-            player.Name, 
-            player.Rating, 
-            isForWhite 
-                ? game.WhiteTimeLeft.TotalMilliseconds
-                : game.BlackTimeLeft.TotalMilliseconds);
+            player.Name,
+            player.Rating,
+            millisecondsLeft);
         return playerInfoDto;
     }
 }
