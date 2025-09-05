@@ -1,4 +1,4 @@
-﻿import { highlightSquares, unhighlightSquares, setTimerHighlighting } from "../ui.js";
+﻿import { highlightSquares, unhighlightSquares } from "../ui.js";
 
 export class HistoryManager {
     currentPly;

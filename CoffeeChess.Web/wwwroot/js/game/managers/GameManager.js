@@ -1,6 +1,6 @@
 ﻿import { HistoryManager } from "./HistoryManager.js";
 import { TimersManager } from "./TimersManager.js";
-import { highlightSquares, showPromotionDialog, unhighlightSquares, setTimerHighlighting } from "../ui.js";
+import { highlightSquares, showPromotionDialog, unhighlightSquares } from "../ui.js";
 import { GameHubMethods } from "../enums/GameHubMethods.js";
 
 export class GameManager {
@@ -26,7 +26,6 @@ export class GameManager {
         this.#historyManager = new HistoryManager("myBoard", fen => this.board.position(fen));
         this.#timersManager = new TimersManager(whiteMillisecondsLeft, blackMillisecondsLeft);
         this.#timersManager.start();
-        setTimerHighlighting(true);
         this.#shouldReturnToLive = false;
         this.#isWhiteTurn = true;
         this.#isGameOver = false;
@@ -45,8 +44,6 @@ export class GameManager {
         new Audio('../../../sounds/piece-move.mp3').play();
 
         this.#isWhiteTurn = this.#game.turn() === 'w';
-        setTimerHighlighting(this.#isWhiteTurn);
-
         this.#timersManager.updateTimers(newWhiteMillisecondsLeft, newBlackMillisecondsLeft, this.#isWhiteTurn);
         
         const history = this.#game.history({ verbose: true });

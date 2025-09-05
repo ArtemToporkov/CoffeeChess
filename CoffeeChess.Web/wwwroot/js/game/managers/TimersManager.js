@@ -1,4 +1,6 @@
-﻿export class TimersManager {
+﻿import { setTimerHighlighting } from "../ui.js";
+
+export class TimersManager {
     #timer;
     #isWhiteTurn;
     whiteMillisecondsLeft;
@@ -40,7 +42,10 @@
     }
 
     updateTimers(whiteMillisecondsLeft = null, blackMillisecondsLeft = null, isWhiteTurn = null) {
-        this.#isWhiteTurn = isWhiteTurn ?? this.#isWhiteTurn;
+        if (isWhiteTurn !== null) {
+            this.#isWhiteTurn = isWhiteTurn;
+            setTimerHighlighting(this.#isWhiteTurn);
+        }
         this.whiteMillisecondsLeft = whiteMillisecondsLeft ?? this.whiteMillisecondsLeft;
         this.blackMillisecondsLeft = blackMillisecondsLeft ?? this.blackMillisecondsLeft;
         
