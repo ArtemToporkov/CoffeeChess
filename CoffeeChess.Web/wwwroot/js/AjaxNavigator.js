@@ -16,11 +16,6 @@
         $(document).on('click', '.ajax-nav-link', async e => {
             e.preventDefault();
             const url = $(e.currentTarget).prop('href');
-
-            const parsedUrl = new URL(url, window.location.origin);
-            if (parsedUrl.pathname === window.location.pathname)
-                return;
-
             await this.loadContent(url);
         });
 
@@ -34,6 +29,10 @@
     }
 
     async loadContent(url, shouldPushToHistory = true, delay = 100) {
+        const parsedUrl = new URL(url, window.location.origin);
+        if (parsedUrl.pathname === window.location.pathname)
+            return;
+        
         const $mainContainer = $('main[role="main"]');
         const data = await $.get(url);
         await this.hideEverythingHideable(delay);
