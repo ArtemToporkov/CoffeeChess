@@ -41,7 +41,7 @@ export class TimersManager {
         this.#timer = null;
     }
 
-    updateTimers(whiteMillisecondsLeft = null, blackMillisecondsLeft = null, isWhiteTurn = null) {
+    updateTimers({whiteMillisecondsLeft = null, blackMillisecondsLeft = null, isWhiteTurn = null} = {}) {
         if (isWhiteTurn !== null) {
             this.#isWhiteTurn = isWhiteTurn;
             setTimerHighlighting(this.#isWhiteTurn);

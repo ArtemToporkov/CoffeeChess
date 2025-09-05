@@ -44,7 +44,11 @@ export class GameManager {
         new Audio('../../../sounds/piece-move.mp3').play();
 
         this.#isWhiteTurn = this.#game.turn() === 'w';
-        this.#timersManager.updateTimers(newWhiteMillisecondsLeft, newBlackMillisecondsLeft, this.#isWhiteTurn);
+        this.#timersManager.updateTimers({
+            whiteMillisecondsLeft: newWhiteMillisecondsLeft,
+            blackMillisecondsLeft: newBlackMillisecondsLeft,
+            isWhiteTurn: this.#isWhiteTurn,
+        });
         
         const history = this.#game.history({ verbose: true });
         const move = history[history.length - 1];
@@ -64,6 +68,9 @@ export class GameManager {
         highlightSquares(lastMove.from, lastMove.to);
         this.board.position(this.#game.fen());
         this.#isWhiteTurn = this.#game.turn() === 'w';
+        this.#timersManager.updateTimers({
+            isWhiteTurn: this.#isWhiteTurn
+        });
     }
     
     undoLastMove() {
