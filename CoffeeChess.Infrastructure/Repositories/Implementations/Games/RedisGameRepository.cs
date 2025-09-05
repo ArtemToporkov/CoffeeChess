@@ -4,6 +4,7 @@ using System.Runtime.Serialization;
 using System.Text.Json;
 using System.Text.Json.Serialization.Metadata;
 using CoffeeChess.Domain.Games.AggregatesRoots;
+using CoffeeChess.Domain.Games.Enums;
 using CoffeeChess.Domain.Games.Repositories.Interfaces;
 using CoffeeChess.Domain.Shared.Abstractions;
 using CoffeeChess.Domain.Shared.Interfaces;
@@ -22,6 +23,7 @@ public class RedisGameRepository(
     private readonly IDatabase _database = redis.GetDatabase();
     private const string GameKeyPrefix = "game";
     private const string ActiveGameForPlayerKeySuffix = "activegame";
+    private const string GameTimoutAtKey = "game:finishes:by:timout:at";
     private static readonly JsonSerializerOptions GameSerializationOptions = GetGameSerializationOptions();
 
     public async Task<Game?> GetByIdAsync(string id, CancellationToken cancellationToken = default)
@@ -42,6 +44,8 @@ public class RedisGameRepository(
             GetPlayerActiveGameKey(game.WhitePlayerId), game.GameId, when: When.NotExists);
         _ = transaction.StringSetAsync(
             GetPlayerActiveGameKey(game.BlackPlayerId), game.GameId, when: When.NotExists);
+        _ = transaction.SortedSetAddAsync(
+            GameTimoutAtKey, game.GameId, GetGameTimeoutUnixMilliseconds(game));
         await transaction.ExecuteAsync();
     }
 
@@ -51,14 +55,19 @@ public class RedisGameRepository(
         _ = transaction.KeyDeleteAsync(GetGameKey(game.GameId));
         _ = transaction.KeyDeleteAsync(GetPlayerActiveGameKey(game.WhitePlayerId));
         _ = transaction.KeyDeleteAsync(GetPlayerActiveGameKey(game.BlackPlayerId));
+        _ = transaction.SortedSetRemoveAsync(GameTimoutAtKey, game.GameId);
         await transaction.ExecuteAsync();
     }
 
     public async Task SaveChangesAsync(Game game, CancellationToken cancellationToken = default)
     {
         var serializedGame = JsonSerializer.Serialize(game, GameSerializationOptions);
-        await _database.StringSetAsync($"{GameKeyPrefix}:{game.GameId}", serializedGame);
-
+        var transaction = _database.CreateTransaction();
+        _ = transaction.StringSetAsync($"{GameKeyPrefix}:{game.GameId}", serializedGame);
+        _ = transaction.SortedSetAddAsync(
+            GameTimoutAtKey, game.GameId, GetGameTimeoutUnixMilliseconds(game));
+        await transaction.ExecuteAsync();
+        
         using var scope = serviceProvider.CreateScope();
         var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
         foreach (var @event in game.DomainEvents)
@@ -66,7 +75,7 @@ public class RedisGameRepository(
         game.ClearDomainEvents();
     }
 
-    public async Task<string?> CheckPlayerForActiveGames(string playerId)
+    public async Task<string?> CheckPlayerForActiveGameAsync(string playerId)
     {
         var value = await _database.StringGetAsync(GetPlayerActiveGameKey(playerId));
         if (value.IsNull)
@@ -74,10 +83,16 @@ public class RedisGameRepository(
         return value;
     }
 
-    public IEnumerable<Game> GetActiveGames()
+    public async IAsyncEnumerable<Game> GetFinishedByTimeoutGamesAsync()
     {
-        // TODO: implement
-        return [];
+        var nowTimestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+        var redisResult = await _database.SortedSetRangeByScoreAsync(
+            GameTimoutAtKey, 0, nowTimestamp);
+        foreach (var gameId in redisResult.Select(x => x.ToString()))
+        {
+            var game = await GetByIdAsync(gameId);
+            yield return game!;
+        }
     }
 
     private static string GetGameKey(string gameId)
@@ -138,5 +153,14 @@ public class RedisGameRepository(
             TypeInfoResolver = jsonTypeResolver,
             Converters = { new FenConverter(), new SanConverter() }
         };
+    }
+
+    private static long GetGameTimeoutUnixMilliseconds(Game game)
+    {
+        var timeoutsAfter = game.CurrentPlayerColor == PlayerColor.White 
+            ? game.WhiteTimeLeft 
+            : game.BlackTimeLeft;
+        var timeoutsAt = new DateTimeOffset(game.LastTimeUpdate + timeoutsAfter).ToUnixTimeMilliseconds();
+        return timeoutsAt;
     }
 }

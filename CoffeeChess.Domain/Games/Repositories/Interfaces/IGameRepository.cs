@@ -5,7 +5,7 @@ namespace CoffeeChess.Domain.Games.Repositories.Interfaces;
 
 public interface IGameRepository : IBaseRepository<Game>
 {
-    public IEnumerable<Game> GetActiveGames();
+    public IAsyncEnumerable<Game> GetFinishedByTimeoutGamesAsync();
 
-    public Task<string?> CheckPlayerForActiveGames(string playerId);
+    public Task<string?> CheckPlayerForActiveGameAsync(string playerId);
 }

@@ -36,7 +36,7 @@ public class GameHub(
     public override async Task OnConnectedAsync()
     {
         var playerId = Context.UserIdentifier!;
-        var checkForActiveGamesCommand = new CheckForActiveGamesCommand(playerId);
+        var checkForActiveGamesCommand = new CheckForActiveGameCommand(playerId);
         var activeGameId = await mediator.Send(checkForActiveGamesCommand);
         if (!string.IsNullOrEmpty(activeGameId))
             await Clients.User(playerId).GameStarted(activeGameId);
