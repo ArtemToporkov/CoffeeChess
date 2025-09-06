@@ -2,7 +2,7 @@
 
 Implementing cute chess website using asp.net mvc, signalr.
 
-Showcase: https://www.youtube.com/watch?v=tOOClbreYXA
+Watch the showcase on [Youtube](https://www.youtube.com/watch?v=tOOClbreYXA) or [cloud.mail.ru](https://cloud.mail.ru/public/UHuu/iBgfknD8K).
 
 ## Status
 
